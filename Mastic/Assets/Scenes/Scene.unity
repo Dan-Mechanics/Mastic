@@ -182,7 +182,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f975e1d54a7bbb94b9ffdf7d80dd4bfb, type: 2}
+  - {fileID: 2100000, guid: 644198e1298d37f41806538d267b8907, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -672,10 +672,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3229349398631652837, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652837, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -716,41 +712,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: maxFps
-      value: 300
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: sendRate
-      value: 64
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: sequence
       value: 
       objectReference: {fileID: 1313093710}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: transport
-      value: 
-      objectReference: {fileID: 3229349398353710520}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: onlineScene
-      value: Assets/Scenes/Scene.unity
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: offlineScene
-      value: Assets/Scenes/Scene.unity
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: playerPrefab
-      value: 
-      objectReference: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: maxConnections
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: dontDestroyOnLoad
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3229349398631652857, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_Name
       value: network_manager
@@ -760,17 +724,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
---- !u!114 &3229349398353710520 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3229349398631652856, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-  m_PrefabInstance: {fileID: 3229349398353710519}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

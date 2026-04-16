@@ -26,6 +26,7 @@ namespace Mastic
             base.Awake();
 
             respawn = GameObject.FindWithTag("Respawn").transform;
+            sequence = FindAnyObjectByType<Sequence>();
 
             // ---
 
@@ -34,7 +35,7 @@ namespace Mastic
 
             Time.fixedDeltaTime = STANDARD_FIXED_DELTA_TIME;
             sendRate = STANDARD_TICKRATE;
-            Physics.autoSimulation = false;
+            Physics.simulationMode = SimulationMode.Script;
         }
 
         /*public override void Start()
