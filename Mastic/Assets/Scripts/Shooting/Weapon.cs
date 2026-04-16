@@ -206,7 +206,7 @@ namespace Mastic
 
         [Server]
         private void Shoot(ShootMessage shootMessage)
-        {.
+        {
             // or you could just send the rotation since you dont have to look where u aiming anyway.
             transform.rotation = Quaternion.AngleAxis(shootMessage.yRotation, Vector3.up);
             eyes.localRotation = Quaternion.AngleAxis(shootMessage.xRotation, Vector3.right);
