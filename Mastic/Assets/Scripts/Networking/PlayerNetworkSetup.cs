@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace Mastic
 {
-    /// <summary>
-    /// Need to add mouselocker static class.s
-    /// </summary>
     public class PlayerNetworkSetup : NetworkBehaviour
     {
         [SerializeField] private Object[] localRemove = null;

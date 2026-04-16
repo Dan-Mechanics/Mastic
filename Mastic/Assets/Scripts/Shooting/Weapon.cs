@@ -7,13 +7,13 @@ namespace Mastic
 {
     /// <summary>
     /// 
-    /// Current shit:
-    ///     How does drops effect interpolation or any of that shit ? is that allowed ?
+    /// Current stuff:
+    ///     How does drops effect interpolation or any of that stuff ? is that allowed ?
     ///     What happens to the system when we use Physics.Synctransforms ?
     ///         Should we do that after the returntopresent(); step ?
     ///             I think in this context it doesn't really matter,
     ///             but it prolly does with RB.
-    /// Other shit:
+    /// Other stuff:
     ///     make it so that all the unlocal clients are sent as an array of pos rots and
     ///     then when unloading give insta sync to physics.
     ///     
@@ -42,7 +42,7 @@ namespace Mastic
         [SerializeField] private float step = default;
         [SerializeField] private float maxCooldown = default;
 
-        [Header("User")] // why this here ?
+        [Header("User")] 
 
         [SerializeField] private Image fillImage = default;
         [SerializeField] private AudioClip sound = default;
@@ -162,14 +162,14 @@ namespace Mastic
         }
 
         /// <summary>
-        /// This only works because the player model isnt effected by aiming direction...
+        /// This only works because the player model isnt effected by aiming direction.
         /// </summary>
         [ClientRpc]
         private void RpcShoot(float yRotation, float xRotation)
         {
             if (isLocalPlayer) { return; }
 
-            // we dont need this because the thing works already ... ???
+            // we dont need this because the thing works already.
             transform.rotation = Quaternion.AngleAxis(yRotation, Vector3.up);
             eyes.localRotation = Quaternion.AngleAxis(xRotation, Vector3.right);
 
@@ -187,7 +187,7 @@ namespace Mastic
         {
             shootMessage.Verify();
 
-            // ???
+            // I think this is useful, need to test more.
             if (shootMessage.shotTick <= movement.processedTick)
             {
                 if (CanCast() && serverCanShootOverride)
@@ -206,8 +206,7 @@ namespace Mastic
 
         [Server]
         private void Shoot(ShootMessage shootMessage)
-        {
-            // i fcuking hope this works.
+        {.
             // or you could just send the rotation since you dont have to look where u aiming anyway.
             transform.rotation = Quaternion.AngleAxis(shootMessage.yRotation, Vector3.up);
             eyes.localRotation = Quaternion.AngleAxis(shootMessage.xRotation, Vector3.right);
@@ -215,7 +214,7 @@ namespace Mastic
             Vector3 recreatedPos = Vector3.Lerp(movement.previousEyePos, eyes.position, shootMessage.lerpValue);
             Vector3 recreatedDir = eyes.forward;
 
-            // this is always zero so we did good !.
+            // this is always zero so it works
             //Debug.LogWarning();
 
           //  LagCompensation.instance.RewindTime(shootMessage.id, entity);
@@ -237,9 +236,9 @@ namespace Mastic
             {
                 TargetCallDamage(connectionToClient, damage);
 
-                // we're not putting self-damage off the table ...
+                // we're not putting self-damage off the table.
                 // # think about the way bugs will appear if they do, you dont want the damage function itself to be the last line of defense, you cant
-                // damage yourself because you cant't shoot yourself after all... so if you are able to shoot yourself we basically WANT that to be a big issue so it gets fixed quickly.
+                // damage yourself because you cant't shoot yourself after all. so if you are able to shoot yourself we basically WANT that to be a big issue so it gets fixed quickly.
                 // think: overwatch bastion ult bug >= vs ==
                 hit.GetComponent<PlayerHealth>().Damage(damage);
             }
@@ -263,7 +262,7 @@ namespace Mastic
             {
                 for (int p = 0; p < LagCompensation.instance.players.Count; p++)
                 {
-                    // !performance, you could also just remove the player from the list... ???
+                    // !performance, you could also just remove the player from the list
                     if (LagCompensation.instance.players[p] == this) { continue; }
 
                     *//*if (Intersections.IsPointWithinCapsule(pos + (l * step * dir), LagCompensation.instance.players[p].movement.transform.position, controller.height, controller.radius))

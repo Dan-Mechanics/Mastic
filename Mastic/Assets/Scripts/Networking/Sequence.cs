@@ -4,9 +4,6 @@ using Mirror;
 
 namespace Mastic
 {
-    /// <summary>
-    /// Make it so that this works for multible clients too.
-    /// </summary>
     public class Sequence : MonoBehaviour
     {
         //private readonly List<ServerAuthClientPredSimple> players = new List<ServerAuthClientPredSimple>();

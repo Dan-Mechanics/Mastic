@@ -4,9 +4,6 @@ using Mirror;
 
 namespace Mastic
 {
-    /// <summary>
-    /// https://docs.google.com/document/d/1ruX-Pqfwd8WIK8eIo0dRAs86pEsc5Z398IOfDLNskYc/edit?tab=t.0#bookmark=id.yvrx5neiq0iy
-    /// </summary>
     public class LagCompensation : MonoBehaviour
     {
         public static LagCompensation instance;

@@ -5,7 +5,6 @@ namespace Mastic
     public class CameraHandlerGUI : MonoBehaviour
     {
         public CameraHandler cameraHandler;
-
         public Color color = Color.white;
         public int padding = 2;
         public int width = 150;

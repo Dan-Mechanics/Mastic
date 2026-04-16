@@ -16,8 +16,6 @@ namespace Mastic
         public event Action<string> OnCheatsChanged;
         public event Action<bool> OnReconsileStateChanged;
 
-        // this is not best practice.
-
         [HideInInspector] public int processedTick;
         [HideInInspector] public uint id;
         [HideInInspector] public Vector3 previousEyePos;
@@ -110,8 +108,6 @@ namespace Mastic
             if (Input.GetKeyDown(KeyCode.DownArrow)) { currentTick -= 10; Debug.LogWarning("-10"); }*/
 
 
-
-            // this should not be here I think --> should be in the game closer or something like that.
             if (Input.GetKeyDown(KeyCode.Q)) { connectionToServer.Disconnect(); }
         }
 

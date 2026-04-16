@@ -43,9 +43,6 @@ namespace Mastic
             }
         }
 
-        /// <summary>
-        /// I don't know either.
-        /// </summary>
         public bool CanPerform(NetworkPhysicsMovement networkPhysicsMovement)
         {
             return networkPhysicsMovement.CurrentTick - lastPerformTick >= cooldownTicks;

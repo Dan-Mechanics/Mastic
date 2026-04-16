@@ -31,12 +31,12 @@ namespace Mastic
         }
 
         /// <summary>
-        /// ADD: cooldown and recovery or something ...
+        /// Idea: cooldown and recovery or something ...
         /// </summary>
         [Command]
         private void CmdCast() 
         {
-            // wait for casttime
+            // wait for casttime ..
 
             Invoke(nameof(Cast), castTime);
         }

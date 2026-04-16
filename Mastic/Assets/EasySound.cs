@@ -2,23 +2,16 @@
 
 namespace Mastic
 {
+    /// <summary>
+    /// Todo: check if this already exists.
+    /// </summary>
     [RequireComponent(typeof(AudioSource))]
     public class EasySound : MonoBehaviour
     {
-        [SerializeField] private AudioClip clip = null;
-
+        [SerializeField] private AudioClip clip = default;
         private AudioSource source;
 
-        private void Awake()
-        {
-            source = GetComponent<AudioSource>();   
-        }
-
-        public void Play() 
-        {
-            if(source == null) { return; }
-
-            source.PlayOneShot(clip);
-        }
+        private void Awake() => source = GetComponent<AudioSource>();
+        public void Play() => source.PlayOneShot(clip);
     }
 }

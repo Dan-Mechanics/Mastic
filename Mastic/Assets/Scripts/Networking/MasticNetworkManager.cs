@@ -5,9 +5,6 @@ using UnityEngine.SceneManagement;
 
 namespace Mastic
 {
-    /// <summary>
-    /// Dont rename pls. --> it breaks everything.
-    /// </summary>
     public class MasticNetworkManager : NetworkManager
     {
         [Header("Dan-Mechanics")]
@@ -15,11 +12,11 @@ namespace Mastic
         public const int STANDARD_TICKRATE = 64;
         public const float STANDARD_FIXED_DELTA_TIME = 1f / STANDARD_TICKRATE;
 
-        [SerializeField] private Sequence sequence = null;
-        [SerializeField] private int maxFps = 0;
+        [SerializeField] private int maxFps = default;
 
         private readonly List<NetworkConnectionToClient> connections = new List<NetworkConnectionToClient>();
         private Transform respawn;
+        private Sequence sequence;
 
         public override void Awake()
         {
@@ -66,7 +63,6 @@ namespace Mastic
 
             Debug.Log("DISCONNECTED FROM SERVER");
 
-            // what if we leave mid-shoot animation ? >>>
             //GameObject.FindWithTag("MainCamera").transform.GetChild(0).gameObject.SetActive(false);
 
             Cursor.visible = true;

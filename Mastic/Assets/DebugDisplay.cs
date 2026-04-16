@@ -27,7 +27,6 @@ namespace Mastic
         {
             tickrateText.text = newTickrate.ToString();
 
-            // i dont know if these colors are perfect but its more about the vibe anyway ...
             if (newTickrate > MasticNetworkManager.STANDARD_TICKRATE) { tickrateText.color = Color.green; }
             else if (newTickrate < MasticNetworkManager.STANDARD_TICKRATE) { tickrateText.color = Color.red; }
             else { tickrateText.color = Color.white; }

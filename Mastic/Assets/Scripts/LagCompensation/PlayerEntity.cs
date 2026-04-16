@@ -4,9 +4,6 @@ using UnityEngine;
 
 namespace Mastic
 {
-    /// <summary>
-    /// https://docs.google.com/document/d/1ruX-Pqfwd8WIK8eIo0dRAs86pEsc5Z398IOfDLNskYc/edit?tab=t.0#bookmark=id.3wz3pq4fu5jg
-    /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
         [SerializeField] private CharacterController controller = default;
