@@ -1,0 +1,12 @@
+there is a server-only lag comepnsation monobehaviou in the scene
+taht basically has norhing to do with the network side of things
+but is merely a useful component. 
+
+the main concern here is keeping track of what does and does not need
+to be an entity.
+the main idea of the whole software is that we can set the time on the server exactly like how something
+was before.
+
+rules: the implementation of Ientity itself is the dumbest of them all,
+it does not know anything about LagCompensation or nothing like that.
+

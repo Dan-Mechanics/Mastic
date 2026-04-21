@@ -5,7 +5,7 @@
         int GetNetId();
         void RecordFrame(int tick, int maxRecordingLength);
         void SavePresent();
-        void RewindTime(int tick);
+        void SetAsTick(int tick);
         void ReturnToPresent();
     }
 }

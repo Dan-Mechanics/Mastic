@@ -40,7 +40,7 @@ namespace Mastic
         }
 
         [Server]
-        public void RewindTime(int tick)
+        public void SetAsTick(int tick)
         {
             for (int i = 0; i < recording.Count; i++)
             {

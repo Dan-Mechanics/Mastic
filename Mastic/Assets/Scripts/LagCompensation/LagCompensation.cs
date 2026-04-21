@@ -24,7 +24,7 @@ namespace Mastic
                     continue;
 
                 entity.SavePresent();
-                entity.RewindTime(tick);
+                entity.SetAsTick(tick);
             }
 
             Physics.SyncTransforms();
