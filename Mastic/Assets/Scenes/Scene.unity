@@ -672,6 +672,22 @@ PrefabInstance:
       value: cam
       objectReference: {fileID: 0}
     - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+      propertyPath: m_ClearFlags
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0.9811321
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0.7264141
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0.71733713
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
       propertyPath: m_AllowDynamicResolution
       value: 0
       objectReference: {fileID: 0}
