@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 3229349398631652838}
   - component: {fileID: 3229349398631652839}
   - component: {fileID: 3229349398631652856}
-  - component: {fileID: 996126788}
+  - component: {fileID: 8267332148853626195}
+  - component: {fileID: 867135642616040006}
   m_Layer: 0
   m_Name: network_manager
   m_TagString: NetworkManager
@@ -51,7 +52,7 @@ MonoBehaviour:
   runInBackground: 1
   headlessStartMode: 1
   editorAutoStart: 1
-  sendRate: 64
+  sendRate: 32
   offlineScene: Assets/Scenes/Scene.unity
   onlineScene: Assets/Scenes/Scene.unity
   offlineSceneLoadDelay: 0
@@ -79,8 +80,7 @@ MonoBehaviour:
     deliveryTimeEmaDuration: 2
   evaluationMethod: 0
   evaluationInterval: 3
-  timeInterpolationGui: 0
-  maxFps: 300
+  timeInterpolationGui: 1
 --- !u!114 &3229349398631652839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,7 +124,7 @@ MonoBehaviour:
   debugLog: 1
   statisticsGUI: 1
   statisticsLog: 1
---- !u!114 &996126788
+--- !u!114 &8267332148853626195
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -133,10 +133,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 3229349398631652857}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc654f29862fc2643b948f772ebb9e68, type: 3}
+  m_Script: {fileID: 11500000, guid: c761308e733c51245b2e8bb4201f46dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: {r: 0, g: 1, b: 0, a: 1}
-  padding: 150
-  width: 150
-  height: 25
+  enableActiveDiscovery: 1
+  BroadcastAddress: 
+  serverBroadcastListenPort: 47777
+  ActiveDiscoveryInterval: 3
+  transport: {fileID: 3229349398631652856}
+  OnServerFound:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 867135642616040006}
+        m_TargetAssemblyTypeName: Mirror.Discovery.NetworkDiscoveryHUD, Mirror.Components
+        m_MethodName: OnDiscoveredServer
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  secretHandshake: 7704399617018299543
+--- !u!114 &867135642616040006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3229349398631652857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88c37d3deca7a834d80cfd8d3cfcc510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkDiscovery: {fileID: 8267332148853626195}

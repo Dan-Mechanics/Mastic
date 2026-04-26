@@ -9,8 +9,8 @@ namespace Mastic
         [SerializeField] private CharacterController controller = default;
         [SerializeField] private GameObject hitbox = default;
 
-        private readonly List<PlayerFrame> recording = new List<PlayerFrame>();
-        private PlayerFrame present;
+        private readonly List<Frame> recording = new List<Frame>();
+        private Frame present;
         private bool hasSaved;
 
         public override void OnStartServer()
@@ -19,13 +19,13 @@ namespace Mastic
             LagCompensation.instance.Register(this);
         }
 
-        private void SetAsFrame(PlayerFrame frame) => transform.position = frame.pos;
+        private void SetAsFrame(Frame frame) => transform.position = frame.pos;
         public int GetNetId() => (int)netId;
 
         [Server]
         public void RecordFrame(int tick, int maxRecordingLength)
         {
-            recording.Add(new PlayerFrame(transform.position, tick));
+            recording.Add(new Frame(transform.position, tick));
             while (recording.Count > maxRecordingLength)
             {
                 recording.RemoveAt(0);
@@ -71,5 +71,16 @@ namespace Mastic
             hasSaved = false;
         }
 
+        public struct Frame
+        {
+            public Vector3 pos;
+            public int tick;
+
+            public Frame(Vector3 pos, int tick)
+            {
+                this.pos = pos;
+                this.tick = tick;
+            }
+        }
     }
 }

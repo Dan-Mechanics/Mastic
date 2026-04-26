@@ -9,11 +9,11 @@ namespace Mastic
         [SerializeField, Min(1)] private int framerateLimit = default;
         [SerializeField] private SimulationMode simulationMode = default;
 
-        public void Setup(int tickrate)
+        public void Setup(int standardTickrate)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Application.targetFrameRate = framerateLimit;
-            Time.fixedDeltaTime = 1f / tickrate;
+            Time.fixedDeltaTime = 1f / standardTickrate;
             Physics.simulationMode = simulationMode;
             QualitySettings.SetQualityLevel(0, false);
             QualitySettings.vSyncCount = 0;

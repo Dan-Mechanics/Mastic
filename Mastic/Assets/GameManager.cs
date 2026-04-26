@@ -6,7 +6,7 @@ namespace Mastic
     public class GameManager : MonoBehaviour
     {
         [SerializeField] private EasyBinding closeGame = default;
-        [SerializeField, Min(1)] private int tickrate = default;
+        [SerializeField, Min(1)] private int standardTickrate = default;
 
         private SceneSetup sceneSetup;
         private MasticNetworkManager networkManager;
@@ -21,7 +21,7 @@ namespace Mastic
 
         private void Start()
         {
-            sceneSetup.Setup(tickrate);
+            sceneSetup.Setup(standardTickrate);
             networkManager.OnRegisterPlayer += sequence.Register;
         }
 
