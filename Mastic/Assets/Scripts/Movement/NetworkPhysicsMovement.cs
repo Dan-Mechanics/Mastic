@@ -132,7 +132,7 @@ namespace Mastic
 
 
 
-            int ringBufferIndex = currentTick % BUFFER_SIZE;
+            int index = currentTick % BUFFER_SIZE;
 
             if (Application.isFocused) 
             {
@@ -142,16 +142,16 @@ namespace Mastic
                 d = Input.GetKey(KeyCode.D);
             }
 
-            inputBuffer[ringBufferIndex].SetValues(w, a, s, d, mouseMovement.rotation.y, mouseMovement.rotation.x, currentTick);
+            inputBuffer[index].SetValues(w, a, s, d, mouseMovement.rotation.y, mouseMovement.rotation.x, currentTick);
 
-            Move(inputBuffer[ringBufferIndex], true);
+            Move(inputBuffer[index], true);
 
-            stateBuffer[ringBufferIndex].SetValues(transform.position, rb.linearVelocity, inputBuffer[ringBufferIndex]);
+            stateBuffer[index].SetValues(transform.position, rb.linearVelocity, inputBuffer[index]);
 
             /*if (!clientDropMessage && !Input.GetKey(KeyCode.E)) { CmdSendInputMessageToServer(inputBuffer[ringBufferIndex]); }
             else { OnCheatsChanged?.Invoke("not sending ..."); clientDropMessage = false; }*/
 
-            CmdSendInputMessageToServer(inputBuffer[ringBufferIndex]);
+            CmdSendInputMessageToServer(inputBuffer[index]);
 
             // we do it here because then the first is 0.
             OnCurrentTickChanged?.Invoke(currentTick);
@@ -375,8 +375,8 @@ namespace Mastic
         private void Move(InputMessage input, bool lerp)
         {
             // this is very important.
-            transform.rotation = input.CalculateLeftRightRotation();
-            eyes.localRotation = input.CalculateUpDownRotation();
+            transform.rotation = input.GetHorizontalRotation();
+            eyes.localRotation = input.GetVerticalRotation();
 
             physicsMovement.Move(MasticNetworkManager.STANDARD_FIXED_DELTA_TIME, input);
 
@@ -388,93 +388,6 @@ namespace Mastic
             }
 
             if (lerp) { cameraHandler.Assign(eyes.position, rb.linearVelocity); }
-        }
-
-        public struct InputMessage
-        {
-            public bool w;
-            public bool a;
-            public bool s;
-            public bool d;
-            //public bool space;
-
-            public float yRotation;
-            public float xRotation;
-
-            public int tick;
-
-            public void SetValues(bool w, bool a, bool s, bool d, float yRotation, float xRotation, int tick)
-            {
-                this.w = w;
-                this.a = a;
-                this.s = s;
-                this.d = d;
-                //this.space = space;
-                this.yRotation = yRotation;
-                this.xRotation = Mathf.Clamp(xRotation, -MouseMovement.MAX_CAM_ANGLE, MouseMovement.MAX_CAM_ANGLE);
-
-                this.tick = tick;
-            }
-
-            public float CalculateVerticalInput()
-            {
-                float result = 0f;
-
-                if (w) { result++; }
-                if (s) { result--; }
-
-                return result;
-            }
-
-            public float CalculateHorizontalInput()
-            {
-                float result = 0f;
-
-                if (d) { result++; }
-                if (a) { result--; }
-
-                return result;
-            }
-
-            /// <summary>
-            /// ! D.R.Y --> achieved
-            /// </summary>
-            public Quaternion CalculateLeftRightRotation() => Quaternion.AngleAxis(yRotation, Vector3.up);
-            public Quaternion CalculateUpDownRotation() => Quaternion.AngleAxis(xRotation, Vector3.right);
-        }
-
-        public struct StateMessage
-        {
-            public Vector3 position;
-            public Vector3 velocity;
-            public float yRotation;
-            public float xRotation;
-
-            public int tick;
-
-            public void SetValues(Vector3 position, Vector3 velocity, float yRotation, float xRotation, int tick)
-            {
-                this.position = position;
-                this.velocity = velocity;
-
-                this.yRotation = yRotation;
-                this.xRotation = xRotation;
-
-                this.tick = tick;
-            }
-
-            public void SetValues(Vector3 position, Vector3 velocity, InputMessage inputMessage)
-            {
-                this.position = position;
-                this.velocity = velocity;
-
-                yRotation = inputMessage.yRotation;
-                xRotation = inputMessage.xRotation;
-                tick = inputMessage.tick;
-            }
-
-            /*public Quaternion CalculateLeftRightRotation() => Quaternion.AngleAxis(yRotation, Vector3.up);
-            public Quaternion CalculateUpDownRotation() => Quaternion.AngleAxis(xRotation, Vector3.right);*/
         }
     }
 }

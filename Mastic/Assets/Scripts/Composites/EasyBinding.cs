@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ApplyYourself
+namespace Mastic
 {
     [CreateAssetMenu(fileName = nameof(EasyBinding), menuName = nameof(EasyBinding))]
     public class EasyBinding : ScriptableObject

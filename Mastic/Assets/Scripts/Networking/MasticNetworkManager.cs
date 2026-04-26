@@ -1,4 +1,5 @@
 ﻿using Mirror;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,117 +8,71 @@ namespace Mastic
 {
     public class MasticNetworkManager : NetworkManager
     {
-        [Header("Dan-Mechanics")]
+        public event Action<Transform> OnRegisterPlayer;
 
-        public const int STANDARD_TICKRATE = 64;
-        public const float STANDARD_FIXED_DELTA_TIME = 1f / STANDARD_TICKRATE;
+        private List<NetworkConnectionToClient> connections;
+        private Transform spawnpoint;
 
-        [SerializeField] private int maxFps = default;
-
-        private readonly List<NetworkConnectionToClient> connections = new List<NetworkConnectionToClient>();
-        private Transform respawn;
-        private Sequence sequence;
-
-        public override void Awake()
+        public void Setup(Transform spawnpoint, int tickrate)
         {
-            base.Awake();
-
-            respawn = GameObject.FindWithTag("Respawn").transform;
-            sequence = FindAnyObjectByType<Sequence>();
-
-            // ---
-
-            Application.targetFrameRate = maxFps;
-            QualitySettings.SetQualityLevel(0, false);
-
-            Time.fixedDeltaTime = STANDARD_FIXED_DELTA_TIME;
-            sendRate = STANDARD_TICKRATE;
-            Physics.simulationMode = SimulationMode.Script;
-        }
-
-        /*public override void Start()
-        {
-            base.Start();
-
-            Application.targetFrameRate = maxFps;
-            QualitySettings.SetQualityLevel(0, false);
-
-            Time.fixedDeltaTime = STANDARD_FIXED_DELTA_TIME;
-            sendRate = STANDARD_TICKRATE;
-            Physics.autoSimulation = false;
-
-            *//*Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;*//*
-        }*/
-
-        public override void Update()
-        {
-            base.Update();
-
-            if (Input.GetKeyDown(KeyCode.Q) && Input.GetKey(KeyCode.LeftShift)) { Application.Quit(); }
+            this.spawnpoint = spawnpoint;
+            connections = new List<NetworkConnectionToClient>();
+            sendRate = tickrate;
         }
 
         public override void OnClientDisconnect()
         {
             base.OnClientDisconnect();
+            print("CLIENT: DISCONNECTED FROM SERVER");
 
-            Debug.Log("DISCONNECTED FROM SERVER");
-
-            //GameObject.FindWithTag("MainCamera").transform.GetChild(0).gameObject.SetActive(false);
-
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-
+            Utils.UnlockMouse();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient conn)
         {
             base.OnServerDisconnect(conn);
-
             Debug.Log("SERVER: A CLIENT HAS DISCONNECTED");
 
             NetworkServer.Shutdown();
-
-            sequence.Clear();
             connections.Clear();
 
+            // NOTE FOR FUTURE, I THINK I WAS CLEARING
+            // SEQUENCE HERE BECUASE SEQUENCE USED TO BE ON THIS
+            // NETWORK BEHAVIOUR GAME OBJECT WHICH IS DO NOT DESTROY ON LOAD
+            // AND WOULD THEREFORE NOT GET RESETTED.
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         public override void OnClientConnect()
         {
             base.OnClientConnect();
+            Debug.Log("CLIENT: CONNECTED TO SERVER");
 
-            /*Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;*/
-
-            Debug.Log("CLIENT CONNECTED");
+            Utils.LockMouse();
         }
 
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
-            if (connections.Count >= maxConnections) { return; }
-            
+            if (connections.Count >= maxConnections)
+                return;
+
             connections.Add(conn);
-            
-            if(connections.Count >= maxConnections) 
-            {
-                Debug.Log("STARTING GAME...");
+            if (connections.Count < maxConnections)
+                return;
 
-                for (int i = 0; i < connections.Count; i++)
-                {
-                    GameObject player = Instantiate(playerPrefab, respawn.position, Quaternion.identity);
+            connections.ForEach(x => SpawnAndRegisterPlayer(conn));
+            print("STARTING GAME");
+        }
 
-                    //player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
-                    player.name = $"{playerPrefab.name} not yet initialized";
+        [Server]
+        private void SpawnAndRegisterPlayer(NetworkConnectionToClient conn)
+        {
+            GameObject player = Instantiate(playerPrefab, spawnpoint.position, Quaternion.identity);
+            player.name = $"uninitialized_{playerPrefab.name}_{conn.connectionId}";
 
-                    sequence.Register(player.GetComponent<NetworkPhysicsMovement>());
-                    //LagCompensation.instance.Register(player.GetComponent<Entity>());
-
-                    NetworkServer.AddPlayerForConnection(connections[i], player);
-                }
-            }
+            OnRegisterPlayer?.Invoke(player.transform);
+            NetworkServer.AddPlayerForConnection(conn, player);
         }
     }
 }

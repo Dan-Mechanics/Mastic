@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace ApplyYourself
+namespace Mastic
 {
     public static class Utils
     {
@@ -10,9 +10,21 @@ namespace ApplyYourself
             return (T)Enum.Parse(typeof(T), str);
         }
 
-        public static bool IsValid(string str)
+        public static bool IsStringValid(string str)
         {
             return !string.IsNullOrEmpty(str) && !string.IsNullOrWhiteSpace(str);
+        }
+
+        public static void LockMouse()
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+
+        public static void UnlockMouse()
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
         }
     }
 }

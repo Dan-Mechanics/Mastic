@@ -17,7 +17,7 @@ namespace Mastic
         [SerializeField] private Rigidbody rb = null;
         [SerializeField] private Transform eyes = null;
         [SerializeField] private NetworkPhysicsMovement networkPhysicsMovement = null;
-        [SerializeField] private Smite smite = null;
+       //  [SerializeField] private Smite smite = null;
 
         [Header("Movement Settings")]
 
@@ -67,7 +67,7 @@ namespace Mastic
             rb.AddForce(velAdd, ForceMode.VelocityChange);
         }
 
-        public void Move(float deltaTime, NetworkPhysicsMovement.InputMessage input)
+        public void Move(float deltaTime, InputMessage input)
         {
             bool isGrounded = CheckGround();
 
@@ -77,7 +77,7 @@ namespace Mastic
 
             if (!isStunned) 
             {
-                movement = transform.right * input.CalculateHorizontalInput() + transform.forward * input.CalculateVerticalInput();
+                movement = transform.right * input.GetHorizontalInput() + transform.forward * input.GetVerticalInput();
                 movement.Normalize();
             }
 

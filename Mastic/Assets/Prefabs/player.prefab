@@ -299,7 +299,7 @@ GameObject:
   - component: {fileID: 8815636318867098599}
   - component: {fileID: 4470709095662517613}
   m_Layer: 3
-  m_Name: physics_player
+  m_Name: player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

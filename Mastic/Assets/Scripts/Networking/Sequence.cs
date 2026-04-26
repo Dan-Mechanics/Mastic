@@ -4,6 +4,10 @@ using Mirror;
 
 namespace Mastic
 {
+    /// <summary>
+    /// This is bad naming and generally this whole sourccode
+    /// is bad so we are just starting out with refactoring yo.
+    /// </summary>
     public class Sequence : MonoBehaviour
     {
         //private readonly List<ServerAuthClientPredSimple> players = new List<ServerAuthClientPredSimple>();
@@ -54,15 +58,12 @@ namespace Mastic
             }
         }
 
-        public void Register(NetworkPhysicsMovement movement) 
+        public void Register(Transform player) 
         {
-            players.Add(new Player(movement, movement.transform.Find("eyes"), movement.transform));
+            players.Add(new Player(player.GetComponent<NetworkPhysicsMovement>(), player.Find("eyes"), player));
         }
 
-        public void Clear()
-        {
-            players.Clear();
-        }
+        public void Clear() => players.Clear();
 
         private class Player 
         {
