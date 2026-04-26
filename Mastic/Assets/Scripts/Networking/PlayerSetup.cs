@@ -5,14 +5,14 @@ namespace Mastic
 {
     public class PlayerSetup : NetworkBehaviour
     {
-        [SerializeField] private string gameObjectName = default;
+        [SerializeField] private string defaultName = default;
         [SerializeField] private Object[] localRemove = default;
         [SerializeField] private Object[] unlocalRemove = default;
         [SerializeField] private Object[] serverRemove = default;
 
         public void Setup()
         {
-            gameObject.name = gameObjectName;
+            gameObject.name = defaultName;
             if (!isServerOnly)
             {
                 if (isLocalPlayer)

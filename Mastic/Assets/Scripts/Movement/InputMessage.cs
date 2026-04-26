@@ -7,54 +7,51 @@ namespace Mastic
     /// </summary>
     public struct InputMessage
     {
-        public bool forward;
-        public bool left;
-        public bool backward;
-        public bool right;
+        public bool w;
+        public bool a;
+        public bool s;
+        public bool d;
         //public bool space;
 
         public float yRotation;
         public float xRotation;
         public int tick;
 
-        public void SetMovement(bool forward, bool backward, bool left, bool right)
+        public void SetValues(bool w, bool a, bool s, bool d, float yRotation, float xRotation, int tick)
         {
-            this.forward = forward;
-            this.backward = backward;
-            this.left = left;
-            this.right = right;
-        }
-
-        public void SetTick(int tick) => this.tick = tick;
-
-        public void SetRotation(float yRotation, float xRotation)
-        {
+            this.w = w;
+            this.a = a;
+            this.s = s;
+            this.d = d;
             this.yRotation = yRotation;
-            this.xRotation = Mathf.Clamp(xRotation, -MouseMovement.MAX_CAM_ANGLE, MouseMovement.MAX_CAM_ANGLE);
+            this.xRotation = xRotation;
+            this.tick = tick;
         }
+        
+        public void Verify() => xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
         public float GetVerticalInput()
         {
-            float forwardInput = 0f;
-            if (forward)
-                forwardInput++;
+            float vert = 0f;
+            if (w)
+                vert++;
 
-            if (backward)
-                forwardInput--;
+            if (a)
+                vert--;
 
-            return forwardInput;
+            return vert;
         }
 
         public float GetHorizontalInput()
         {
-            float sideways = 0f;
-            if (right) 
-                sideways++;
+            float hori = 0f;
+            if (d) 
+                hori++;
 
-            if (left) 
-                sideways--;
+            if (s) 
+                hori--;
 
-            return sideways;
+            return hori;
         }
 
         public Quaternion GetHorizontalRotation() => Quaternion.AngleAxis(yRotation, Vector3.up);

@@ -12,7 +12,7 @@ namespace Mastic
         public bool HasReceivedFirstMessage => hasReceivedFirstMessage;
 
         public event Action<int> OnBeforeServerTick;
-        public event Action<int> OnCurrentTickChanged;
+        public event Action<int> OnTick;
         public event Action<string> OnCheatsChanged;
         public event Action<bool> OnReconsileStateChanged;
 
@@ -30,6 +30,7 @@ namespace Mastic
         [SerializeField] private PhysicsMovement physicsMovement = null;
         [SerializeField] private GameObject authGraphicPrefab = null;
         [SerializeField] private UnityEvent onSlosh = null;
+        [SerializeField] private int standardTickrate = default;
 
         private int currentTick;
 
@@ -154,7 +155,7 @@ namespace Mastic
             CmdSendInputMessageToServer(inputBuffer[index]);
 
             // we do it here because then the first is 0.
-            OnCurrentTickChanged?.Invoke(currentTick);
+            OnTick?.Invoke(currentTick);
             currentTick++;
         }
 
@@ -253,9 +254,10 @@ namespace Mastic
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
-            if (inputMessage.tick < 0) { return; }
+            if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
+                return;
 
-            if (!(inputMessage.tick > receivedTick)) { return; }
+            inputMessage.Verify();
 
             if (inputMessage.tick > receivedTick + 1 && hasReceivedFirstMessage && bufferHasTicks)
             {
@@ -265,7 +267,8 @@ namespace Mastic
                     clone.tick -= i + 1;
 
                     // if we already defaulted this, then there's no point !
-                    if (clone.tick > previousInputMessage.tick) { pendingInputMessages.Add(clone); }
+                    if (clone.tick > previousInputMessage.tick)
+                        pendingInputMessages.Add(clone);
                 }
             }
 
@@ -378,11 +381,11 @@ namespace Mastic
             transform.rotation = input.GetHorizontalRotation();
             eyes.localRotation = input.GetVerticalRotation();
 
-            physicsMovement.Move(MasticNetworkManager.STANDARD_FIXED_DELTA_TIME, input);
+            physicsMovement.Move(1f/ standardTickrate, input);
 
             if (!isServerOnly)
             {
-                Physics.Simulate(MasticNetworkManager.STANDARD_FIXED_DELTA_TIME);
+                Physics.Simulate(1f / standardTickrate);
 
                 CapVelocity();
             }

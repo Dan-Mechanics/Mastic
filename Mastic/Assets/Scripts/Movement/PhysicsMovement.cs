@@ -67,7 +67,7 @@ namespace Mastic
             rb.AddForce(velAdd, ForceMode.VelocityChange);
         }
 
-        public void Move(float deltaTime, InputMessage input)
+        public void Move(float interval, InputMessage input)
         {
             bool isGrounded = CheckGround();
 
@@ -90,14 +90,14 @@ namespace Mastic
 
             if (mag < walkingSpeed)
             {
-                rb.AddForce(Vector3.ClampMagnitude(accel * deltaTime * movement, walkingSpeed - mag), ForceMode.VelocityChange);
+                rb.AddForce(Vector3.ClampMagnitude(accel * interval * movement, walkingSpeed - mag), ForceMode.VelocityChange);
             }
             else if (isGrounded)
             {
-                rb.AddForce(Vector3.ClampMagnitude(accel * deltaTime * -velocity.normalized, mag - walkingSpeed), ForceMode.VelocityChange);
+                rb.AddForce(Vector3.ClampMagnitude(accel * interval * -velocity.normalized, mag - walkingSpeed), ForceMode.VelocityChange);
             }
 
-            Vector3 counterMovement = accel * deltaTime * accelerationMult * -(velocity.normalized - movement);
+            Vector3 counterMovement = accel * interval * accelerationMult * -(velocity.normalized - movement);
 
             if (mag != 0f && counterMovement.magnitude > mag) { counterMovement = -velocity; }
 

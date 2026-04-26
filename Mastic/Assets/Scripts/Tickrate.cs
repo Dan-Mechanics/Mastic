@@ -16,6 +16,7 @@ namespace Mastic
 
         [Header("Settings")]
 
+        [SerializeField] private int standardTickrate;
         [SerializeField] private float minTimeDilationTime = 0.5f;
         [SerializeField] private int drainedTickrate = 65;
         [SerializeField] private int fullTickrate = 63;
@@ -65,7 +66,7 @@ namespace Mastic
             if (pendingInputMessagesCount < 1) { return drainedTickrate; }
             else if (pendingInputMessagesCount > idealPendingCount) { return fullTickrate; }
 
-            return MasticNetworkManager.STANDARD_TICKRATE;
+            return standardTickrate;
         }
 
         [TargetRpc]
@@ -79,7 +80,7 @@ namespace Mastic
         [Client]
         private void SetTickrate(int tickrate, bool calledFromStart = false)
         {
-            if (tickrate != MasticNetworkManager.STANDARD_TICKRATE && Application.isFocused && !calledFromStart) { onDing?.Invoke(); }
+            if (tickrate != standardTickrate && Application.isFocused && !calledFromStart) { onDing?.Invoke(); }
 
             currentTickrate = tickrate;
 

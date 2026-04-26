@@ -48,7 +48,6 @@ namespace Mastic
         {
             base.OnClientConnect();
             Debug.Log("CLIENT: CONNECTED TO SERVER");
-
             Utils.LockMouse();
         }
 

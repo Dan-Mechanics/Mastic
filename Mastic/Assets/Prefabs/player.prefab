@@ -356,6 +356,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
+  defaultName: player
   localRemove:
   - {fileID: 8563719589400999970}
   - {fileID: 8239588418118008676}
@@ -478,6 +479,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  standardTickrate: 64
 --- !u!114 &6891286507384332386
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -495,7 +497,6 @@ MonoBehaviour:
   rb: {fileID: 3497393699691843500}
   eyes: {fileID: 2720431899970827215}
   networkPhysicsMovement: {fileID: 2546578394722574111}
-  smite: {fileID: 0}
   walkingSpeed: 6
   acceleration: 25
   accelerationMult: 0.35
@@ -543,6 +544,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  standardTickrate: 64
   minTimeDilationTime: 0.5
   drainedTickrate: 65
   fullTickrate: 63
@@ -560,7 +562,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tickrateText: {fileID: 2563108644423690779}
-  currentTickText: {fileID: 4464447807540331817}
+  tickText: {fileID: 4464447807540331817}
   cheatsText: {fileID: 5349842774248880571}
   reconsileIndicator: {fileID: 950590360058413065}
   tickrate: {fileID: 8815636318867098599}

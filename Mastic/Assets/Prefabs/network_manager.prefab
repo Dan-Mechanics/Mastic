@@ -49,8 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 0
   runInBackground: 1
-  headlessStartMode: 0
-  editorAutoStart: 0
+  headlessStartMode: 1
+  editorAutoStart: 1
   sendRate: 64
   offlineScene: Assets/Scenes/Scene.unity
   onlineScene: Assets/Scenes/Scene.unity
@@ -80,7 +80,6 @@ MonoBehaviour:
   evaluationMethod: 0
   evaluationInterval: 3
   timeInterpolationGui: 0
-  sequence: {fileID: 0}
   maxFps: 300
 --- !u!114 &3229349398631652839
 MonoBehaviour:
