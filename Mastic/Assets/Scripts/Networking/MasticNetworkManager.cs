@@ -13,11 +13,11 @@ namespace Mastic
         private List<NetworkConnectionToClient> connections;
         private Transform spawnpoint;
 
-        public void Setup(Transform spawnpoint, int tickrate)
+        public void Setup(Transform spawnpoint, int standardTickrate)
         {
             this.spawnpoint = spawnpoint;
             connections = new List<NetworkConnectionToClient>();
-            sendRate = tickrate;
+            sendRate = standardTickrate;
         }
 
         public override void OnClientDisconnect()

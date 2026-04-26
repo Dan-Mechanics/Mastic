@@ -1,29 +1,28 @@
+using Mirror;
 using UnityEngine;
 
 namespace Mastic
 {
     public class PlayerContext : MonoBehaviour
     {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
+        [SerializeField] private Tickrate tickrate = default;
+        [SerializeField] private DebugDisplay debugDisplay = default;
+
+        [Client]
+        public void Setup(int standardTickrate)
         {
-        
-        }
+            Tickrate tickrate = GetComponent<Tickrate>();
+            DebugDisplay debugDisplay = GetComponent<DebugDisplay>();
+            NetworkPhysicsMovement networkPhysicsMovement = GetComponent<NetworkPhysicsMovement>();
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
+            debugDisplay.Setup(standardTickrate);
 
-        public void Setup()
-        {
-            tickrate.OnTickrateChanged += DisplayTickrate;
+            tickrate.OnTickrateChanged += debugDisplay.DisplayTickrate;
 
-            networkPhysicsMovement.OnTick += DisplayTick;
-            networkPhysicsMovement.OnCheatsChanged += DisplayCheats;
+            networkPhysicsMovement.OnTick += debugDisplay.DisplayTick;
+            networkPhysicsMovement.OnCheatsChanged += debugDisplay.DisplayCheats;
 
-            networkPhysicsMovement.OnReconsileStateChanged += IndicateReconsile;
+            networkPhysicsMovement.OnReconsileStateChanged += debugDisplay.IndicateReconsile;
         }
     }
 }
