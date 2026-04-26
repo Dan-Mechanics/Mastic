@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   framerateLimit: 300
-  closeGame: {fileID: 0}
+  simulationMode: 0
 --- !u!4 &422641785
 Transform:
   m_ObjectHideFlags: 0
@@ -923,6 +923,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08e8a16e888fcef4bb144346823ac396, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  closeGame: {fileID: 0}
+  tickrate: 0
 --- !u!4 &2033716368
 Transform:
   m_ObjectHideFlags: 0
