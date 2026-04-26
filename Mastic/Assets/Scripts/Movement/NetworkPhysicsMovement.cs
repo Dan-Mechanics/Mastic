@@ -37,7 +37,7 @@ namespace Mastic
         private int clientPacketMultiplier;
         //private bool clientDropMessage;
         private Transform serverAuthGraphic;
-        private CameraHandler cameraHandler;
+        private ICameraInterpolation cameraInterpolation;
 
         public const int BUFFER_SIZE = 64;
         public const int MAX_PENDING_INPUT_COUNT = 8;
@@ -60,7 +60,7 @@ namespace Mastic
 
         private void Awake()
         {
-            cameraHandler = GameObject.FindWithTag("MainCamera").GetComponent<CameraHandler>();
+            cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
         }
 
         public override void OnStartLocalPlayer()
@@ -365,7 +365,7 @@ namespace Mastic
 
                 Move(inputBuffer[stateBufferIndex], false);
 
-                cameraHandler.Interject(eyes.position, prev, rb.linearVelocity);
+                cameraInterpolation.Interject(eyes.position, prev, rb.linearVelocity);
 
                 stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputBuffer[stateBufferIndex]);
 
@@ -390,7 +390,7 @@ namespace Mastic
                 CapVelocity();
             }
 
-            if (lerp) { cameraHandler.Assign(eyes.position, rb.linearVelocity); }
+            if (lerp) { cameraInterpolation.Assign(eyes.position, rb.linearVelocity); }
         }
     }
 }

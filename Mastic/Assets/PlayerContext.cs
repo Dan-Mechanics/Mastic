@@ -5,9 +5,6 @@ namespace Mastic
 {
     public class PlayerContext : MonoBehaviour
     {
-        [SerializeField] private Tickrate tickrate = default;
-        [SerializeField] private DebugDisplay debugDisplay = default;
-
         [Client]
         public void Setup(int standardTickrate)
         {

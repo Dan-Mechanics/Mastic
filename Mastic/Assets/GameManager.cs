@@ -10,14 +10,14 @@ namespace Mastic
         [SerializeField] private string spawnpointTag = default;
 
         private SceneSetup sceneSetup;
-        private MasticNetworkManager networkManager;
+        private SimpleNetworkManager networkManager;
         private Sequence sequence;
         private Transform spawnpoint;
 
         private void Awake()
         {
             sceneSetup = FindAnyObjectByType<SceneSetup>();
-            networkManager = FindAnyObjectByType<MasticNetworkManager>();   
+            networkManager = FindAnyObjectByType<SimpleNetworkManager>();   
             sequence = FindAnyObjectByType<Sequence>();
             spawnpoint = GameObject.FindWithTag(spawnpointTag).transform;
         }

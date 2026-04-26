@@ -15,6 +15,7 @@ namespace Mastic
             Application.targetFrameRate = framerateLimit;
             Time.fixedDeltaTime = 1f / standardTickrate;
             Physics.simulationMode = simulationMode;
+
             QualitySettings.SetQualityLevel(0, false);
             QualitySettings.vSyncCount = 0;
 

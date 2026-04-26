@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1196721646778854890}
   - component: {fileID: 6103662349769157085}
   m_Layer: 0
-  m_Name: scene_boilerplate
+  m_Name: scene_setup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,4 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   framerateLimit: 300
-  simulationMode: 0
+  simulationMode: 2

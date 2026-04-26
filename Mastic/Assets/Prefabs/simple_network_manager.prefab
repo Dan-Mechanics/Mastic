@@ -15,8 +15,8 @@ GameObject:
   - component: {fileID: 8267332148853626195}
   - component: {fileID: 867135642616040006}
   m_Layer: 0
-  m_Name: network_manager
-  m_TagString: NetworkManager
+  m_Name: simple_network_manager
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -45,21 +45,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 3229349398631652857}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7dd1cfc47f8f79d44bd379d8d39a5826, type: 3}
+  m_Script: {fileID: 11500000, guid: 7b4c22f87e8fcc140b0a3fc2b176eb4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 0
   runInBackground: 1
   headlessStartMode: 1
   editorAutoStart: 1
-  sendRate: 32
+  sendRate: 64
   offlineScene: Assets/Scenes/Scene.unity
   onlineScene: Assets/Scenes/Scene.unity
   offlineSceneLoadDelay: 0
   transport: {fileID: 3229349398631652856}
   networkAddress: localhost
   maxConnections: 2
-  disconnectInactiveConnections: 0
+  disconnectInactiveConnections: 1
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
   playerPrefab: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}

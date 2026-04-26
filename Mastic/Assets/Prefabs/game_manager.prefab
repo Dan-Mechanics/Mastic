@@ -44,5 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08e8a16e888fcef4bb144346823ac396, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  closeGame: {fileID: 0}
-  standardTickrate: 0
+  closeGame: {fileID: 11400000, guid: 00dbeca336497604191277a392d5c0cd, type: 2}
+  standardTickrate: 64
+  spawnpointTag: Respawn

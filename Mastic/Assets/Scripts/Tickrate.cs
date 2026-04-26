@@ -22,14 +22,14 @@ namespace Mastic
         [SerializeField] private int fullTickrate = 63;
         [SerializeField] private int idealPendingCount = 2;
 
-        private MasticNetworkManager networkManager;
+        private SimpleNetworkManager networkManager;
 
         private int currentTickrate;
         private bool hasTimeDilation = true;
 
         private void Awake()
         {
-            networkManager = GameObject.FindWithTag("NetworkManager").GetComponent<MasticNetworkManager>();
+            networkManager = GameObject.FindWithTag("NetworkManager").GetComponent<SimpleNetworkManager>();
             networkPhysicsMovement.OnBeforeServerTick += TryApplyEffect;
         }
 

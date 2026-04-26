@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace Mastic
 {
-    public class MasticNetworkManager : NetworkManager
+    public class SimpleNetworkManager : NetworkManager
     {
         public event Action<Transform> OnRegisterPlayer;
 
@@ -37,10 +37,10 @@ namespace Mastic
             NetworkServer.Shutdown();
             connections.Clear();
 
-            // NOTE FOR FUTURE, I THINK I WAS CLEARING
+            // NOTE FOR FUTURE: I THINK I WAS CLEARING
             // SEQUENCE HERE BECUASE SEQUENCE USED TO BE ON THIS
-            // NETWORK BEHAVIOUR GAME OBJECT WHICH IS DO NOT DESTROY ON LOAD
-            // AND WOULD THEREFORE NOT GET RESETTED.
+            // NETWORK MANAGER GAME OBJECT WHICH IS DO NOT DESTROY ON LOAD
+            // AND WOULD THEREFORE NOT GET RESET.
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
@@ -60,15 +60,15 @@ namespace Mastic
             if (connections.Count < maxConnections)
                 return;
 
-            connections.ForEach(x => SpawnAndRegisterPlayer(conn));
+            connections.ForEach(x => AddPlayer(conn));
             print("STARTING GAME");
         }
 
         [Server]
-        private void SpawnAndRegisterPlayer(NetworkConnectionToClient conn)
+        private void AddPlayer(NetworkConnectionToClient conn)
         {
             GameObject player = Instantiate(playerPrefab, spawnpoint.position, Quaternion.identity);
-            player.name = $"uninitialized_{playerPrefab.name}_{conn.connectionId}";
+            player.name = $"uninitialized_{playerPrefab.name}_[{conn.connectionId}]";
 
             OnRegisterPlayer?.Invoke(player.transform);
             NetworkServer.AddPlayerForConnection(conn, player);

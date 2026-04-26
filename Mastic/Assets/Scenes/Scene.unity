@@ -341,30 +341,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: cam
       objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_ClearFlags
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_BackGroundColor.b
-      value: 0.9811321
-      objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_BackGroundColor.g
-      value: 0.7264141
-      objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_BackGroundColor.r
-      value: 0.71733713
-      objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_AllowDynamicResolution
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924652, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_RootOrder
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 3129894886814924652, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -517,11 +493,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3229349398631652857, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_Name
-      value: network_manager
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652857, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: m_TagString
-      value: Untagged
+      value: simple_network_manager
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -536,18 +508,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3462017708676104264, guid: 2ceb4a0ba27fb824b98eff6b692e2b7f, type: 3}
-      propertyPath: closeGame
-      value: 
-      objectReference: {fileID: 11400000, guid: 00dbeca336497604191277a392d5c0cd, type: 2}
-    - target: {fileID: 3462017708676104264, guid: 2ceb4a0ba27fb824b98eff6b692e2b7f, type: 3}
-      propertyPath: spawnpointTag
-      value: Respawn
-      objectReference: {fileID: 0}
-    - target: {fileID: 3462017708676104264, guid: 2ceb4a0ba27fb824b98eff6b692e2b7f, type: 3}
-      propertyPath: standardTickrate
-      value: 64
-      objectReference: {fileID: 0}
     - target: {fileID: 4738480979731758940, guid: 2ceb4a0ba27fb824b98eff6b692e2b7f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -761,7 +721,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2857262702044904297, guid: e58735b1d2b7d734f89c67911ff0acb5, type: 3}
       propertyPath: m_Name
-      value: scene_boilerplate
+      value: scene_setup
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -772,6 +732,8 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 5107819873165235031}
+  - {fileID: 8925379699447923364}
   - {fileID: 3229349398353710519}
   - {fileID: 2123367391152673316}
   - {fileID: 1861253640}
@@ -780,5 +742,3 @@ SceneRoots:
   - {fileID: 744171792}
   - {fileID: 198935194}
   - {fileID: 5256125215055487970}
-  - {fileID: 8925379699447923364}
-  - {fileID: 5107819873165235031}
