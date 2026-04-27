@@ -2,7 +2,8 @@
 {
     public interface IEntity
     {
-        void RecordFrame(int tick, int maxRecordingLength);
+        void Setup(LagCompensation lagCompensation);
+        void RecordFrame(int tick);
         void SetAsTick(int tick);
         void ReturnToPresent();
     }

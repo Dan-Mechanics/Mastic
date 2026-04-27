@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class TransformEntity : MonoBehaviour, IEntity
+    public class BuildableEntity : MonoBehaviour, IEntity
     {
         [SerializeField] private GameObject hitbox = default;
         private Frame[] recording;
@@ -31,25 +31,13 @@ namespace Mastic
         private void SetAsFrame(Frame frame)
         {
             hitbox.SetActive(frame.active);
-            if (!frame.active)
-                return;
-
-            transform.SetLocalPositionAndRotation(frame.pos, frame.rot);
             transform.localScale = frame.scale;
         }
 
         [Server]
         public void RecordFrame(int tick)
         {
-            present.active = active;
-            if (present.active)
-            {
-                present.SetValues(
-                    transform.localPosition,
-                    transform.localRotation,
-                    transform.localScale);
-            }
-
+            present.SetValues(transform.localScale, active);
             recording[tick % recording.Length] = present;
         }
 
@@ -61,16 +49,13 @@ namespace Mastic
         
         private struct Frame
         {
-            public Vector3 pos;
-            public Quaternion rot;
             public Vector3 scale;
             public bool active;
 
-            public void SetValues(Vector3 pos, Quaternion rot, Vector3 scale)
+            public void SetValues(Vector3 scale, bool active)
             {
-                this.pos = pos;
-                this.rot = rot;
                 this.scale = scale;
+                this.active = active;
             }
         }
     }

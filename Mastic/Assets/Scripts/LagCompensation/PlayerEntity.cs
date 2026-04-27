@@ -22,10 +22,10 @@ namespace Mastic
         }
 
         [Server]
-        public void RecordFrame(int tick, int maxRecordingLength)
+        public void RecordFrame(int tick)
         {
             present.SetValues(transform.position);
-            recording[tick % maxRecordingLength] = present;
+            recording[tick % recording.Length] = present;
         }
 
         [Server]
