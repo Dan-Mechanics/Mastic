@@ -1,4 +1,5 @@
 ﻿using Mirror;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mastic
@@ -6,63 +7,81 @@ namespace Mastic
     public class TransformEntity : NetworkBehaviour, IEntity
     {
         [SerializeField] private GameObject hitbox = default;
-        private Frame[] recording;
+        [SerializeField] private bool includePosition = default;
+        [SerializeField] private bool includeRotation = default;
+        [SerializeField] private bool includeScale = default;
+        private readonly List<Frame> recording = new List<Frame>();
         private Frame present;
-        private bool hitboxActive;
+        private bool active;
 
         public override void OnStartServer()
         {
             base.OnStartServer();
-            LagCompensation lagCompensation = FindAnyObjectByType<LagCompensation>();
-            recording = new Frame[lagCompensation.MaxRecordingLength];
-            EnableHitbox(true);
-            lagCompensation.Register(this);
+            FindAnyObjectByType<LagCompensation>().Register(this);
+        }
+
+        public void Destroy()
+        {
+
         }
 
         private void SetAsFrame(Frame frame)
         {
-            transform.position = frame.pos;
-            hitbox.SetActive(frame.active);
+            if (includePosition)
+                transform.localPosition = frame.pos;
+
+            if (includeRotation)
+                transform.localRotation = frame.rot;
+
+            if (includeScale)
+                transform.localScale = frame.scale;
         }
 
         [Server]
         public void RecordFrame(int tick, int maxRecordingLength)
         {
-            recording[tick % recording.Length].
-                SetValues(transform.position, hitboxActive);
-        }
+            present.tick = tick;
+            if (includePosition)
+                present.pos = transform.localPosition;
 
-        [Server]
-        public void SavePresent()
-        {
-            present.SetValues(transform.position, hitboxActive);
+            if (includeRotation)
+                present.rot = transform.localRotation;
+
+            if (includeScale)
+                present.scale = transform.localScale;
+
+            recording.Add(present);
+            while (recording.Count > maxRecordingLength)
+            {
+                recording.RemoveAt(0);
+            }
         }
 
         [Server]
         public void SetAsTick(int tick)
         {
-            SetAsFrame(recording[tick % recording.Length]);
+            // !PERFORMANCE,
+            // you can have some basic checks here and limit searching.
+            hitbox.SetActive(false);
+            for (int i = recording.Count - 1; i >= 0; i--)
+            {
+                if (recording[i].tick != tick)
+                    continue;
+
+                hitbox.SetActive(true);
+                SetAsFrame(recording[i]);
+            }
         }
 
         [Server]
-        public void EnableHitbox(bool active) => hitboxActive = active;
-
-        [Server]
-        public void ReturnToPresent()
-        {
-            SetAsFrame(present);
-        }
+        public void ReturnToPresent() => SetAsFrame(present);
 
         private struct Frame
         {
             public Vector3 pos;
-            public bool active;
-
-            public void SetValues(Vector3 pos, bool active)
-            {
-                this.pos = pos;
-                this.active = active;
-            }
+            public Quaternion rot;
+            public Vector3 scale;
+            public int tick;
         }
     }
 }

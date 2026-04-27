@@ -15,6 +15,8 @@ namespace Mastic
             base.OnStartServer();
             LagCompensation lagCompensation = FindAnyObjectByType<LagCompensation>();
             recording = new Frame[lagCompensation.MaxRecordingLength];
+
+            // FOR THE TIME BEING, THE PLAYER WILL SPAWN WITH HITBOX ENABLED.
             EnableHitbox(true);
             lagCompensation.Register(this);
         }
@@ -28,14 +30,8 @@ namespace Mastic
         [Server]
         public void RecordFrame(int tick, int maxRecordingLength)
         {
-            recording[tick % recording.Length].
-                SetValues(transform.position, hitboxActive);
-        }
-
-        [Server]
-        public void SavePresent()
-        {
             present.SetValues(transform.position, hitboxActive);
+            recording[tick % recording.Length] = present;
         }
 
         [Server]
@@ -45,13 +41,14 @@ namespace Mastic
         }
 
         [Server]
-        public void EnableHitbox(bool active) => hitboxActive = active;
+        public void EnableHitbox(bool active)
+        {
+            hitboxActive = active;
+            hitbox.SetActive(hitboxActive);
+        }
 
         [Server]
-        public void ReturnToPresent()
-        {
-            SetAsFrame(present);
-        }
+        public void ReturnToPresent() => SetAsFrame(present);
 
         private struct Frame
         {

@@ -1,3 +1,11 @@
+true statements about player:
+1. you cant rollback on a player that is dead, in the sense that it doenst
+matter if you do that
+a player in the future means do nothing
+player should be constant so ringbuffer is advised
+
+
+
 there is a server-only lag comepnsation monobehaviou in the scene
 taht basically has norhing to do with the network side of things
 but is merely a useful component. 

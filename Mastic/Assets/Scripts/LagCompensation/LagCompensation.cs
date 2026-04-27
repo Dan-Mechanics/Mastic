@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Mirror;
+using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
-using System;
 
 namespace Mastic
 {
@@ -27,16 +26,16 @@ namespace Mastic
             Physics.SyncTransforms();
         }
 
-        [Server]
-        public void SavePresent()
-        {
-            entities.ForEach(x => x.SavePresent());
-        }
-
+        /// <summary>
+        /// This should only be called after RecordFrame().
+        /// </summary>
         [Server]
         public void ReturnToPresent()
         {
-            entities.ForEach(x => x.ReturnToPresent());
+            for (int i = 0; i < entities.Count; i++)
+            {
+                entities[i].ReturnToPresent();
+            }
         }
 
         [Server]
@@ -45,17 +44,20 @@ namespace Mastic
             entities.ForEach(x => x.RecordFrame(currentTick, maxRecordingLength));
             currentTick++;
 
-            // MAKE SURE TO TEST THIS !!
+            // !FIX, !TEST
             oldestTick = Mathf.Max(0, currentTick - maxRecordingLength);
         }
 
         [Server]
-        public void Register(PlayerEntity entity) 
+        public void Register(IEntity entity) 
         {
             if (entity != null && !entities.Contains(entity))
                 entities.Add(entity);
         }
 
+        /// <summary>
+        /// This should be called first in the sequence.
+        /// </summary>
         [Server]
         public void CleanEntities()
         {
