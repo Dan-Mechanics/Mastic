@@ -1,32 +1,43 @@
 ﻿using Mirror;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mastic
 {
+    /// <summary>
+    /// This class could be optimized further but this is sufficient.
+    /// </summary>
     public class TransformEntity : NetworkBehaviour, IEntity
     {
         [SerializeField] private GameObject hitbox = default;
         [SerializeField] private bool includePosition = default;
         [SerializeField] private bool includeRotation = default;
         [SerializeField] private bool includeScale = default;
-        private readonly List<Frame> recording = new List<Frame>();
+        private Frame[] recording;
         private Frame present;
         private bool active;
 
         public override void OnStartServer()
         {
             base.OnStartServer();
-            FindAnyObjectByType<LagCompensation>().Register(this);
+            LagCompensation lagCompensation = new LagCompensation();    
+            recording = new Frame[lagCompensation.MaxRecordingLength];
+            EnableCollision(true);
+            lagCompensation.Register(this);
         }
 
-        public void Destroy()
+        [Server]
+        public void Deregister(float fullyGoneTime)
         {
-
+            EnableCollision(false);
+            Destroy(gameObject, fullyGoneTime);
         }
+
+        [Server]
+        public void EnableCollision(bool active) => this.active = active;
 
         private void SetAsFrame(Frame frame)
         {
+            hitbox.SetActive(frame.active);
             if (includePosition)
                 transform.localPosition = frame.pos;
 
@@ -40,7 +51,7 @@ namespace Mastic
         [Server]
         public void RecordFrame(int tick, int maxRecordingLength)
         {
-            present.tick = tick;
+            present.active = active;
             if (includePosition)
                 present.pos = transform.localPosition;
 
@@ -50,38 +61,21 @@ namespace Mastic
             if (includeScale)
                 present.scale = transform.localScale;
 
-            recording.Add(present);
-            while (recording.Count > maxRecordingLength)
-            {
-                recording.RemoveAt(0);
-            }
+            recording[tick % maxRecordingLength] = present;
         }
 
         [Server]
-        public void SetAsTick(int tick)
-        {
-            // !PERFORMANCE,
-            // you can have some basic checks here and limit searching.
-            hitbox.SetActive(false);
-            for (int i = recording.Count - 1; i >= 0; i--)
-            {
-                if (recording[i].tick != tick)
-                    continue;
-
-                hitbox.SetActive(true);
-                SetAsFrame(recording[i]);
-            }
-        }
+        public void SetAsTick(int tick) => SetAsFrame(recording[tick % recording.Length]);
 
         [Server]
         public void ReturnToPresent() => SetAsFrame(present);
-
+        
         private struct Frame
         {
             public Vector3 pos;
             public Quaternion rot;
             public Vector3 scale;
-            public int tick;
+            public bool active;
         }
     }
 }

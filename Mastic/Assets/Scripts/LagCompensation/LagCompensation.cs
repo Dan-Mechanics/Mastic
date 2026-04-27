@@ -44,7 +44,7 @@ namespace Mastic
             entities.ForEach(x => x.RecordFrame(currentTick, maxRecordingLength));
             currentTick++;
 
-            // !FIX, !TEST
+            // MAKE SURE TO TEST IF THIS DOES WAHT YOU THINK IT DOES !!
             oldestTick = Mathf.Max(0, currentTick - maxRecordingLength);
         }
 

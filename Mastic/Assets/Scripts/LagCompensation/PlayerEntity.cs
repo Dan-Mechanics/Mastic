@@ -5,33 +5,27 @@ namespace Mastic
 {
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
-        [SerializeField] private GameObject hitbox = default;
         private Frame[] recording;
         private Frame present;
-        private bool hitboxActive;
 
-        public override void OnStartServer()
+        [Server]
+        public void Setup(LagCompensation lagCompensation)
         {
-            base.OnStartServer();
-            LagCompensation lagCompensation = FindAnyObjectByType<LagCompensation>();
             recording = new Frame[lagCompensation.MaxRecordingLength];
-
-            // FOR THE TIME BEING, THE PLAYER WILL SPAWN WITH HITBOX ENABLED.
-            EnableHitbox(true);
             lagCompensation.Register(this);
         }
 
         private void SetAsFrame(Frame frame)
         {
             transform.position = frame.pos;
-            hitbox.SetActive(frame.active);
+            // ADD ROTATION HERE TOO.
         }
 
         [Server]
         public void RecordFrame(int tick, int maxRecordingLength)
         {
-            present.SetValues(transform.position, hitboxActive);
-            recording[tick % recording.Length] = present;
+            present.SetValues(transform.position);
+            recording[tick % maxRecordingLength] = present;
         }
 
         [Server]
@@ -40,11 +34,17 @@ namespace Mastic
             SetAsFrame(recording[tick % recording.Length]);
         }
 
+        /// <summary>
+        /// Invoke when respawned.
+        /// </summary>
         [Server]
-        public void EnableHitbox(bool active)
+        public void RefreshBuffer()
         {
-            hitboxActive = active;
-            hitbox.SetActive(hitboxActive);
+            present.SetValues(transform.position);
+            for (int i = 0; i < recording.Length; i++)
+            {
+                recording[i] = present;
+            }
         }
 
         [Server]
@@ -53,12 +53,11 @@ namespace Mastic
         private struct Frame
         {
             public Vector3 pos;
-            public bool active;
+            // ADD ROTATION HERE TOO.
 
-            public void SetValues(Vector3 pos, bool active)
+            public void SetValues(Vector3 pos)
             {
                 this.pos = pos;
-                this.active = active;
             }
         }
     }
