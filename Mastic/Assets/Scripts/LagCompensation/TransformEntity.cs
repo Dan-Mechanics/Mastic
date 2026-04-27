@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class PlayerEntity : NetworkBehaviour, IEntity
+    public class TransformEntity : NetworkBehaviour, IEntity
     {
         [SerializeField] private GameObject hitbox = default;
         private Frame[] recording;
