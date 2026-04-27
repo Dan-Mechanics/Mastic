@@ -5,6 +5,7 @@ namespace Mastic
 {
     /// <summary>
     /// It would be smart to split these into separate channels in the future.
+    /// That does mean that LagCompensation needs to keep track of more interfaces...
     /// </summary>
     public class TransformEntity : NetworkBehaviour, IEntity
     {
@@ -12,9 +13,9 @@ namespace Mastic
         [SerializeField] private bool includePosition = default;
         [SerializeField] private bool includeRotation = default;
         [SerializeField] private bool includeScale = default;
-        private bool currentlyActive;
         private Frame[] recording;
         private Frame present;
+        private bool active;
 
         public override void OnStartServer()
         {
@@ -33,33 +34,23 @@ namespace Mastic
         }
 
         [Server]
-        public void EnableCollision(bool active) => currentlyActive = active;
+        public void EnableCollision(bool active) => this.active = active;
 
         private void SetAsFrame(Frame frame)
         {
             hitbox.SetActive(frame.active);
-            if (includePosition)
-                transform.localPosition = frame.pos;
-
-            if (includeRotation)
-                transform.localRotation = frame.rot;
-
-            if (includeScale)
-                transform.localScale = frame.scale;
+            transform.SetPositionAndRotation(frame.pos, frame.rot);
+            transform.localScale = frame.scale;
         }
 
         [Server]
         public void RecordFrame(int tick, int maxRecordingLength)
         {
-            present.active = currentlyActive;
-            if (includePosition)
-                present.pos = transform.localPosition;
-
-            if (includeRotation)
-                present.rot = transform.localRotation;
-
-            if (includeScale)
-                present.scale = transform.localScale;
+            present.SetValues(
+                transform.position,
+                transform.rotation,
+                transform.localScale,
+                active);
 
             recording[tick % maxRecordingLength] = present;
         }
@@ -76,6 +67,14 @@ namespace Mastic
             public Quaternion rot;
             public Vector3 scale;
             public bool active;
+
+            public void SetValues(Vector3 pos, Quaternion rot, Vector3 scale, bool active)
+            {
+                this.pos = pos;
+                this.rot = rot;
+                this.scale = scale;
+                this.active = active;
+            }
         }
     }
 }
