@@ -143,7 +143,7 @@ namespace Mastic
                 d = Input.GetKey(KeyCode.D);
             }
 
-            inputBuffer[index].SetValues(w, a, s, d, mouseMovement.rotation.y, mouseMovement.rotation.x, currentTick);
+            inputBuffer[index].SetValues(w, a, s, d, mouseMovement.Rotation.x, mouseMovement.Rotation.y, currentTick);
 
             Move(inputBuffer[index], true);
 
@@ -257,7 +257,7 @@ namespace Mastic
             if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
-            inputMessage.Verify();
+            inputMessage.Verify(mouseMovement.MinCamAngle, mouseMovement.MaxCamAngle);
 
             if (inputMessage.tick > receivedTick + 1 && hasReceivedFirstMessage && bufferHasTicks)
             {
@@ -377,12 +377,10 @@ namespace Mastic
 
         private void Move(InputMessage input, bool lerp)
         {
-            // this is very important.
-            transform.rotation = input.GetHorizontalRotation();
-            eyes.localRotation = input.GetVerticalRotation();
+            // THIS PART IS VERY IMPORTANT.
+            mouseMovement.SetAsRotation(input.xRotation, input.yRotation);
 
             physicsMovement.Move(1f/ standardTickrate, input);
-
             if (!isServerOnly)
             {
                 Physics.Simulate(1f / standardTickrate);

@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Mastic
 {
+    /// <summary>
+    /// Lag compensation for player.
+    /// </summary>
     public class PlayerEntity : MonoBehaviour, IEntity
     {
         private Frame[] recording;

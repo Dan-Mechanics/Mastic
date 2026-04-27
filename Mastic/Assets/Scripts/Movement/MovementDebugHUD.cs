@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Mastic
 {
-    public class DebugDisplay : MonoBehaviour
+    public class MovementDebugHUD : MonoBehaviour
     {
         [SerializeField] private Text tickrateText = null;
         [SerializeField] private Text tickText = null;

@@ -185,7 +185,7 @@ namespace Mastic
         [Command]
         private void CmdShoot(ShootMessage shootMessage)
         {
-            shootMessage.Verify();
+            shootMessage.Verify(-90f, 90f);
 
             // I think this is useful, need to test more.
             if (shootMessage.shotTick <= movement.processedTick)
@@ -298,11 +298,11 @@ namespace Mastic
                 this.cheatEnemyPos = cheatEnemyPos;
             }
 
-            public void Verify()
+            public void Verify(float min, float max)
             {
                 lerpValue = Mathf.Clamp(lerpValue, 0f, 1f);
 
-                xRotation = Mathf.Clamp(xRotation, -MouseMovement.MAX_CAM_ANGLE, MouseMovement.MAX_CAM_ANGLE);
+                xRotation = Mathf.Clamp(xRotation, min, max);
             }
         }
     }

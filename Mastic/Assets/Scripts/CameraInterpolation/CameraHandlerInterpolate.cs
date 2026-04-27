@@ -19,7 +19,11 @@ namespace Mastic
 
         private void Update()
         {
-            Value = Mathf.Clamp((Time.time - time) / Time.fixedDeltaTime, 0f, 1f);
+            // https://docs.unity3d.com/ScriptReference/Vector3.LerpUnclamped.html
+            // YOU CAN USE EITHER CLAMPED OR UNCLAMPED FOR THIS,
+            // IT'S IMPORTANT THAT IN THE RECREATION YOU USE THE SAME ONE.
+
+            Value = (Time.time - time) / Time.fixedDeltaTime;
             transform.position = Vector3.Lerp(prevPos, pos, Value);
         }
 
@@ -27,7 +31,6 @@ namespace Mastic
         {
             time = Time.time;
             IsInterjected = false;
-
             prevPos = this.pos;
             this.pos = pos;
         }

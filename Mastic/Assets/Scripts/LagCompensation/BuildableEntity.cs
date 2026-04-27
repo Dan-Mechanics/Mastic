@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Mastic
 {
+    /// <summary>
+    /// Lag compensation for scale and enabled.
+    /// </summary>
     public class BuildableEntity : MonoBehaviour, IEntity
     {
         [SerializeField] private GameObject hitbox = default;

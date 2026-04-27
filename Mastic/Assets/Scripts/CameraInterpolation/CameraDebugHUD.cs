@@ -2,7 +2,7 @@
 
 namespace Mastic
 {
-    public class CameraDebugDisplay : MonoBehaviour
+    public class CameraDebugHUD : MonoBehaviour
     {
         [SerializeField] private Color color = default;
         [SerializeField] private int padding = default;
@@ -10,13 +10,10 @@ namespace Mastic
         [SerializeField] private int height = default;
         private ICameraInterpolation interpolation;
 
-        private void Awake() => interpolation = GetComponent<ICameraInterpolation>();
-
         private void OnGUI()
         {
-            if (interpolation == null)
-                return;
-            
+            interpolation ??= GetComponent<ICameraInterpolation>();
+
             GUI.color = color;
             Rect rect = new Rect(Screen.width - width - padding, Screen.height - height - padding, width, height);
             GUIStyle style = GUI.skin.GetStyle("Label");

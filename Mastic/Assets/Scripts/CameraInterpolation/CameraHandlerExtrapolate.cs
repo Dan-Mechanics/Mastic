@@ -23,7 +23,6 @@ namespace Mastic
         {
             time = Time.time;
             IsInterjected = false;
-
             this.pos = pos;
             this.vel = vel;
         }

@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Mastic
 {
+    /// <summary>
+    /// Lag compensation for position, rotation, scale and enabled.
+    /// </summary>
     public class TransformEntity : MonoBehaviour, IEntity
     {
         [SerializeField] private GameObject hitbox = default;
@@ -43,12 +46,7 @@ namespace Mastic
         {
             present.active = active;
             if (present.active)
-            {
-                present.SetValues(
-                    transform.localPosition,
-                    transform.localRotation,
-                    transform.localScale);
-            }
+                present.SetValues(transform.localPosition, transform.localRotation, transform.localScale);
 
             recording[tick % recording.Length] = present;
         }

@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Mastic
 {
+    /// <summary>
+    /// Lag compensation for position and rotation.
+    /// </summary>
     public class EnvironmentEntity : MonoBehaviour, IEntity
     {
         private Frame[] recording;

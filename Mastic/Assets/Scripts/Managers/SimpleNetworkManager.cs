@@ -9,6 +9,7 @@ namespace Mastic
     public class SimpleNetworkManager : NetworkManager
     {
         public event Action<Transform> OnRegisterPlayer;
+        public event Action OnReload;
 
         private List<NetworkConnectionToClient> connections;
         private Transform spawnpoint;
@@ -34,13 +35,9 @@ namespace Mastic
             base.OnServerDisconnect(conn);
             Debug.Log("SERVER: A CLIENT HAS DISCONNECTED");
 
-            NetworkServer.Shutdown();
             connections.Clear();
-
-            // NOTE FOR FUTURE: I THINK I WAS CLEARING
-            // SEQUENCE HERE BECUASE SEQUENCE USED TO BE ON THIS
-            // NETWORK MANAGER GAME OBJECT WHICH IS DO NOT DESTROY ON LOAD
-            // AND WOULD THEREFORE NOT GET RESET.
+            OnReload?.Invoke();
+            NetworkServer.Shutdown();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 

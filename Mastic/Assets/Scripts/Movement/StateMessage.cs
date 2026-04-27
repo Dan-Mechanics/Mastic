@@ -8,28 +8,19 @@ namespace Mastic
     /// </summary>
     public struct StateMessage
     {
-        public int tick;
         public Vector3 position;
         public Vector3 velocity;
-        public float yRotation;
         public float xRotation;
-
-        public void SetValues(int tick, Vector3 position, Vector3 velocity, float yRotation, float xRotation)
-        {
-            this.tick = tick;
-            this.position = position;
-            this.velocity = velocity;
-            this.yRotation = yRotation;
-            this.xRotation = xRotation;
-        }
+        public float yRotation;
+        public int tick;
 
         public void SetValues(Vector3 position, Vector3 velocity, InputMessage inputMessage)
         {
-            tick = inputMessage.tick;
             this.position = position;
             this.velocity = velocity;
-            yRotation = inputMessage.yRotation;
             xRotation = inputMessage.xRotation;
+            yRotation = inputMessage.yRotation;
+            tick = inputMessage.tick;
         }
     }
 }

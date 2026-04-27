@@ -1,58 +1,45 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Mastic
 {
     public class MouseMovement : MonoBehaviour
     {
-        [SerializeField] private Transform eyes = null;
-        [SerializeField] private float sensitivity = 0.33f;
+        public Vector2 Rotation => rotation;
+        public float MinCamAngle => minCamAngle;
+        public float MaxCamAngle => maxCamAngle;
 
-        [SerializeField] private bool useMainCamera = true;
-
+        [SerializeField] private Transform eyes = default;
+        [SerializeField] private float sensitivity = default;
+        [SerializeField] private float minCamAngle = default;
+        [SerializeField] private float maxCamAngle = default;
+        [SerializeField] private Vector2 rotation = default;
         private Transform cam;
 
-        //private const float MIN_CAM_ANGLE = -90f;
-        public const float MAX_CAM_ANGLE = 90f;
-        
-        public Vector2 rotation;
-
-        private Vector2 mouseMovement;
-        private float mouseInputX;
-        private float mouseInputY;
-
-        private void Awake()
+        public void Setup()
         {
-            if (useMainCamera) { cam = GameObject.FindWithTag("MainCamera").transform; }
+            cam = GameObject.FindWithTag("MainCamera").transform;
+            if (minCamAngle > maxCamAngle)
+                (minCamAngle, maxCamAngle) = (maxCamAngle, minCamAngle);
         }
 
         private void Update()
         {
-            //if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.Mouse1)) { return; }
+            float x = -Input.GetAxisRaw("Mouse Y");
+            float y = Input.GetAxisRaw("Mouse X");
+            rotation += new Vector2(x, y) * sensitivity;
+            rotation.x = Mathf.Clamp(rotation.x, minCamAngle, maxCamAngle);
 
-            //if (Input.GetKey(KeyCode.Mouse1)) { return; }
+            SetAsRotation(rotation.x, rotation.y);
+            cam.rotation = eyes.rotation;
+        }
 
-            mouseInputX = Input.GetAxisRaw("Mouse X");
-            mouseInputY = -Input.GetAxisRaw("Mouse Y");
-
-            // i am flipping these because left and right is Y arrow direction.
-            //mouseMovement = new Vector2(mouseInputY, mouseInputX + (Input.GetKey(KeyCode.Mouse1) ? 180f * Time.deltaTime : 0f));
-            mouseMovement = new Vector2(mouseInputY, mouseInputX);
-
-            /*if (Input.GetKey(KeyCode.Mouse1)) { mouseMovement.y += 180f * Time.deltaTime; }
-            if (Input.GetKey(KeyCode.Mouse0)) { mouseMovement.y -= 180f * Time.deltaTime; }*/
-
-            rotation += mouseMovement * sensitivity;
-
-            rotation.x = Mathf.Clamp(rotation.x, -MAX_CAM_ANGLE, MAX_CAM_ANGLE);
-
-            eyes.localRotation = Quaternion.AngleAxis(rotation.x, Vector3.right);
-
-            // this could be local rotation if u are planning on giving player parent object but i dont plan to
-            transform.rotation = Quaternion.AngleAxis(rotation.y, Vector3.up);
-
-            if (useMainCamera) { cam.rotation = eyes.rotation; }
+        /// <summary>
+        /// Assuming values have been validated.
+        /// </summary>
+        public void SetAsRotation(float xRotation, float yRotation)
+        {
+            eyes.localRotation = Quaternion.AngleAxis(xRotation, Vector3.right);
+            transform.rotation = Quaternion.AngleAxis(yRotation, Vector3.up);
         }
     }
 }

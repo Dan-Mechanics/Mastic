@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Mastic
 {
+    /// <summary>
+    /// Context class managing the flow of the game.
+    /// </summary>
     public class GameManager : MonoBehaviour
     {
         [SerializeField] private EasyBinding closeGame = default;
@@ -27,6 +30,7 @@ namespace Mastic
             sceneSetup.Setup(standardTickrate);
             networkManager.Setup(spawnpoint, standardTickrate);
             networkManager.OnRegisterPlayer += sequence.Register;
+            networkManager.OnReload += sequence.Clear;
         }
 
         private void Update()
