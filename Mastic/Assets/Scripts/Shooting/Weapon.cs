@@ -230,7 +230,7 @@ namespace Mastic
                 if (enemyDiff > ServerAuthClientPredSimple.TOLERANCE) { Debug.LogWarning($"enemy diff problem : {enemyDiff}"); }
             }*/
 
-            LagCompensation.instance.ReturnToPresent();
+         //   LagCompensation.instance.ReturnToPresent();
 
             if (hit != null)
             {

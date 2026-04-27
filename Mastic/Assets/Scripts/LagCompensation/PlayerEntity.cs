@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class PlayerEntity : NetworkBehaviour, IEntity
+    public class PlayerEntity : MonoBehaviour, IEntity
     {
         private Frame[] recording;
         private Frame present;

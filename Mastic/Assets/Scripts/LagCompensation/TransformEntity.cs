@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Mastic
 {
     /// <summary>
-    /// This class could be optimized further but this is sufficient.
+    /// It would be smart to split these into separate channels in the future.
     /// </summary>
     public class TransformEntity : NetworkBehaviour, IEntity
     {
@@ -12,9 +12,9 @@ namespace Mastic
         [SerializeField] private bool includePosition = default;
         [SerializeField] private bool includeRotation = default;
         [SerializeField] private bool includeScale = default;
+        private bool currentlyActive;
         private Frame[] recording;
         private Frame present;
-        private bool active;
 
         public override void OnStartServer()
         {
@@ -33,7 +33,7 @@ namespace Mastic
         }
 
         [Server]
-        public void EnableCollision(bool active) => this.active = active;
+        public void EnableCollision(bool active) => currentlyActive = active;
 
         private void SetAsFrame(Frame frame)
         {
@@ -51,7 +51,7 @@ namespace Mastic
         [Server]
         public void RecordFrame(int tick, int maxRecordingLength)
         {
-            present.active = active;
+            present.active = currentlyActive;
             if (includePosition)
                 present.pos = transform.localPosition;
 
