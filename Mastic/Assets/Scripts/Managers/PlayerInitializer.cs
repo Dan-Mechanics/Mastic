@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class PlayerSetup : MonoBehaviour
+    public class PlayerInitializer : NetworkBehaviour
     {
         [SerializeField] private string defaultName = default;
         [SerializeField] private Object[] localRemove = default;
         [SerializeField] private Object[] unlocalRemove = default;
         [SerializeField] private Object[] serverRemove = default;
 
-        public void Setup(bool isServer, bool isLocalPlayer)
+        private void Start()
         {
             gameObject.name = defaultName;
             if (!isServer)

@@ -4,7 +4,8 @@ using UnityEngine;
 namespace Mastic
 {
     /// <summary>
-    /// Context class managing the flow of the game.
+    /// The goal of this is to have a decoupling between 
+    /// network manager and the player manager.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -14,14 +15,14 @@ namespace Mastic
 
         private SceneSetup sceneSetup;
         private SimpleNetworkManager networkManager;
-        private Sequence sequence;
+        private PlayerManager sequence;
         private Transform spawnpoint;
 
         private void Awake()
         {
             sceneSetup = FindAnyObjectByType<SceneSetup>();
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();   
-            sequence = FindAnyObjectByType<Sequence>();
+            sequence = FindAnyObjectByType<PlayerManager>();
             spawnpoint = GameObject.FindWithTag(spawnpointTag).transform;
         }
 

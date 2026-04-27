@@ -10,25 +10,25 @@ namespace Mastic
     /// </summary>
     public class Player : NetworkBehaviour
     {
-        private PlayerSetup playerSetup;
+        private PlayerInitializer playerComponentRemover;
 
         private void Awake()
         {
             // GET ALL THE STUFF.
-            playerSetup = GetComponent<PlayerSetup>();
+            playerComponentRemover = GetComponent<PlayerInitializer>();
         }
 
         private void Start()
         {
             // SET ALL THE STUFF.
-            playerSetup.Setup(isServer, isLocalPlayer);
+            playerComponentRemover.Setup(isServer, isLocalPlayer);
             if(isLocalPlayer)
             {
                 SetupClient();
             }
         }
 
-        private void SetupClient(int standardTickrate)
+        private void DoClientSetup(int standardTickrate)
         {
             Tickrate tickrate = GetComponent<Tickrate>();
             MovementDebugHUD debugDisplay = GetComponent<MovementDebugHUD>();
