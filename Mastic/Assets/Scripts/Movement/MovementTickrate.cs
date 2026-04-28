@@ -29,7 +29,7 @@ namespace Mastic
         public override void OnStartLocalPlayer()
         {
             base.OnStartLocalPlayer();
-            SetTickrate(fullTickrateOffset, true);
+            SetTickrate(standardTickrate + fullTickrateOffset, true);
         }
 
         [Server]

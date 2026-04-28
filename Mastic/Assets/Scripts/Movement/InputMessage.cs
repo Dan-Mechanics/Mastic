@@ -45,7 +45,7 @@ namespace Mastic
             if (w)
                 vert++;
 
-            if (a)
+            if (s)
                 vert--;
 
             return vert;
@@ -57,7 +57,7 @@ namespace Mastic
             if (d) 
                 hori++;
 
-            if (s) 
+            if (a) 
                 hori--;
 
             return hori;

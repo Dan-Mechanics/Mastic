@@ -49,6 +49,7 @@ namespace Mastic
         private bool hasReceivedFirstMessage;
 
         private bool bufferHasTicks;
+        private float standardInterval;
 
         private bool w, a, s, d;
         private float timer;
@@ -56,6 +57,7 @@ namespace Mastic
         public void Setup(int standardTickrate, ICameraInterpolation interpolation)
         {
             this.standardTickrate = standardTickrate;
+            standardInterval = 1f / standardTickrate;
             this.interpolation = interpolation;
         }
 
@@ -90,7 +92,7 @@ namespace Mastic
             {
                 timer -= Time.fixedDeltaTime;
 
-                OnCheatsChanged?.Invoke(clientPacketMultiplier.ToString());
+                OnCheatsChanged?.Invoke($"cheats: {clientPacketMultiplier}");
 
                 for (int i = 0; i < clientPacketMultiplier; i++)
                 {
@@ -366,10 +368,10 @@ namespace Mastic
             // THIS PART IS VERY IMPORTANT.
             mouseMovement.SetAsRotation(input.xRotation, input.yRotation);
 
-            physicsMovement.Move(1f/ standardTickrate, input);
+            physicsMovement.Move(standardInterval, input);
             if (!isServerOnly)
             {
-                Physics.Simulate(1f / standardTickrate);
+                Physics.Simulate(standardInterval);
 
                 CapVelocity();
             }

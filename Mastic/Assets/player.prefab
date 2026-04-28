@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 7516573107909302405}
   - component: {fileID: 8715196333278241559}
   m_Layer: 3
-  m_Name: tickrate
+  m_Name: tickrate_holder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -588,7 +588,7 @@ GameObject:
   - component: {fileID: 3946726450155218114}
   - component: {fileID: 4464447807540331817}
   m_Layer: 3
-  m_Name: current_tick
+  m_Name: tick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -654,7 +654,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: current tick
+  m_Text: 'tick
+
+'
 --- !u!1 &5121912641830587212
 GameObject:
   m_ObjectHideFlags: 0
@@ -794,10 +796,10 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6833988937010159751}
+  - {fileID: 2509597877927879607}
   - {fileID: 335160464671695066}
   - {fileID: 1061385733448966193}
   - {fileID: 5010591793252565916}
-  - {fileID: 2509597877927879607}
   m_Father: {fileID: 3751572637676758943}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -959,7 +961,7 @@ GameObject:
   - component: {fileID: 7574152802950713027}
   - component: {fileID: 7417291049486533421}
   m_Layer: 3
-  m_Name: current_tick
+  m_Name: tick_holder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1200,7 +1202,7 @@ GameObject:
   - component: {fileID: 1919427715212289342}
   - component: {fileID: 7913958231280266065}
   m_Layer: 3
-  m_Name: cheats
+  m_Name: cheats_holder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
