@@ -478,6 +478,10 @@ MonoBehaviour:
   mouseMovement: {fileID: 3751572637676758940}
   physicsMovement: {fileID: 6891286507384332386}
   authGraphicPrefab: {fileID: 4866268349233265365, guid: 51629528fa6e51d4fbb2eddc7a1da3d4, type: 3}
+  forward: {fileID: 11400000, guid: a825cc5f0ba418542b07d99baf53a432, type: 2}
+  left: {fileID: 11400000, guid: 2a5853aeed8f0bf4e8e8fdd8b6e7afa0, type: 2}
+  backward: {fileID: 11400000, guid: 2214675bc157dd54db2700e88ca1a8f1, type: 2}
+  right: {fileID: 11400000, guid: b8e3ccdcc27814744b86665e6c2be37e, type: 2}
   onReconsile:
     m_PersistentCalls:
       m_Calls:
@@ -1168,7 +1172,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8a3cce8adfe3aa544b15e597849b1ea3, type: 2}
+  - {fileID: 2100000, guid: 2f8bffd3afda8c245aa9e8ee9dc462aa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1277,14 +1281,6 @@ PrefabInstance:
     - target: {fileID: 4866268349233265365, guid: 13ad6d3d31dcb244b94d3b7c409a1d7b, type: 3}
       propertyPath: m_Name
       value: graphic
-      objectReference: {fileID: 0}
-    - target: {fileID: 4866268349233265365, guid: 13ad6d3d31dcb244b94d3b7c409a1d7b, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 9053060450937464085, guid: 13ad6d3d31dcb244b94d3b7c409a1d7b, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9053060450937464085, guid: 13ad6d3d31dcb244b94d3b7c409a1d7b, type: 3}
       propertyPath: m_LocalPosition.x

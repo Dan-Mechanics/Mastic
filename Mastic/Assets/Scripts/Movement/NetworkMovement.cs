@@ -24,9 +24,12 @@ namespace Mastic
         [SerializeField] private MouseMovement mouseMovement = default;
         [SerializeField] private PhysicsMovement physicsMovement = default;
         [SerializeField] private GameObject authGraphicPrefab = default;
+        [SerializeField] private EasyBinding forward = default;
+        [SerializeField] private EasyBinding left = default;
+        [SerializeField] private EasyBinding backward = default;
+        [SerializeField] private EasyBinding right = default;
         [SerializeField] private UnityEvent onReconsile = default;
 
-        private int standardTickrate;
         private int currentTick;
 
         private int clientPacketMultiplier;
@@ -56,7 +59,6 @@ namespace Mastic
 
         public void Setup(int standardTickrate, ICameraInterpolation interpolation)
         {
-            this.standardTickrate = standardTickrate;
             standardInterval = 1f / standardTickrate;
             this.interpolation = interpolation;
         }
@@ -123,26 +125,26 @@ namespace Mastic
 
 
 
-            int index = currentTick % BUFFER_SIZE;
+            int bufferIndex = currentTick % BUFFER_SIZE;
 
             if (Application.isFocused) 
             {
-                w = Input.GetKey(KeyCode.W);
-                a = Input.GetKey(KeyCode.A);
-                s = Input.GetKey(KeyCode.S);
-                d = Input.GetKey(KeyCode.D);
+                w = forward.IsHeld;
+                a = left.IsHeld;
+                s = backward.IsHeld;
+                d = right.IsHeld;
             }
 
-            inputBuffer[index].SetValues(w, a, s, d, mouseMovement.Rotation.x, mouseMovement.Rotation.y, currentTick);
+            inputBuffer[bufferIndex].SetValues(w, a, s, d, mouseMovement.Rotation.x, mouseMovement.Rotation.y, currentTick);
 
-            Move(inputBuffer[index], true);
+            Move(inputBuffer[bufferIndex], true);
 
-            stateBuffer[index].SetValues(transform.position, rb.linearVelocity, inputBuffer[index]);
+            stateBuffer[bufferIndex].SetValues(transform.position, rb.linearVelocity, inputBuffer[bufferIndex]);
 
             /*if (!clientDropMessage && !Input.GetKey(KeyCode.E)) { CmdSendInputMessageToServer(inputBuffer[ringBufferIndex]); }
             else { OnCheatsChanged?.Invoke("not sending ..."); clientDropMessage = false; }*/
 
-            CmdSendInputMessageToServer(inputBuffer[index]);
+            CmdSendInputMessageToServer(inputBuffer[bufferIndex]);
 
             // we do it here because then the first is 0.
             OnTick?.Invoke(currentTick);

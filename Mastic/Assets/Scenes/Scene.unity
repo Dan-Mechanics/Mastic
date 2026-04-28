@@ -272,6 +272,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: cam
       objectReference: {fileID: 0}
+    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0.8773585
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0.8773585
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0.8773585
+      objectReference: {fileID: 0}
     - target: {fileID: 3129894886814924652, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -563,7 +575,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4726804905350571350, guid: ef8e98326438fc04785dd5e75907b0f6, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4726804905350571350, guid: ef8e98326438fc04785dd5e75907b0f6, type: 3}
       propertyPath: m_LocalPosition.z
