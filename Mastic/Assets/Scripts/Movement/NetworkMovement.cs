@@ -374,7 +374,8 @@ namespace Mastic
                 CapVelocity();
             }
 
-            if (lerp) { interpolation.Assign(eyes.position, rb.linearVelocity); }
+            if (lerp)
+                interpolation.Assign(eyes.position, rb.linearVelocity);
         }
     }
 }

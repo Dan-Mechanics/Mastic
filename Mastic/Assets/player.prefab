@@ -358,7 +358,6 @@ MonoBehaviour:
   localRemove:
   - {fileID: 8563719589400999970}
   - {fileID: 8239588418118008676}
-  - {fileID: 0}
   unlocalRemove:
   - {fileID: 5846048930810008312}
   - {fileID: 3497393699691843500}

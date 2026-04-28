@@ -10,12 +10,12 @@ namespace Mastic
         [SerializeField] private Object[] unlocalRemove = default;
         [SerializeField] private Object[] serverRemove = default;
 
-        public void Setup(bool isServerOnly, bool isLocalPlayer)
+        public void Setup(bool isServer, bool isLocal)
         {
             gameObject.name = defaultName;
-            if (!isServerOnly)
+            if (!isServer)
             {
-                if (isLocalPlayer)
+                if (isLocal)
                 {
                     gameObject.name += " | local client";
                     RemoveAll(localRemove);

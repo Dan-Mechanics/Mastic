@@ -43,6 +43,7 @@ namespace Mastic
         {
             entities.ForEach(x => x.RecordFrame(currentTick));
             currentTick++;
+
             oldestTick = currentTick - maxRecordingLength;
             if (oldestTick < 0)
                 oldestTick = 0;
@@ -59,7 +60,7 @@ namespace Mastic
         /// This should be called first in the sequence.
         /// </summary>
         [Server]
-        public void CleanEntities()
+        public void Clean()
         {
             for (int i = entities.Count - 1; i >= 0; i--)
             {
