@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Mastic
 {
+    /// <summary>
+    /// In theory I would like to make this an interface.
+    /// </summary>
     public class PhysicsMovement : MonoBehaviour
     {
         public bool isSmiting;

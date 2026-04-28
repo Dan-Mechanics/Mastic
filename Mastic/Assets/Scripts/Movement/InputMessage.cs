@@ -29,9 +29,12 @@ namespace Mastic
             this.tick = tick;
         }
         
-        public void Verify(float minCamAngle, float maxCamAngle)
+        /// <summary>
+        /// Consider adding max look angle 90 degrees here too,
+        /// for performance.
+        /// </summary>
+        public void Verify()
         {
-            xRotation = Mathf.Clamp(xRotation, minCamAngle, maxCamAngle);
             if (tick < 0)
                 tick = 0;
         }

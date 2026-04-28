@@ -4,6 +4,10 @@ using Mirror;
 
 namespace Mastic
 {
+    /// <summary>
+    /// Server script for handling the sequence of player code.
+    /// Rename this server sequence manager because it will include lagcompensation soon.
+    /// </summary>
     public class PlayerManager : MonoBehaviour
     {
         private readonly List<Player> players = new List<Player>();
@@ -26,15 +30,13 @@ namespace Mastic
             for (int i = 0; i < players.Count; i++)
             {
                 Player player = players[i];
-
-                player.stateBufferIndex = player.networkMovement.DoServerMovementTick();
+                player.stateBufferIndex = player.networkMovement.DoServerTick();
             }
 
             Physics.Simulate(Time.fixedDeltaTime);
             for (int i = 0; i < players.Count; i++)
             {
                 Player player = players[i];
-
                 player.networkMovement.CapVelocity();
                 player.networkMovement.Send(player.stateBufferIndex);
                 player.networkMovement.RpcSendStateMessageToClients(player.transform.position, player.transform.rotation, player.eyes.localRotation);

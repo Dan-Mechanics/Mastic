@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
+using Mirror;
 
 namespace Mastic
 {
-    public class MouseMovement : MonoBehaviour
+    public class MouseMovement : NetworkBehaviour
     {
         public Vector2 Rotation => rotation;
-        public float MinCamAngle => minCamAngle;
-        public float MaxCamAngle => maxCamAngle;
 
         [SerializeField] private Transform eyes = default;
         [SerializeField] private float sensitivity = default;
@@ -24,6 +23,9 @@ namespace Mastic
 
         private void Update()
         {
+            if (!isLocalPlayer)
+                return;
+
             float x = -Input.GetAxisRaw("Mouse Y");
             float y = Input.GetAxisRaw("Mouse X");
             rotation += new Vector2(x, y) * sensitivity;
@@ -33,11 +35,9 @@ namespace Mastic
             cam.rotation = eyes.rotation;
         }
 
-        /// <summary>
-        /// Assuming values have been validated.
-        /// </summary>
         public void SetAsRotation(float xRotation, float yRotation)
         {
+            xRotation = Mathf.Clamp(xRotation, minCamAngle, maxCamAngle);
             eyes.localRotation = Quaternion.AngleAxis(xRotation, Vector3.right);
             transform.rotation = Quaternion.AngleAxis(yRotation, Vector3.up);
         }

@@ -15,14 +15,14 @@ namespace Mastic
 
         private SceneSetup sceneSetup;
         private SimpleNetworkManager networkManager;
-        private PlayerManager sequence;
+        private PlayerManager playerManager;
         private Transform spawnpoint;
 
         private void Awake()
         {
             sceneSetup = FindAnyObjectByType<SceneSetup>();
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();   
-            sequence = FindAnyObjectByType<PlayerManager>();
+            playerManager = FindAnyObjectByType<PlayerManager>();
             spawnpoint = GameObject.FindWithTag(spawnpointTag).transform;
         }
 
@@ -30,8 +30,8 @@ namespace Mastic
         {
             sceneSetup.Setup(standardTickrate);
             networkManager.Setup(spawnpoint, standardTickrate);
-            networkManager.OnRegisterPlayer += sequence.Register;
-            networkManager.OnReload += sequence.Clear;
+            networkManager.OnRegisterPlayer += playerManager.Register;
+            networkManager.OnReload += playerManager.Clear;
         }
 
         private void Update()

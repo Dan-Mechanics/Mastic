@@ -19,12 +19,8 @@ namespace Mastic
 
         private void Update()
         {
-            // https://docs.unity3d.com/ScriptReference/Vector3.LerpUnclamped.html
-            // YOU CAN USE EITHER CLAMPED OR UNCLAMPED FOR THIS,
-            // IT'S IMPORTANT THAT IN THE RECREATION YOU USE THE SAME ONE.
-
             Value = (Time.time - time) / Time.fixedDeltaTime;
-            transform.position = Vector3.Lerp(prevPos, pos, Value);
+            SetAsValue(Value);
         }
 
         public void Assign(Vector3 pos, Vector3 vel)
@@ -40,6 +36,16 @@ namespace Mastic
             IsInterjected = true;
             this.pos = pos;
             this.prevPos = prevPos;
+        }
+
+        /// <summary>
+        /// https://docs.unity3d.com/ScriptReference/Vector3.LerpUnclamped.html
+        /// </summary>
+        public void SetAsValue(float value)
+        {
+            // SINCE WE ARE NOT USING UNCLAMPED LERP HERE,
+            // WE DON'T HAVE TO CLAMP ANYTHING.
+            transform.position = Vector3.Lerp(prevPos, pos, value);
         }
     }
 }

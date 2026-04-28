@@ -77,18 +77,15 @@ namespace Mastic
 
         private void Update()
         {
-            if (!isLocalPlayer) { return; }
+            if (!isLocalPlayer)
+                return;
 
             // if (Input.GetKeyDown(KeyCode.Mouse3)) { clientDropMessage = true; }
-
             if (Input.GetKey(KeyCode.Mouse4)) { clientPacketMultiplier = 2; }
             else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
             else { clientPacketMultiplier = 1; }
             
-            
-
             timer += Time.deltaTime;
-
             while (timer >= Time.fixedDeltaTime)
             {
                 timer -= Time.fixedDeltaTime;
@@ -103,12 +100,7 @@ namespace Mastic
 
             /*if (Input.GetKeyDown(KeyCode.UpArrow)) { currentTick += 10; Debug.LogWarning("+10"); }
             if (Input.GetKeyDown(KeyCode.DownArrow)) { currentTick -= 10; Debug.LogWarning("-10"); }*/
-
-
-            if (Input.GetKeyDown(KeyCode.Q)) { connectionToServer.Disconnect(); }
         }
-
-        #region Ticks
 
         [Client]
         private void DoClientTick()
@@ -155,8 +147,12 @@ namespace Mastic
             currentTick++;
         }
 
+        /// <summary>
+        /// Process player on the server.
+        /// </summary>
+        /// <returns>stateBufferIndex</returns>
         [Server]
-        public int DoServerMovementTick()
+        public int DoServerTick()
         {
             //TryApplyEffect();
             OnBeforeServerTick?.Invoke(hasReceivedFirstMessage, pendingInputMessages.Count);
@@ -233,8 +229,6 @@ namespace Mastic
             return inputMessageToProcess;
         }
 
-        #endregion
-
         [Command]
         private void CmdSendJumpTick(int tick) 
         {
@@ -253,8 +247,7 @@ namespace Mastic
             if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
-            inputMessage.Verify(mouseMovement.MinCamAngle, mouseMovement.MaxCamAngle);
-
+            inputMessage.Verify();
             if (inputMessage.tick > receivedTick + 1 && hasReceivedFirstMessage && bufferHasTicks)
             {
                 for (int i = 0; i < inputMessage.tick - receivedTick - 1; i++)
@@ -324,8 +317,6 @@ namespace Mastic
             }
         }
 
-        #region Reconsiliation
-
         [Client]
         private void TryReconsiliation()
         {
@@ -369,8 +360,6 @@ namespace Mastic
                 tickToProcess++;
             }
         }
-
-        #endregion
 
         private void Move(InputMessage input, bool lerp)
         {

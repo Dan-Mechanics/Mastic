@@ -45,7 +45,6 @@ namespace Mastic
         {
             base.OnClientConnect();
             Debug.Log("CLIENT: CONNECTED TO SERVER");
-            Utils.LockMouse();
         }
 
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
@@ -57,7 +56,7 @@ namespace Mastic
             if (connections.Count < maxConnections)
                 return;
 
-            connections.ForEach(x => AddPlayer(conn));
+            connections.ForEach(x => AddPlayer(x));
             print("STARTING GAME");
         }
 
@@ -66,8 +65,9 @@ namespace Mastic
         {
             GameObject player = Instantiate(playerPrefab, spawnpoint.position, Quaternion.identity);
             player.name = $"uninitialized_{playerPrefab.name}_[{conn.connectionId}]";
-            OnRegisterPlayer?.Invoke(player.transform);
+
             NetworkServer.AddPlayerForConnection(conn, player);
+            OnRegisterPlayer?.Invoke(player.transform);
         }
     }
 }

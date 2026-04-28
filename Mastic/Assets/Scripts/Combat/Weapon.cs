@@ -18,7 +18,7 @@ namespace Mastic
     ///     then when unloading give insta sync to physics.
     ///     
     /// </summary>
-    public class Weapon : NetworkBehaviour
+    public class Weapon : NetworkBehaviour, IShootable
     {
         [Header("References")]
 
@@ -125,7 +125,8 @@ namespace Mastic
             cooldownTimer = Mathf.Clamp(cooldownTimer, 0f, maxCooldown);
         }
 
-        public void TryShoot()
+        [Server]
+        public void DoShootTick()
         {
             for (int i = shootMessages.Count - 1; i >= 0; i--)
             {

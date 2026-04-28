@@ -294,9 +294,11 @@ GameObject:
   - component: {fileID: 3751572637676758940}
   - component: {fileID: 3497393699691843500}
   - component: {fileID: 9035837507783845604}
+  - component: {fileID: 321237805516363557}
   - component: {fileID: 2546578394722574111}
   - component: {fileID: 6891286507384332386}
   - component: {fileID: 8815636318867098599}
+  - component: {fileID: -1140434863641568140}
   m_Layer: 3
   m_Name: player
   m_TagString: Player
@@ -319,8 +321,8 @@ Transform:
   m_Children:
   - {fileID: 2720431899970827215}
   - {fileID: 5508603587625558180}
-  - {fileID: 5038350148219842603}
   - {fileID: 4254405902870664056}
+  - {fileID: 5038350148219842603}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4334621193292541053
@@ -352,28 +354,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95aee48c0a84a5243b401ee854b46175, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
   defaultName: player
   localRemove:
   - {fileID: 8563719589400999970}
   - {fileID: 8239588418118008676}
+  - {fileID: 0}
   unlocalRemove:
   - {fileID: 5846048930810008312}
-  - {fileID: 0}
-  - {fileID: 3751572637676758940}
   - {fileID: 3497393699691843500}
   - {fileID: 9035837507783845604}
   - {fileID: 6891286507384332386}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 3751572637676758940}
+  - {fileID: 3685579806953591295}
   serverRemove:
   - {fileID: 5846048930810008312}
-  - {fileID: 0}
-  - {fileID: 3751572637676758940}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 3685579806953591295}
 --- !u!114 &3751572637676758940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,6 +381,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecfa6c7cad5c2dd4a8e1072663832954, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   eyes: {fileID: 2720431899970827215}
   sensitivity: 0.33
   minCamAngle: -90
@@ -441,6 +439,23 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &321237805516363557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b04328ff865c4847a6ac90c804c88ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  standardTickrate: 64
+  disconnect: {fileID: 11400000, guid: 76fa061607a567d45bc7219f92c14f6f, type: 2}
 --- !u!114 &2546578394722574111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -546,6 +561,22 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &-1140434863641568140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 564722f94ac08594191119d0d6a3a945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tickrateText: {fileID: 2563108644423690779}
+  tickText: {fileID: 4464447807540331817}
+  cheatsText: {fileID: 5349842774248880571}
+  reconsileIndicator: {fileID: 950590360058413065}
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0
@@ -763,11 +794,11 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 6833988937010159751}
   - {fileID: 335160464671695066}
   - {fileID: 1061385733448966193}
   - {fileID: 5010591793252565916}
   - {fileID: 2509597877927879607}
-  - {fileID: 6833988937010159751}
   m_Father: {fileID: 3751572637676758943}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

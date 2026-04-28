@@ -16,7 +16,7 @@ namespace Mastic
         private void Update()
         {
             Value = Time.time - time;
-            transform.position = pos + (vel * Value);
+            SetAsValue(Value);
         }
 
         public void Assign(Vector3 pos, Vector3 vel)
@@ -32,6 +32,12 @@ namespace Mastic
             IsInterjected = true;
             this.pos = pos;
             this.vel = vel;
+        }
+
+        public void SetAsValue(float value)
+        {
+            value = Mathf.Clamp(value, 0f, Time.fixedDeltaTime);
+            transform.position = pos + (vel * value);
         }
     }
 }

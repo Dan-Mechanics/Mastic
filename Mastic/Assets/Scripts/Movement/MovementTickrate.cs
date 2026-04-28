@@ -9,10 +9,10 @@ namespace Mastic
     {
         public event Action<int> OnTickrateChanged;
 
-        [SerializeField] private float minTimeDilationTime = 0.5f;
-        [SerializeField] private int drainedTickrateOffset = 1;
-        [SerializeField] private int fullTickrateOffset = -1;
-        [SerializeField] private int idealPendingCount = 2;
+        [SerializeField] private float minTimeDilationTime = default;
+        [SerializeField] private int drainedTickrateOffset = default;
+        [SerializeField] private int fullTickrateOffset = default;
+        [SerializeField] private int idealPendingCount = default;
         [SerializeField] private UnityEvent onTickrateChanged = default;
         private NetworkManager networkManager;
         private int standardTickrate;
@@ -25,9 +25,12 @@ namespace Mastic
             this.networkManager = networkManager;
             hasTimeDilation = true;
         }
-        
-        [Client]
-        public void LocalClientSetup() => SetTickrate(fullTickrateOffset, true);
+
+        public override void OnStartLocalPlayer()
+        {
+            base.OnStartLocalPlayer();
+            SetTickrate(fullTickrateOffset, true);
+        }
 
         [Server]
         public void ApplyTimeDilation(bool hasReceivedFirstMessage, int pendingCount)
@@ -36,11 +39,11 @@ namespace Mastic
                 return;
 
             hasTimeDilation = true;
-            TargetApplyTickrate(connectionToClient, GetCurrentTickrate(pendingCount));
+            TargetApplyTickrate(connectionToClient, GetTickrate(pendingCount));
         }
 
         [Server]
-        private int GetCurrentTickrate(int pendingCount)
+        private int GetTickrate(int pendingCount)
         {
             if (pendingCount < 1)
             {

@@ -3,17 +3,17 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class PlayerSetup : NetworkBehaviour
+    public class PlayerSetup : MonoBehaviour
     {
         [SerializeField] private string defaultName = default;
         [SerializeField] private Object[] localRemove = default;
         [SerializeField] private Object[] unlocalRemove = default;
         [SerializeField] private Object[] serverRemove = default;
 
-        private void Start()
+        public void Setup(bool isServerOnly, bool isLocalPlayer)
         {
             gameObject.name = defaultName;
-            if (!isServer)
+            if (!isServerOnly)
             {
                 if (isLocalPlayer)
                 {
@@ -40,7 +40,6 @@ namespace Mastic
         {
             for (int i = 0; i < components.Length; i++)
             {
-                // do we needa check here ??
                 Destroy(components[i]);
             }
         }
