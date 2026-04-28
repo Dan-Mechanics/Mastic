@@ -25,7 +25,7 @@ namespace Mastic
         [SerializeField] private HitMarker blueHitMarker = default;
         [SerializeField] private HitMarker redHitMarker = default;
 
-        [SerializeField] private NetworkPhysicsMovement movement = default;
+        [SerializeField] private NetworkMovement movement = default;
         [SerializeField] private MouseMovement mouseMovement = default;
         [SerializeField] private PlayerEntity entity = default;
         [SerializeField] private LayerMask environmentMask = default;

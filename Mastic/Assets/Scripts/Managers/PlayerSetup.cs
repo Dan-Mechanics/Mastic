@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class PlayerInitializer : NetworkBehaviour
+    public class PlayerSetup : NetworkBehaviour
     {
         [SerializeField] private string defaultName = default;
         [SerializeField] private Object[] localRemove = default;
@@ -40,6 +40,7 @@ namespace Mastic
         {
             for (int i = 0; i < components.Length; i++)
             {
+                // do we needa check here ??
                 Destroy(components[i]);
             }
         }

@@ -6,12 +6,11 @@ using UnityEngine.Events;
 
 namespace Mastic
 {
-    public class NetworkPhysicsMovement : NetworkBehaviour
+    public class NetworkMovement : NetworkBehaviour
     {
         public int CurrentTick => currentTick;
-        public bool HasReceivedFirstMessage => hasReceivedFirstMessage;
 
-        public event Action<int> OnBeforeServerTick;
+        public event Action<bool, int> OnBeforeServerTick;
         public event Action<int> OnTick;
         public event Action<string> OnCheatsChanged;
         public event Action<bool> OnReconsileStateChanged;
@@ -20,24 +19,20 @@ namespace Mastic
         [HideInInspector] public uint id;
         [HideInInspector] public Vector3 previousEyePos;
 
-        // ---
+        [SerializeField] private Rigidbody rb = default;
+        [SerializeField] private Transform eyes = default;
+        [SerializeField] private MouseMovement mouseMovement = default;
+        [SerializeField] private PhysicsMovement physicsMovement = default;
+        [SerializeField] private GameObject authGraphicPrefab = default;
+        [SerializeField] private UnityEvent onReconsile = default;
 
-        [Header("References")]
-
-        [SerializeField] private Rigidbody rb = null;
-        [SerializeField] private Transform eyes = null;
-        [SerializeField] private MouseMovement mouseMovement = null;
-        [SerializeField] private PhysicsMovement physicsMovement = null;
-        [SerializeField] private GameObject authGraphicPrefab = null;
-        [SerializeField] private UnityEvent onSlosh = null;
-        [SerializeField] private int standardTickrate = default;
-
+        private int standardTickrate;
         private int currentTick;
 
         private int clientPacketMultiplier;
         //private bool clientDropMessage;
         private Transform serverAuthGraphic;
-        private ICameraInterpolation cameraInterpolation;
+        private ICameraInterpolation interpolation;
 
         public const int BUFFER_SIZE = 64;
         public const int MAX_PENDING_INPUT_COUNT = 8;
@@ -58,9 +53,10 @@ namespace Mastic
         private bool w, a, s, d;
         private float timer;
 
-        private void Awake()
+        public void Setup(int standardTickrate, ICameraInterpolation interpolation)
         {
-            cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
+            this.standardTickrate = standardTickrate;
+            this.interpolation = interpolation;
         }
 
         public override void OnStartLocalPlayer()
@@ -163,7 +159,7 @@ namespace Mastic
         public int DoServerMovementTick()
         {
             //TryApplyEffect();
-            OnBeforeServerTick?.Invoke(pendingInputMessages.Count);
+            OnBeforeServerTick?.Invoke(hasReceivedFirstMessage, pendingInputMessages.Count);
 
             InputMessage inputMessageToProcess;
 
@@ -345,7 +341,8 @@ namespace Mastic
         [Client]
         private void DoReconsile(int serverStateBufferIndex)
         {
-            if (Application.isFocused) { onSlosh?.Invoke(); }
+            if (Application.isFocused)
+                onReconsile?.Invoke();
 
             Debug.LogWarning($"We have to reconcile for {mostRecentServerStateMessage.tick} | if ({mostRecentServerStateMessage.position} != {stateBuffer[serverStateBufferIndex].position}).");
             //Debug.LogWarning(Vector3.Distance(mostRecentServerStateMessage.position, stateBuffer[serverStateBufferIndex].position).ToString());
@@ -365,7 +362,7 @@ namespace Mastic
 
                 Move(inputBuffer[stateBufferIndex], false);
 
-                cameraInterpolation.Interject(eyes.position, prev, rb.linearVelocity);
+                interpolation.Interject(eyes.position, prev, rb.linearVelocity);
 
                 stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputBuffer[stateBufferIndex]);
 
@@ -388,7 +385,7 @@ namespace Mastic
                 CapVelocity();
             }
 
-            if (lerp) { cameraInterpolation.Assign(eyes.position, rb.linearVelocity); }
+            if (lerp) { interpolation.Assign(eyes.position, rb.linearVelocity); }
         }
     }
 }

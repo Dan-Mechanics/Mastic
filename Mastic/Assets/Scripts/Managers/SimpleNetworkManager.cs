@@ -66,7 +66,6 @@ namespace Mastic
         {
             GameObject player = Instantiate(playerPrefab, spawnpoint.position, Quaternion.identity);
             player.name = $"uninitialized_{playerPrefab.name}_[{conn.connectionId}]";
-
             OnRegisterPlayer?.Invoke(player.transform);
             NetworkServer.AddPlayerForConnection(conn, player);
         }

@@ -60,7 +60,7 @@ namespace Mastic
         {
             public bool Exists => transform != null;
             
-            public NetworkPhysicsMovement networkMovement;
+            public NetworkMovement networkMovement;
             //public Weapon weapon;
             public Transform eyes;
             public Transform transform;
@@ -69,7 +69,7 @@ namespace Mastic
             public Player(Transform transform)
             {
                 this.transform = transform;
-                networkMovement = transform.GetComponent<NetworkPhysicsMovement>();
+                networkMovement = transform.GetComponent<NetworkMovement>();
                 eyes = transform.Find("eyes");
             }
         }

@@ -16,7 +16,7 @@ namespace Mastic
 
         [SerializeField] private Rigidbody rb = null;
         [SerializeField] private Transform eyes = null;
-        [SerializeField] private NetworkPhysicsMovement networkPhysicsMovement = null;
+        [SerializeField] private NetworkMovement networkPhysicsMovement = null;
        //  [SerializeField] private Smite smite = null;
 
         [Header("Movement Settings")]

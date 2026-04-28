@@ -17,7 +17,7 @@ namespace Mastic
         private int lastPerformTick;
         private readonly List<int> requestTicks = new List<int>();
 
-        private void Perform(NetworkPhysicsMovement networkPhysicsMovement) 
+        private void Perform(NetworkMovement networkPhysicsMovement) 
         {
             lastPerformTick = networkPhysicsMovement.CurrentTick;
 
@@ -26,7 +26,7 @@ namespace Mastic
 
         public void AddRequestTick(int requestTick)
         {
-            if (requestTicks.Count >= NetworkPhysicsMovement.MAX_PENDING_INPUT_COUNT) { return; }
+            if (requestTicks.Count >= NetworkMovement.MAX_PENDING_INPUT_COUNT) { return; }
             if (requestTick <= lastRequestTick) { return; }
 
             requestTicks.Add(requestTick);
@@ -43,12 +43,12 @@ namespace Mastic
             }
         }
 
-        public bool CanPerform(NetworkPhysicsMovement networkPhysicsMovement)
+        public bool CanPerform(NetworkMovement networkPhysicsMovement)
         {
             return networkPhysicsMovement.CurrentTick - lastPerformTick >= cooldownTicks;
         }
 
-        public void Try(NetworkPhysicsMovement networkPhysicsMovement, int inputTick) 
+        public void Try(NetworkMovement networkPhysicsMovement, int inputTick) 
         {
             for (int i = 0; i < requestTicks.Count; i++)
             {
