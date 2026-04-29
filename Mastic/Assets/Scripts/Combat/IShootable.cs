@@ -2,6 +2,6 @@
 {
     public interface IShootable
     {
-        void DoShootTick();
+        void DoShootTick(int movementTick);
     }
 }

@@ -10,7 +10,7 @@ namespace Mastic
 
         private AdaptiveTickrate adaptiveTickrate;
         private MovementDebugHUD movementDebugHUD;
-        private MouseMovement mouseMovement;
+        private PlayerLook mouseMovement;
         private NetworkManager networkManager;
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
@@ -22,7 +22,7 @@ namespace Mastic
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             physicsMovement = GetComponent<PhysicsMovement>();
             playerSetup = GetComponent<PlayerSetup>();
-            mouseMovement = GetComponent<MouseMovement>();
+            mouseMovement = GetComponent<PlayerLook>();
             movementDebugHUD = GetComponent<MovementDebugHUD>();
             networkMovement = GetComponent<NetworkMovement>();
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();
@@ -39,7 +39,7 @@ namespace Mastic
         {
             base.OnStartServer();
             playerSetup.Setup(true, false);
-            networkMovement.OnBeforeServerTick += adaptiveTickrate.ApplyTimeDilation;
+            networkMovement.OnPendingBufferChanged += adaptiveTickrate.ApplyTimeDilation;
         }
 
         public override void OnStartClient()
@@ -50,8 +50,9 @@ namespace Mastic
                 Utils.LockMouse();
                 playerSetup.Setup(false, true);
 
+                networkMovement.OnReceiveAuthoritativeState += movementDebugHUD.DisplayServerState;
                 adaptiveTickrate.OnTickrateChanged += movementDebugHUD.DisplayTickrate;
-                networkMovement.OnTick += movementDebugHUD.DisplayTick;
+                networkMovement.OnCurrentTickChanged += movementDebugHUD.DisplayTick;
                 networkMovement.OnCheatsChanged += movementDebugHUD.DisplayCheats;
                 networkMovement.OnReconsileStateChanged += movementDebugHUD.IndicateReconsile;
             }

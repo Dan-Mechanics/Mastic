@@ -26,7 +26,7 @@ namespace Mastic
         [SerializeField] private HitMarker redHitMarker = default;
 
         [SerializeField] private NetworkMovement movement = default;
-        [SerializeField] private MouseMovement mouseMovement = default;
+        [SerializeField] private PlayerLook mouseMovement = default;
         [SerializeField] private PlayerEntity entity = default;
         [SerializeField] private LayerMask environmentMask = default;
         [SerializeField] private Transform eyes = null;
@@ -126,7 +126,7 @@ namespace Mastic
         }
 
         [Server]
-        public void DoShootTick()
+        public void DoShootTick(int movementTick)
         {
             for (int i = shootMessages.Count - 1; i >= 0; i--)
             {

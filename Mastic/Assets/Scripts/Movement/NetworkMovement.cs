@@ -10,10 +10,11 @@ namespace Mastic
     {
         public int CurrentTick => currentTick;
 
-        public event Action<bool, int> OnBeforeServerTick;
-        public event Action<int> OnTick;
+        public event Action<bool, int> OnPendingBufferChanged;
+        public event Action<int> OnCurrentTickChanged;
         public event Action<string> OnCheatsChanged;
         public event Action<bool> OnReconsileStateChanged;
+        public event Action<StateMessage> OnReceiveAuthoritativeState;
 
         [HideInInspector] public int processedTick;
         [HideInInspector] public uint id;
@@ -21,7 +22,7 @@ namespace Mastic
 
         [SerializeField] private Rigidbody rb = default;
         [SerializeField] private Transform eyes = default;
-        [SerializeField] private MouseMovement mouseMovement = default;
+        [SerializeField] private PlayerLook playerLook = default;
         [SerializeField] private PhysicsMovement physicsMovement = default;
         [SerializeField] private GameObject authGraphicPrefab = default;
         [SerializeField] private EasyBinding forward = default;
@@ -135,8 +136,7 @@ namespace Mastic
                 d = right.IsHeld;
             }
 
-            Vector2 rotation = mouseMovement.GetLocalRotation();
-            inputBuffer[bufferIndex].SetValues(w, a, s, d, rotation.x, rotation.y, currentTick);
+            inputBuffer[bufferIndex].SetValues(w, a, s, d, playerLook.RotationX, playerLook.RotationY, currentTick);
 
             Move(inputBuffer[bufferIndex], true);
 
@@ -148,7 +148,7 @@ namespace Mastic
             CmdSendInputMessageToServer(inputBuffer[bufferIndex]);
 
             // we do it here because then the first is 0.
-            OnTick?.Invoke(currentTick);
+            OnCurrentTickChanged?.Invoke(currentTick);
             currentTick++;
         }
 
@@ -160,7 +160,7 @@ namespace Mastic
         public int DoServerTick()
         {
             //TryApplyEffect();
-            OnBeforeServerTick?.Invoke(hasReceivedFirstMessage, pendingInputMessages.Count);
+            OnPendingBufferChanged?.Invoke(hasReceivedFirstMessage, pendingInputMessages.Count);
 
             InputMessage inputMessageToProcess;
 
@@ -253,7 +253,6 @@ namespace Mastic
             if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
-            inputMessage.Verify();
             if (inputMessage.tick > receivedTick + 1 && hasReceivedFirstMessage && bufferHasTicks)
             {
                 for (int i = 0; i < inputMessage.tick - receivedTick - 1; i++)
@@ -296,12 +295,16 @@ namespace Mastic
             }
 
             mostRecentServerStateMessage = stateMessage;
+            OnReceiveAuthoritativeState?.Invoke(mostRecentServerStateMessage);
 
             physicsMovement.CleanTicks(mostRecentServerStateMessage.tick);
 
             TryReconsiliation();
         }
 
+        /// <summary>
+        /// This needs to be removed becuase this is already in PlayerEntity !!
+        /// </summary>
         [ClientRpc(channel = Channels.Unreliable)]
         public void RpcSendStateMessageToClients(Vector3 pos, Quaternion rot, Quaternion eyeRot) 
         {
@@ -369,7 +372,7 @@ namespace Mastic
 
         private void Move(InputMessage input, bool assignToCamera)
         {
-            mouseMovement.SetAsRotation(input.xRotation, input.yRotation);
+            playerLook.SetAsRotation(input.xRotation, input.yRotation);
             physicsMovement.Move(standardInterval, input);
 
             if (isClient)

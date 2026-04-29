@@ -27,12 +27,16 @@ namespace Mastic
         private void Tick() 
         {
             Clean();
+            
+            // IT SHOULD GO LIKE:
+            // 1. MOVE
+            // 2. SHOOT
+            // 3. RECORDFRAME & SEND
+            
             foreach (Player player in players)
             {
                 player.stateBufferIndex = player.networkMovement.DoServerTick();
             }
-
-            // SHOOT STEP SOMEWHERE HERE.
 
             Physics.Simulate(Time.fixedDeltaTime);
             foreach (Player player in players)
@@ -64,6 +68,9 @@ namespace Mastic
             //public Weapon weapon;
             public Transform eyes;
             public Transform transform;
+            public List<IShootable> shootables;
+            // ^ something like this also for movement abilities.
+
             public int stateBufferIndex;
 
             public Player(Transform transform)

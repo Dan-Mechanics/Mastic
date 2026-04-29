@@ -475,7 +475,7 @@ MonoBehaviour:
   previousEyePos: {x: 0, y: 0, z: 0}
   rb: {fileID: 3497393699691843500}
   eyes: {fileID: 2720431899970827215}
-  mouseMovement: {fileID: 3751572637676758940}
+  playerLook: {fileID: 3751572637676758940}
   physicsMovement: {fileID: 6891286507384332386}
   authGraphicPrefab: {fileID: 4866268349233265365, guid: 51629528fa6e51d4fbb2eddc7a1da3d4, type: 3}
   forward: {fileID: 11400000, guid: a825cc5f0ba418542b07d99baf53a432, type: 2}
@@ -516,7 +516,7 @@ MonoBehaviour:
   networkPhysicsMovement: {fileID: 2546578394722574111}
   walkingSpeed: 6
   acceleration: 25
-  multiplier: 0.5
+  multiplier: 0.35
   speedLimit: 25
   mask:
     serializedVersion: 2
@@ -580,6 +580,7 @@ MonoBehaviour:
   tickText: {fileID: 4464447807540331817}
   cheatsText: {fileID: 5349842774248880571}
   reconsileIndicator: {fileID: 950590360058413065}
+  authPrefab: {fileID: 4866268349233265365, guid: 51629528fa6e51d4fbb2eddc7a1da3d4, type: 3}
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,8 +3,11 @@ using Mirror;
 
 namespace Mastic
 {
-    public class MouseMovement : NetworkBehaviour
+    public class PlayerLook : NetworkBehaviour
     {
+        public float RotationX => rotation.x;
+        public float RotationY => rotation.x;
+        
         [SerializeField] private Transform eyes = default;
         [SerializeField] private float sensitivity = default;
         [SerializeField] private float minCamAngle = default;
@@ -32,8 +35,6 @@ namespace Mastic
             SetAsRotation(rotation.x, rotation.y);
             cam.rotation = eyes.rotation;
         }
-
-        public Vector2 GetLocalRotation() => rotation;
 
         public void SetAsRotation(float xRotation, float yRotation)
         {

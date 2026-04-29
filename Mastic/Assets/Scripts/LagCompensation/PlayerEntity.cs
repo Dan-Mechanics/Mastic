@@ -8,9 +8,16 @@ namespace Mastic
     /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
+        /// <summary>
+        /// I am here assuming that the tick on the local
+        /// player is the same as the tick that the player is shooting at.
+        /// </summary>
+        public int RollbackTick => rollbackTick;
+        
+        [SerializeField] private PlayerLook playerLook = default;
         private Frame[] recording;
         private Frame present;
-        private int currentTick;
+        private int rollbackTick;
 
         [Server]
         public void Setup(LagCompensation lagCompensation)
@@ -21,30 +28,30 @@ namespace Mastic
 
         private void SetAsFrame(Frame frame)
         {
-            transform.position = frame.pos;
-            // ADD ROTATION HERE TOO.
+            transform.position = frame.position;
+            playerLook.SetAsRotation(frame.xRotation, frame.yRotation);
+            
+            // THIS IS WHERE LOOKBONE SHOULD GO.
+            // INCLUDING HITBOX IF THAT IS NOT ATTACHED TO LOOKBONE.
         }
 
         [Server]
         public void RecordFrame(int tick)
         {
-            present.SetValues(transform.position);
+            present.SetValues(transform.position, playerLook.RotationX, playerLook.RotationY);
             recording[tick % recording.Length] = present;
             RpcSendAuthState(present, tick);
         }
 
         [Server]
-        public void SetAsTick(int tick)
-        {
-            SetAsFrame(recording[tick % recording.Length]);
-        }
+        public void SetAsTick(int tick) => SetAsFrame(recording[tick % recording.Length]);
 
         [ClientRpc(channel = Channels.Unreliable)]
         private void RpcSendAuthState(Frame frame, int tick)
         {
             if (isLocalPlayer)
             {
-                currentTick = tick;
+                rollbackTick = tick;
             }
             else
             {
@@ -61,7 +68,7 @@ namespace Mastic
         [Server]
         public void RefreshBuffer()
         {
-            present.SetValues(transform.position);
+            present.SetValues(transform.position, playerLook.RotationX, playerLook.RotationY);
             for (int i = 0; i < recording.Length; i++)
             {
                 recording[i] = present;
@@ -71,17 +78,17 @@ namespace Mastic
         [Server]
         public void ReturnToPresent() => SetAsFrame(present);
 
-        [Client]
-        public int GetCurrentTick() => currentTick;
-
         private struct Frame
         {
-            public Vector3 pos;
-            // ADD ROTATION HERE TOO.
+            public Vector3 position;
+            public float xRotation;
+            public float yRotation;
 
-            public void SetValues(Vector3 pos)
+            public void SetValues(Vector3 position, float xRotation, float yRotation)
             {
-                this.pos = pos;
+                this.position = position;
+                this.xRotation = xRotation;
+                this.yRotation = yRotation;
             }
         }
     }

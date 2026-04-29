@@ -28,16 +28,6 @@ namespace Mastic
             this.yRotation = yRotation;
             this.tick = tick;
         }
-        
-        /// <summary>
-        /// Consider adding max look angle 90 degrees here too,
-        /// for performance.
-        /// </summary>
-        public void Verify()
-        {
-            if (tick < 0)
-                tick = 0;
-        }
 
         public float GetVerticalInput()
         {
