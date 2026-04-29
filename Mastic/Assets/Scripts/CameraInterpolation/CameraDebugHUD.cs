@@ -18,7 +18,7 @@ namespace Mastic
             Rect rect = new Rect(Screen.width - width - padding, Screen.height - height - padding, width, height);
             GUIStyle style = GUI.skin.GetStyle("Label");
             style.alignment = TextAnchor.MiddleRight;
-            GUI.Label(rect, $"{interpolation.Value} | {interpolation.IsInterjected}", style);
+            GUI.Label(rect, $"{interpolation.LerpValue} | {interpolation.IsInterjected}", style);
             GUI.color = Color.white;
         }
     }

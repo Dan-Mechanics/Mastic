@@ -4,7 +4,7 @@ namespace Mastic
 {
     public class CameraHandlerInterpolate : MonoBehaviour, ICameraInterpolation
     {
-        public float Value { get; set; }
+        public float LerpValue { get; set; }
         public bool IsInterjected { get; set; }
 
         private Vector3 pos;
@@ -19,8 +19,8 @@ namespace Mastic
 
         private void Update()
         {
-            Value = (Time.time - time) / Time.fixedDeltaTime;
-            SetAsValue(Value);
+            LerpValue = (Time.time - time) / Time.fixedDeltaTime;
+            SetAsValue(LerpValue);
         }
 
         public void Assign(Vector3 pos, Vector3 vel)

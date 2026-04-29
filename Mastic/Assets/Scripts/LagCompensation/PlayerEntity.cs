@@ -6,10 +6,11 @@ namespace Mastic
     /// <summary>
     /// Lag compensation for player.
     /// </summary>
-    public class PlayerEntity : MonoBehaviour, IEntity
+    public class PlayerEntity : NetworkBehaviour, IEntity
     {
         private Frame[] recording;
         private Frame present;
+        private int currentTick;
 
         [Server]
         public void Setup(LagCompensation lagCompensation)
@@ -29,6 +30,7 @@ namespace Mastic
         {
             present.SetValues(transform.position);
             recording[tick % recording.Length] = present;
+            RpcSendAuthState(present, tick);
         }
 
         [Server]
@@ -37,8 +39,24 @@ namespace Mastic
             SetAsFrame(recording[tick % recording.Length]);
         }
 
+        [ClientRpc(channel = Channels.Unreliable)]
+        private void RpcSendAuthState(Frame frame, int tick)
+        {
+            if (isLocalPlayer)
+            {
+                currentTick = tick;
+            }
+            else
+            {
+                SetAsFrame(frame);
+            }
+        }
+
         /// <summary>
-        /// Invoke when respawned.
+        /// Invoke when (re)spawned.
+        /// This is important because otherwise we can rollback
+        /// the player to a time before he was dead and then he will
+        /// get shot in the spawn room.
         /// </summary>
         [Server]
         public void RefreshBuffer()
@@ -52,6 +70,9 @@ namespace Mastic
 
         [Server]
         public void ReturnToPresent() => SetAsFrame(present);
+
+        [Client]
+        public int GetCurrentTick() => currentTick;
 
         private struct Frame
         {

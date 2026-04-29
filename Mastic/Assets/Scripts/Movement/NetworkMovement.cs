@@ -135,7 +135,8 @@ namespace Mastic
                 d = right.IsHeld;
             }
 
-            inputBuffer[bufferIndex].SetValues(w, a, s, d, mouseMovement.Rotation.x, mouseMovement.Rotation.y, currentTick);
+            Vector2 rotation = mouseMovement.GetLocalRotation();
+            inputBuffer[bufferIndex].SetValues(w, a, s, d, rotation.x, rotation.y, currentTick);
 
             Move(inputBuffer[bufferIndex], true);
 

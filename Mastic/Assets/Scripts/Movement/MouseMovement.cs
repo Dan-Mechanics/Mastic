@@ -5,8 +5,6 @@ namespace Mastic
 {
     public class MouseMovement : NetworkBehaviour
     {
-        public Vector2 Rotation => rotation;
-
         [SerializeField] private Transform eyes = default;
         [SerializeField] private float sensitivity = default;
         [SerializeField] private float minCamAngle = default;
@@ -34,6 +32,8 @@ namespace Mastic
             SetAsRotation(rotation.x, rotation.y);
             cam.rotation = eyes.rotation;
         }
+
+        public Vector2 GetLocalRotation() => rotation;
 
         public void SetAsRotation(float xRotation, float yRotation)
         {
