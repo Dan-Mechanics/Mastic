@@ -8,17 +8,19 @@ namespace Mastic
         [SerializeField, Min(1)] private int standardTickrate = default;
         [SerializeField] private EasyBinding disconnect = default;
 
-        private MovementTickrate movementTickrate;
+        private AdaptiveTickrate adaptiveTickrate;
         private MovementDebugHUD movementDebugHUD;
         private MouseMovement mouseMovement;
         private NetworkManager networkManager;
+        private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
         private ICameraInterpolation interpolation;
         private PlayerSetup playerSetup;
 
         private void Awake()
         {
-            movementTickrate = GetComponent<MovementTickrate>();
+            adaptiveTickrate = GetComponent<AdaptiveTickrate>();
+            physicsMovement = GetComponent<PhysicsMovement>();
             playerSetup = GetComponent<PlayerSetup>();
             mouseMovement = GetComponent<MouseMovement>();
             movementDebugHUD = GetComponent<MovementDebugHUD>();
@@ -26,8 +28,9 @@ namespace Mastic
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();
             interpolation = FindAnyObjectByType<CameraHandlerExtrapolate>();
 
+            physicsMovement.Setup();
             mouseMovement.Setup();
-            movementTickrate.Setup(networkManager, standardTickrate);
+            adaptiveTickrate.Setup(networkManager, standardTickrate);
             movementDebugHUD.Setup(standardTickrate);
             networkMovement.Setup(standardTickrate, interpolation);
         }
@@ -36,7 +39,7 @@ namespace Mastic
         {
             base.OnStartServer();
             playerSetup.Setup(true, false);
-            networkMovement.OnBeforeServerTick += movementTickrate.ApplyTimeDilation;
+            networkMovement.OnBeforeServerTick += adaptiveTickrate.ApplyTimeDilation;
         }
 
         public override void OnStartClient()
@@ -47,7 +50,7 @@ namespace Mastic
                 Utils.LockMouse();
                 playerSetup.Setup(false, true);
 
-                movementTickrate.OnTickrateChanged += movementDebugHUD.DisplayTickrate;
+                adaptiveTickrate.OnTickrateChanged += movementDebugHUD.DisplayTickrate;
                 networkMovement.OnTick += movementDebugHUD.DisplayTick;
                 networkMovement.OnCheatsChanged += movementDebugHUD.DisplayCheats;
                 networkMovement.OnReconsileStateChanged += movementDebugHUD.IndicateReconsile;

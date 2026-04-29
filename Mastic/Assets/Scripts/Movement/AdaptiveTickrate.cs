@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 namespace Mastic
 {
-    public class MovementTickrate : NetworkBehaviour
+    public class AdaptiveTickrate : NetworkBehaviour
     {
         public event Action<int> OnTickrateChanged;
 

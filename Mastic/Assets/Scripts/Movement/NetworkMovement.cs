@@ -220,10 +220,11 @@ namespace Mastic
             TargetSendAuthState(connectionToClient, stateBuffer[stateBufferIndex]);
         }
 
-        public void CapVelocity() 
-        {
-            rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, physicsMovement.SpeedCap);
-        }
+        /// <summary>
+        /// This is because afte the simulation step
+        /// the velocity is unstable, so we limit it.
+        /// </summary>
+        public void LimitSpeed() => physicsMovement.LimitSpeed();
 
         private InputMessage GiveDefaultedTick()
         {
@@ -343,7 +344,7 @@ namespace Mastic
             //Debug.LogWarning(Vector3.Distance(mostRecentServerStateMessage.position, stateBuffer[serverStateBufferIndex].position).ToString());
             
             //Teleport(mostRecentServerStateMessage.position, mostRecentServerStateMessage.velocity);
-            physicsMovement.Teleport(mostRecentServerStateMessage.position, mostRecentServerStateMessage.velocity);
+            physicsMovement.Teleport(mostRecentServerStateMessage);
 
             stateBuffer[serverStateBufferIndex] = mostRecentServerStateMessage;
 
@@ -365,20 +366,18 @@ namespace Mastic
             }
         }
 
-        private void Move(InputMessage input, bool lerp)
+        private void Move(InputMessage input, bool assignToCamera)
         {
-            // THIS PART IS VERY IMPORTANT.
             mouseMovement.SetAsRotation(input.xRotation, input.yRotation);
-
             physicsMovement.Move(standardInterval, input);
-            if (!isServerOnly)
+
+            if (isClient)
             {
                 Physics.Simulate(standardInterval);
-
-                CapVelocity();
+                LimitSpeed();
             }
 
-            if (lerp)
+            if (assignToCamera)
                 interpolation.Assign(eyes.position, rb.linearVelocity);
         }
     }

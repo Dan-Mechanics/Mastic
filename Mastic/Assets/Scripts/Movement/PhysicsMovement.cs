@@ -3,15 +3,22 @@ using UnityEngine;
 
 namespace Mastic
 {
+    public interface IMovement
+    {
+        bool GetIsGrounded();
+        void Move(float interval, InputMessage inputMessage);
+        void Teleport(StateMessage stateMessage);
+    }
+    
     /// <summary>
     /// In theory I would like to make this an interface.
     /// </summary>
-    public class PhysicsMovement : MonoBehaviour
+    public class PhysicsMovement : MonoBehaviour, IMovement
     {
         public bool isSmiting;
         public bool isStunned;
         
-        public float SpeedCap => speedCap;
+        public float SpeedLimit => speedLimit;
         public SimpleMovementAbility JumpAbility => jumpAbility;
         public SimpleMovementAbility DashAbility => dashAbility;
 
@@ -23,18 +30,16 @@ namespace Mastic
        //  [SerializeField] private Smite smite = null;
 
         [Header("Movement Settings")]
-
         [SerializeField] private float walkingSpeed = 0f;
         [SerializeField] private float acceleration = 0f;
-        [SerializeField] private float accelerationMult = 0f;
-        [SerializeField] private float speedCap = 0f;
+        [SerializeField] private float multiplier = 0f;
+        [SerializeField] private float speedLimit = 0f;
 
         [Header("Grounded Settings")]
-
-        [SerializeField] private LayerMask groundMask = 0;
-        [SerializeField] private float groundColliderRadius = 0f;
-        [SerializeField] private float groundColliderDownward = 0f;
-        [SerializeField] private float maxGroundSurfaceAngle = 0f;
+        [SerializeField] private LayerMask mask = default;
+        [SerializeField] private float radius = default;
+        [SerializeField] private float offset = default;
+        [SerializeField] private float slopeLimit = default;
 
         [Header("Magic Settings")]
 
@@ -42,39 +47,38 @@ namespace Mastic
         [SerializeField] private SimpleMovementAbility dashAbility = null;
         //[SerializeField] private SimpleMovementAbility smiteAbility = null;
 
-        private void Awake()
-        {
-            jumpAbility.OnPerform += Jump;
-            dashAbility.OnPerform += Dash;
-            //smiteAbility.OnPerform += smite.TrySmite;
-        }
-
-        private void Start()
+        public void Setup()
         {
             rb.sleepThreshold = 0f;
+            jumpAbility.OnPerform += Jump;
+            dashAbility.OnPerform += Dash;
         }
 
         private void Dash()
         {
-            Vector3 velAdd = eyes.forward * dashAbility.Speed;
-            if (velAdd.y >= 0f && rb.linearVelocity.y < 0f) { velAdd.y -= rb.linearVelocity.y; }
+            Vector3 force = eyes.forward * dashAbility.Speed;
+            if (force.y >= 0f && rb.linearVelocity.y < 0f)
+                force.y -= rb.linearVelocity.y;
 
-            rb.AddForce(velAdd, ForceMode.VelocityChange);
+            rb.AddForce(force, ForceMode.VelocityChange);
         }
 
         private void Jump()
         {
-            Vector3 velAdd = Vector3.up * jumpAbility.Speed;
-            if (rb.linearVelocity.y < 0f) { velAdd.y -= rb.linearVelocity.y; }
+            Vector3 force = Vector3.up * jumpAbility.Speed;
+            if (rb.linearVelocity.y < 0f)
+                force.y -= rb.linearVelocity.y;
 
-            rb.AddForce(velAdd, ForceMode.VelocityChange);
+            rb.AddForce(force, ForceMode.VelocityChange);
         }
+
+        public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, speedLimit);
 
         public void Move(float interval, InputMessage input)
         {
-            bool isGrounded = CheckGround();
+            bool isGrounded = GetIsGrounded();
 
-            float accel = isGrounded ? acceleration : acceleration * accelerationMult;
+            float accel = isGrounded ? acceleration : acceleration * multiplier;
 
             Vector3 movement = Vector3.zero;
 
@@ -100,7 +104,7 @@ namespace Mastic
                 rb.AddForce(Vector3.ClampMagnitude(accel * interval * -velocity.normalized, mag - walkingSpeed), ForceMode.VelocityChange);
             }
 
-            Vector3 counterMovement = accel * interval * accelerationMult * -(velocity.normalized - movement);
+            Vector3 counterMovement = accel * interval * multiplier * -(velocity.normalized - movement);
 
             if (mag != 0f && counterMovement.magnitude > mag) { counterMovement = -velocity; }
 
@@ -114,24 +118,21 @@ namespace Mastic
             dashAbility.Try(networkPhysicsMovement, input.tick);
         }
 
-        public void Teleport(Vector3 position, Vector3 velocity)
+        public void Teleport(StateMessage stateMessage)
         {
-            transform.position = position;
-            rb.linearVelocity = velocity;
+            transform.position = stateMessage.position;
+            rb.linearVelocity = stateMessage.velocity;
         }
 
-        private bool CheckGround()
+        public bool GetIsGrounded()
         {
-            RaycastHit[] hits = Physics.SphereCastAll(transform.position, groundColliderRadius, Vector3.down, groundColliderDownward, groundMask, QueryTriggerInteraction.Ignore);
+            RaycastHit[] hits = Physics.SphereCastAll(transform.position, radius,
+                Vector3.down, offset, mask, QueryTriggerInteraction.Ignore);
 
             foreach (RaycastHit hit in hits)
             {
-                if (hit.distance == 0f) { continue; }
-
-                if (Vector3.Angle(Vector3.up, hit.normal) <= maxGroundSurfaceAngle)
-                {
+                if (hit.distance > 0f && Vector3.Angle(Vector3.up, hit.normal) <= slopeLimit)
                     return true;
-                }
             }
 
             return false;
@@ -145,8 +146,10 @@ namespace Mastic
 
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.white;
-            Gizmos.DrawWireSphere(transform.position + (Vector3.down * groundColliderDownward), groundColliderRadius);
+            Color color = Color.Lerp(Color.green, Color.white, 0.5f);
+            color.a = 0.5f;
+            Gizmos.color = color;
+            Gizmos.DrawSphere(transform.position + (Vector3.down * offset), radius);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Mastic
     /// Server script for handling the sequence of player code.
     /// Rename this server sequence manager because it will include lagcompensation soon.
     /// </summary>
-    public class PlayerManager : MonoBehaviour
+    public class ServerManager : MonoBehaviour
     {
         private readonly List<Player> players = new List<Player>();
         private float timer;
@@ -27,17 +27,17 @@ namespace Mastic
         private void Tick() 
         {
             Clean();
-            for (int i = 0; i < players.Count; i++)
+            foreach (Player player in players)
             {
-                Player player = players[i];
                 player.stateBufferIndex = player.networkMovement.DoServerTick();
             }
 
+            // SHOOT STEP SOMEWHERE HERE.
+
             Physics.Simulate(Time.fixedDeltaTime);
-            for (int i = 0; i < players.Count; i++)
+            foreach (Player player in players)
             {
-                Player player = players[i];
-                player.networkMovement.CapVelocity();
+                player.networkMovement.LimitSpeed();
                 player.networkMovement.Send(player.stateBufferIndex);
                 player.networkMovement.RpcSendStateMessageToClients(player.transform.position, player.transform.rotation, player.eyes.localRotation);
             }
@@ -47,7 +47,7 @@ namespace Mastic
         {
             for (int i = players.Count - 1; i >= 0; i--)
             {
-                if (!players[i].Exists)
+                if (players[i] == null || players[i].transform == null)
                     players.RemoveAt(i);
             }
         }
@@ -60,8 +60,6 @@ namespace Mastic
 
         private class Player 
         {
-            public bool Exists => transform != null;
-            
             public NetworkMovement networkMovement;
             //public Weapon weapon;
             public Transform eyes;

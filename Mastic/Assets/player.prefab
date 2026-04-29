@@ -516,14 +516,14 @@ MonoBehaviour:
   networkPhysicsMovement: {fileID: 2546578394722574111}
   walkingSpeed: 6
   acceleration: 25
-  accelerationMult: 0.35
-  speedCap: 25
-  groundMask:
+  multiplier: 0.5
+  speedLimit: 25
+  mask:
     serializedVersion: 2
     m_Bits: 1
-  groundColliderRadius: 0.55
-  groundColliderDownward: 0.5
-  maxGroundSurfaceAngle: 42.5
+  radius: 0.62
+  offset: 0.61
+  slopeLimit: 50
   jumpAbility:
     speed: 5
     cooldownTicks: 32
