@@ -5,31 +5,46 @@ namespace Mastic
 {
     public class Player : NetworkBehaviour
     {
-        [SerializeField, Min(1)] private int standardTickrate = default;
         [SerializeField] private EasyBinding disconnect = default;
+        [SerializeField, Min(1)] private int standardTickrate = default;
 
         private AdaptiveTickrate adaptiveTickrate;
         private MovementDebugHUD movementDebugHUD;
-        private PlayerLook mouseMovement;
+        private PlayerEntity playerEntity;
         private NetworkManager networkManager;
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
         private ICameraInterpolation interpolation;
+        private LagCompensation lagCompensation;
         private PlayerSetup playerSetup;
+        private PlayerLook playerLook;
+        private Weapon weapon;
+        private Transform eyes;
+        private Transform cam;
 
         private void Awake()
         {
+            eyes = transform.Find("eyes");
+            cam = GameObject.FindWithTag("MainCamera").transform;
+
+            weapon = GetComponent<Weapon>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             physicsMovement = GetComponent<PhysicsMovement>();
             playerSetup = GetComponent<PlayerSetup>();
-            mouseMovement = GetComponent<PlayerLook>();
+            playerEntity = GetComponent<PlayerEntity>();
+            playerLook = GetComponent<PlayerLook>();
             movementDebugHUD = GetComponent<MovementDebugHUD>();
             networkMovement = GetComponent<NetworkMovement>();
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();
-            interpolation = FindAnyObjectByType<CameraHandlerExtrapolate>();
+            lagCompensation = FindAnyObjectByType<LagCompensation>();
+            interpolation = cam.GetComponent<ICameraInterpolation>();
+        }
 
+        private void Setup()
+        {
+            weapon.Setup(cam, eyes, interpolation, lagCompensation);
             physicsMovement.Setup();
-            mouseMovement.Setup();
+            playerLook.Setup();
             adaptiveTickrate.Setup(networkManager, standardTickrate);
             movementDebugHUD.Setup(standardTickrate);
             networkMovement.Setup(standardTickrate, interpolation);
@@ -38,6 +53,8 @@ namespace Mastic
         public override void OnStartServer()
         {
             base.OnStartServer();
+            Setup();
+
             playerSetup.Setup(true, false);
             networkMovement.OnPendingBufferChanged += adaptiveTickrate.ApplyTimeDilation;
         }
@@ -45,6 +62,8 @@ namespace Mastic
         public override void OnStartClient()
         {
             base.OnStartClient();
+            Setup();
+
             if (isLocalPlayer)
             {
                 Utils.LockMouse();
@@ -64,7 +83,11 @@ namespace Mastic
 
         private void Update()
         {
-            if (isLocalPlayer && disconnect.WasPressed)
+            if (!isLocalPlayer)
+                return;
+
+            weapon.DoClientUpdate(networkMovement.MovementTick, playerEntity.RollbackTick);
+            if (disconnect.WasPressed)
                 connectionToServer.Disconnect();
         }
     }

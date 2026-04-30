@@ -19,7 +19,7 @@ namespace Mastic
 
         private void Perform(NetworkMovement networkPhysicsMovement) 
         {
-            lastPerformTick = networkPhysicsMovement.CurrentTick;
+            lastPerformTick = networkPhysicsMovement.MovementTick;
 
             OnPerform?.Invoke();
         }
@@ -45,7 +45,7 @@ namespace Mastic
 
         public bool CanPerform(NetworkMovement networkPhysicsMovement)
         {
-            return networkPhysicsMovement.CurrentTick - lastPerformTick >= cooldownTicks;
+            return networkPhysicsMovement.MovementTick - lastPerformTick >= cooldownTicks;
         }
 
         public void Try(NetworkMovement networkPhysicsMovement, int inputTick) 

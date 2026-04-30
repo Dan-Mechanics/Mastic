@@ -12,12 +12,12 @@ namespace Mastic
         /// I am here assuming that the tick on the local
         /// player is the same as the tick that the player is shooting at.
         /// </summary>
-        public int RollbackTick => rollbackTick;
+        public int RollbackTick => tick;
         
         [SerializeField] private PlayerLook playerLook = default;
         private Frame[] recording;
         private Frame present;
-        private int rollbackTick;
+        private int tick;
 
         [Server]
         public void Setup(LagCompensation lagCompensation)
@@ -51,7 +51,7 @@ namespace Mastic
         {
             if (isLocalPlayer)
             {
-                rollbackTick = tick;
+                this.tick = tick;
             }
             else
             {

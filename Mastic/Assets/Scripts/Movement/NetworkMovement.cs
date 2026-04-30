@@ -8,7 +8,7 @@ namespace Mastic
 {
     public class NetworkMovement : NetworkBehaviour
     {
-        public int CurrentTick => currentTick;
+        public int MovementTick => currentTick;
 
         public event Action<bool, int> OnPendingBufferChanged;
         public event Action<int> OnCurrentTickChanged;
@@ -126,7 +126,7 @@ namespace Mastic
 
 
 
-            int bufferIndex = currentTick % BUFFER_SIZE;
+            int inputBufferIndex = currentTick % BUFFER_SIZE;
 
             if (Application.isFocused) 
             {
@@ -136,16 +136,16 @@ namespace Mastic
                 d = right.IsHeld;
             }
 
-            inputBuffer[bufferIndex].SetValues(w, a, s, d, playerLook.RotationX, playerLook.RotationY, currentTick);
+            inputBuffer[inputBufferIndex].SetValues(w, a, s, d, playerLook.RotationX, playerLook.RotationY, currentTick);
 
-            Move(inputBuffer[bufferIndex], true);
+            Move(inputBuffer[inputBufferIndex], true);
 
-            stateBuffer[bufferIndex].SetValues(transform.position, rb.linearVelocity, inputBuffer[bufferIndex]);
+            stateBuffer[inputBufferIndex].SetValues(transform.position, rb.linearVelocity, inputBuffer[inputBufferIndex]);
 
             /*if (!clientDropMessage && !Input.GetKey(KeyCode.E)) { CmdSendInputMessageToServer(inputBuffer[ringBufferIndex]); }
             else { OnCheatsChanged?.Invoke("not sending ..."); clientDropMessage = false; }*/
 
-            CmdSendInputMessageToServer(inputBuffer[bufferIndex]);
+            CmdSendInputMessageToServer(inputBuffer[inputBufferIndex]);
 
             // we do it here because then the first is 0.
             OnCurrentTickChanged?.Invoke(currentTick);
@@ -213,11 +213,11 @@ namespace Mastic
             return stateBufferIndex;
         }
 
-        public void Send(int stateBufferIndex) 
+        [Server]
+        public void SendAuthStateToClient(int stateBufferIndex) 
         {
             stateBuffer[stateBufferIndex].position = transform.position;
             stateBuffer[stateBufferIndex].velocity = rb.linearVelocity;
-
             TargetSendAuthState(connectionToClient, stateBuffer[stateBufferIndex]);
         }
 
@@ -284,11 +284,10 @@ namespace Mastic
             {
                 Debug.LogWarning("we have to return here since the positions are stored in a ringbuffer and otherwise would wrap around and completely break the reconsile.");
                 return;
-
             }
 
             // we might need to remove this if we use server ticks.
-            if (!(stateMessage.tick > mostRecentServerStateMessage.tick))
+            if (stateMessage.tick <= mostRecentServerStateMessage.tick)
             {
                 Debug.LogWarning("we have to return here since we already reconsiled on this tick and we cant do it twice, yes this means we have the possibility of missing reconsiles but that's acceptable since we get the next message next.");
                 return;
@@ -300,30 +299,6 @@ namespace Mastic
             physicsMovement.CleanTicks(mostRecentServerStateMessage.tick);
 
             TryReconsiliation();
-        }
-
-        /// <summary>
-        /// This needs to be removed becuase this is already in PlayerEntity !!
-        /// </summary>
-        [ClientRpc(channel = Channels.Unreliable)]
-        public void RpcSendStateMessageToClients(Vector3 pos, Quaternion rot, Quaternion eyeRot) 
-        {
-            //this.id = id;
-
-            if (isLocalPlayer)
-            {
-                if (serverAuthGraphic != null)
-                {
-                    serverAuthGraphic.SetPositionAndRotation(pos + (Vector3.up * 2.5f), rot);
-                }
-            }
-            else
-            {
-                // TODO: add lerp.
-                
-                transform.SetPositionAndRotation(pos, rot);
-                eyes.localRotation = eyeRot;
-            }
         }
 
         [Client]

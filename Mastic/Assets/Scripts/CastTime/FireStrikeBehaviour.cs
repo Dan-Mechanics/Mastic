@@ -7,7 +7,7 @@ namespace Mastic
         [SerializeField] private float damage = 0f;
         [SerializeField] private Rigidbody rb = null;
 
-        private Weapon weapon;
+     //   private Weapon weapon;
 
         private bool destroyed;
         private bool isServer;
@@ -19,7 +19,7 @@ namespace Mastic
 
         public void Setup(Weapon weapon, bool isServer) 
         {
-            this.weapon = weapon;
+          //  this.weapon = weapon;
             this.isServer = isServer;
         }
 
@@ -43,7 +43,7 @@ namespace Mastic
 
             collision.transform.GetComponent<PlayerHealth>().Damage(damage);
             
-            weapon.TargetCallDamage(weapon.connectionToClient, damage);
+         //   weapon.TargetCallDamage(weapon.connectionToClient, damage);
         }
     }
 }

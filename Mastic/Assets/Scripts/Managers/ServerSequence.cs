@@ -4,14 +4,13 @@ using Mirror;
 
 namespace Mastic
 {
-    /// <summary>
-    /// Server script for handling the sequence of player code.
-    /// Rename this server sequence manager because it will include lagcompensation soon.
-    /// </summary>
-    public class ServerManager : MonoBehaviour
+    public class ServerSequence : MonoBehaviour
     {
         private readonly List<Player> players = new List<Player>();
+        private LagCompensation lagCompensation;
         private float timer;
+
+        public void Setup(LagCompensation lagCompensation) => this.lagCompensation = lagCompensation;
 
         [ServerCallback]
         private void Update()
@@ -27,12 +26,6 @@ namespace Mastic
         private void Tick() 
         {
             Clean();
-            
-            // IT SHOULD GO LIKE:
-            // 1. MOVE
-            // 2. SHOOT
-            // 3. RECORDFRAME & SEND
-            
             foreach (Player player in players)
             {
                 player.stateBufferIndex = player.networkMovement.DoServerTick();
@@ -42,9 +35,19 @@ namespace Mastic
             foreach (Player player in players)
             {
                 player.networkMovement.LimitSpeed();
-                player.networkMovement.Send(player.stateBufferIndex);
-                player.networkMovement.RpcSendStateMessageToClients(player.transform.position, player.transform.rotation, player.eyes.localRotation);
+                player.networkMovement.SendAuthStateToClient(player.stateBufferIndex);
             }
+
+            lagCompensation.RecordFrame();
+            foreach (Player player in players)
+            {
+                for (int i = 0; i < player.shootables.Length; i++)
+                {
+                    player.shootables[i].DoShootTick(player.networkMovement.MovementTick);
+                }
+            }
+
+            lagCompensation.ReturnToPresent();
         }
 
         private void Clean()
@@ -65,17 +68,15 @@ namespace Mastic
         private class Player 
         {
             public NetworkMovement networkMovement;
-            //public Weapon weapon;
             public Transform eyes;
             public Transform transform;
-            public List<IShootable> shootables;
-            // ^ something like this also for movement abilities.
-
+            public IShootable[] shootables;
             public int stateBufferIndex;
 
             public Player(Transform transform)
             {
                 this.transform = transform;
+                shootables = transform.GetComponents<IShootable>();
                 networkMovement = transform.GetComponent<NetworkMovement>();
                 eyes = transform.Find("eyes");
             }
