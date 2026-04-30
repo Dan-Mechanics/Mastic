@@ -20,7 +20,7 @@ namespace Mastic
         private void Update()
         {
             LerpValue = (Time.time - time) / Time.fixedDeltaTime;
-            SetAsValue(LerpValue);
+            SetValue(LerpValue);
         }
 
         public void Assign(Vector3 pos, Vector3 vel)
@@ -41,7 +41,7 @@ namespace Mastic
         /// <summary>
         /// https://docs.unity3d.com/ScriptReference/Vector3.LerpUnclamped.html
         /// </summary>
-        public void SetAsValue(float value)
+        public void SetValue(float value)
         {
             // SINCE WE ARE NOT USING UNCLAMPED LERP HERE,
             // WE DON'T HAVE TO CLAMP ANYTHING.

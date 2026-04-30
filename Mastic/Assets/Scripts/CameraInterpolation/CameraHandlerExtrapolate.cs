@@ -16,7 +16,7 @@ namespace Mastic
         private void Update()
         {
             LerpValue = Time.time - time;
-            SetAsValue(LerpValue);
+            SetValue(LerpValue);
         }
 
         public void Assign(Vector3 pos, Vector3 vel)
@@ -34,7 +34,7 @@ namespace Mastic
             this.vel = vel;
         }
 
-        public void SetAsValue(float value)
+        public void SetValue(float value)
         {
             value = Mathf.Clamp(value, 0f, Time.fixedDeltaTime);
             transform.position = pos + (vel * value);

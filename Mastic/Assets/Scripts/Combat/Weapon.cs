@@ -1,4 +1,5 @@
 ﻿using Mirror;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,61 +7,58 @@ using UnityEngine.UI;
 namespace Mastic
 {
     /// <summary>
-    /// 
-    /// Current stuff:
-    ///     How does drops effect interpolation or any of that stuff ? is that allowed ?
-    ///     What happens to the system when we use Physics.Synctransforms ?
-    ///         Should we do that after the returntopresent(); step ?
-    ///             I think in this context it doesn't really matter,
-    ///             but it prolly does with RB.
-    /// Other stuff:
-    ///     make it so that all the unlocal clients are sent as an array of pos rots and
-    ///     then when unloading give insta sync to physics.
-    ///     
+    /// Add: cooldown integration.
     /// </summary>
     public class Weapon : NetworkBehaviour, IShootable
     {
+        /// <summary>
+        /// Meaning that the local client has dealed damage to an enemy on the server.
+        /// </summary>
+        public event Action<float> OnDealDamage;
+        
         [Header("References")]
-
         [SerializeField] private HitMarker blueHitMarker = default;
         [SerializeField] private HitMarker redHitMarker = default;
 
+        [SerializeField] private Rigidbody rb = default;
         [SerializeField] private NetworkMovement movement = default;
-        [SerializeField] private PlayerLook mouseMovement = default;
-        [SerializeField] private PlayerEntity entity = default;
-        [SerializeField] private LayerMask environmentMask = default;
+        [SerializeField] private PlayerEntity playerEntity;
+        [SerializeField] private PlayerLook playerLook;
         [SerializeField] private Transform eyes = null;
-        [SerializeField] private CharacterController controller = default;
+
         [SerializeField] private AudioSource source = default;
         [SerializeField] private GameObject beamGraphic = default;
         [SerializeField] private Image overlay = default;
-
-        [Header("Settings")]
-
-        [SerializeField] private float range = default;
-        [SerializeField] private float damage = default;
-        [SerializeField] private float step = default;
-        [SerializeField] private float maxCooldown = default;
-
-        [Header("User")] 
-
         [SerializeField] private Image fillImage = default;
         [SerializeField] private AudioClip sound = default;
         [SerializeField] private Color fullColor = default;
         [SerializeField] private Color fadeColor = default;
+
+        [Header("Settings")]
+        [SerializeField] private LayerMask mask = default;
+        [SerializeField] private float range = default;
+        [SerializeField] private float damage = default;
+        //[SerializeField] private float step = default;
+        [SerializeField] private float cooldown = default;
         [SerializeField] private bool serverCanShootOverride = default;
         [SerializeField] private float shootEffectTime = default;
 
-        private float cooldownTimer;
-        private Transform cam; // we want to use the cam because its the "most accurate" for the client.
-        private CameraHandlerInterpolate cameraHandlerInterpolate;
-        private readonly List<ShootMessage> shootMessages = new List<ShootMessage>();
+        private LagCompensation lagCompensation;
+        private ICameraInterpolation cameraInterpolation;
+
+        private Transform cam;
+        private Vector3 prevPosition;
+        private Vector3 currPosition;
+
+        private readonly List<ShootMessage> pendingShootMessages = new List<ShootMessage>();
         private float beamTime;
+        private float cooldownTimer;
 
         private void Awake()
         {
             cam = GameObject.FindWithTag("MainCamera").transform;
-            cameraHandlerInterpolate = cam.GetComponent<CameraHandlerInterpolate>();
+            cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
+            lagCompensation = FindAnyObjectByType<LagCompensation>();
         }
 
         public override void OnStartServer()
@@ -87,13 +85,17 @@ namespace Mastic
 
             if (Input.GetKeyDown(KeyCode.Mouse0) && CanCast())
             {
-                Transform hit = InstantRaycast(cam.position, cam.forward);
+                RaycastHit hit;
 
-                if (hit != null) { blueHitMarker.Damage(damage); }
+                if (Physics.Raycast(cam.position, eyes.forward, out hit, range, mask, QueryTriggerInteraction.Ignore) && IsPlayer(hit))
+                {
+                    blueHitMarker.Damage(damage);
+                }
 
-                /*CmdShoot(new ShootMessage(cameraHandlerInterpolate.lerpValue, movement.id - 1,
-                    mouseMovement.rotation.y, mouseMovement.rotation.x, movement.currentTick - 1,
-                    cam.position, hit ? hit.position : Vector3.zero));*/
+                // !allocation this can be done better.
+                // so we are now using our own tick which is lowkey sketch but it works.
+                CmdShoot(new ShootMessage(cameraInterpolation.lerpValue, movement.id - 1,
+                    playerLook.RotationY, playerLook.RotationY, movement.currentTick - 1));
 
                 cooldownTimer = 0f;
 
@@ -107,70 +109,76 @@ namespace Mastic
         {
             beamGraphic.SetActive(beamTime >= Time.time);
 
-            if (isLocalPlayer)
-            {
-                fillImage.fillAmount = cooldownTimer / maxCooldown; fillImage.color = CanCast() ? Color.white : Color.gray;
+            if (isLocalPlayer) 
+            { 
+                fillImage.fillAmount = cooldownTimer / cooldown; fillImage.color = CanCast() ? Color.white : Color.gray;
                 overlay.color = beamTime >= Time.time ? fullColor : fadeColor;
             }
         }
 
         private bool CanCast()
         {
-            return cooldownTimer >= maxCooldown;
+            return cooldownTimer >= cooldown;
         }
 
         private void ChargeCooldown()
         {
             cooldownTimer += Time.deltaTime;
-            cooldownTimer = Mathf.Clamp(cooldownTimer, 0f, maxCooldown);
+            cooldownTimer = Mathf.Clamp(cooldownTimer, 0f, cooldown);
         }
 
-        [Server]
-        public void DoShootTick(int movementTick)
+        public void CheckShootMessages() 
         {
-            for (int i = shootMessages.Count - 1; i >= 0; i--)
+            for (int i = pendingShootMessages.Count - 1; i >= 0; i--)
             {
-                if (shootMessages[i].shotTick <= movement.processedTick)
+                if (pendingShootMessages[i].movementTick > movement.processedTick) { continue; }
+
+                if (CanCast() && serverCanShootOverride)
                 {
-                    if (CanCast() && serverCanShootOverride)
-                    {
-                        Shoot(shootMessages[i]);
-                        cooldownTimer = 0f;
+                    Shoot(pendingShootMessages[i]);
+                    cooldownTimer = 0f;
 
-                        RpcShoot(shootMessages[i].yRotation, shootMessages[i].xRotation);
-                    }
-
-                    shootMessages.RemoveAt(i);
-
-                    TargetSyncCooldown(connectionToClient, cooldownTimer, NetworkTime.time);
+                    // yah and also send message if you couldnt shoot because then we have to delete the prediction.
+                    RpcShoot(pendingShootMessages[i].yRotation, pendingShootMessages[i].xRotation);
                 }
+
+                pendingShootMessages.RemoveAt(i);
+
+                TargetSyncCooldown(connectionToClient, cooldownTimer, NetworkTime.time);
             }
         }
 
         [TargetRpc]
-        public void TargetCallDamage(NetworkConnectionToClient conn, float damage)
+        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) 
         {
             redHitMarker.Damage(damage);
         }
 
         [TargetRpc]
-        protected void TargetSyncCooldown(NetworkConnectionToClient conn, float cooldown, double sendTime)
+        private void TargetSyncCooldown(NetworkConnectionToClient conn, float cooldown, double sendTime)
         {
-            if (cooldown != 0f) { source.Stop(); beamTime = 0f; blueHitMarker.Damage(-damage); Debug.LogWarning("unable to shoot !"); }
+            if (cooldown != 0f) 
+            { 
+                source.Stop();
+                beamTime = 0f;
+                blueHitMarker.Damage(-damage);
+
+                Debug.LogWarning("unable to shoot !");
+            }
 
             cooldownTimer = cooldown + (float)(NetworkTime.time - sendTime);
-            cooldownTimer = Mathf.Clamp(cooldownTimer, 0f, maxCooldown);
+            cooldownTimer = Mathf.Clamp(cooldownTimer, 0f, this.cooldown);
         }
 
         /// <summary>
-        /// This only works because the player model isnt effected by aiming direction.
+        /// This only works because the player model isnt effected by aiming direction...
         /// </summary>
         [ClientRpc]
-        private void RpcShoot(float yRotation, float xRotation)
+        private void RpcShoot(float yRotation, float xRotation) 
         {
             if (isLocalPlayer) { return; }
 
-            // we dont need this because the thing works already.
+            // we dont need this because the thing works already ... ???
             transform.rotation = Quaternion.AngleAxis(yRotation, Vector3.up);
             eyes.localRotation = Quaternion.AngleAxis(xRotation, Vector3.right);
 
@@ -184,126 +192,77 @@ namespace Mastic
         }
 
         [Command]
-        private void CmdShoot(ShootMessage shootMessage)
+        private void CmdShoot(ShootMessage shootMessage) 
         {
-            shootMessage.Verify(-90f, 90f);
+            shootMessage.Verify();
+            pendingShootMessages.Add(shootMessage);
 
-            // I think this is useful, need to test more.
-            if (shootMessage.shotTick <= movement.processedTick)
+            /*if (shootMessage.shotTick <= movement.processedTick)
             {
+
                 if (CanCast() && serverCanShootOverride)
                 {
                     Shoot(shootMessage);
                     cooldownTimer = 0f;
 
+                    // yah and also send message if you couldnt shoot because then we have to delete the prediction.
                     RpcShoot(shootMessage.yRotation, shootMessage.xRotation);
                 }
 
                 TargetSyncCooldown(connectionToClient, cooldownTimer, NetworkTime.time);
             }
-
-            shootMessages.Add(shootMessage);
+            else
+            {
+                shootMessages.Add(shootMessage);
+            }*/
         }
 
         [Server]
-        private void Shoot(ShootMessage shootMessage)
+        private void Shoot(ShootMessage shootMessage) 
         {
-            // or you could just send the rotation since you dont have to look where u aiming anyway.
-            transform.rotation = Quaternion.AngleAxis(shootMessage.yRotation, Vector3.up);
-            eyes.localRotation = Quaternion.AngleAxis(shootMessage.xRotation, Vector3.right);
+            lagCompensation.SetAsTick(shootMessage.rollbackTick);
+            
+            playerLook.SetAsRotation(shootMessage.xRotation, shootMessage.yRotation);
+            cameraInterpolation.Interject(currPosition, prevPosition, rb.linearVelocity);
+            cameraInterpolation.SetValue(shootMessage.lerpValue);
 
-            Vector3 recreatedPos = Vector3.Lerp(movement.previousEyePos, eyes.position, shootMessage.lerpValue);
-            Vector3 recreatedDir = eyes.forward;
+            Physics.SyncTransforms();
+            if (!Physics.Raycast(cam.position, eyes.forward,
+                out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
+                return;
 
-            // this is always zero so it works
-            //Debug.LogWarning();
+            if (!hit.transform.root.TryGetComponent(out IDamagable damagable))
+                return;
 
-          //  LagCompensation.instance.RewindTime(shootMessage.id, entity);
-
-            Transform hit = InstantRaycast(recreatedPos, recreatedDir);
-
-            /*float eyeDiff = Vector3.Distance(recreatedPos, shootMessage.cheatEyesPos);
-            if (eyeDiff > ServerAuthClientPredSimple.TOLERANCE) { Debug.LogWarning($"eye diff problem : {eyeDiff}"); }
-
-            if (hit != null && shootMessage.cheatEnemyPos != Vector3.zero)
-            {
-                float enemyDiff = Vector3.Distance(hit.position, shootMessage.cheatEnemyPos);
-                if (enemyDiff > ServerAuthClientPredSimple.TOLERANCE) { Debug.LogWarning($"enemy diff problem : {enemyDiff}"); }
-            }*/
-
-         //   LagCompensation.instance.ReturnToPresent();
-
-            if (hit != null)
-            {
-                TargetCallDamage(connectionToClient, damage);
-
-                // we're not putting self-damage off the table.
-                // # think about the way bugs will appear if they do, you dont want the damage function itself to be the last line of defense, you cant
-                // damage yourself because you cant't shoot yourself after all. so if you are able to shoot yourself we basically WANT that to be a big issue so it gets fixed quickly.
-                // think: overwatch bastion ult bug >= vs ==
-                hit.GetComponent<PlayerHealth>().Damage(damage);
-            }
+            damagable.Damage(damage);
+            TargetDisplayHitPip(connectionToClient, damage);
+            hit.transform.root.GetComponent<PlayerHealth>().Damage(damage);
         }
 
-        private Transform InstantRaycast(Vector3 pos, Vector3 dir)
+        [Server]
+        public void DoShootTick(int movementTick)
         {
-            float rayLength = range;
+            // TODO: MAKE SURE THIS IS CORRECT.
+            prevPosition = currPosition;
+            currPosition = transform.position;
 
-            RaycastHit hit;
-
-            if (Physics.Raycast(pos, dir, out hit, range, environmentMask, QueryTriggerInteraction.Ignore))
+            // !FIX
+            for (int i = pendingShootMessages.Count - 1; i >= 0; i--)
             {
-                rayLength = hit.distance;
-            }
+                if (pendingShootMessages[i].movementTick > movementTick)
+                    continue;
 
-            int amount = Mathf.RoundToInt(rayLength / step); // closest guess with regards to very thin surfaces...
-
-            // <= because the first is zero length if that makese sense.
-            /*for (int l = 0; l <= amount; l++)
-            {
-                for (int p = 0; p < LagCompensation.instance.players.Count; p++)
+                if (CanCast() && serverCanShootOverride)
                 {
-                    // !performance, you could also just remove the player from the list
-                    if (LagCompensation.instance.players[p] == this) { continue; }
+                    Shoot(pendingShootMessages[i]);
+                    cooldownTimer = 0f;
 
-                    *//*if (Intersections.IsPointWithinCapsule(pos + (l * step * dir), LagCompensation.instance.players[p].movement.transform.position, controller.height, controller.radius))
-                    {
-                        return LagCompensation.instance.players[p].transform;
-                    }*//*
+                    // yah and also send message if you couldnt shoot because then we have to delete the prediction.
+                    RpcShoot(pendingShootMessages[i].yRotation, pendingShootMessages[i].xRotation);
                 }
-            }*/
 
-            return null;
-        }
-
-        private struct ShootMessage
-        {
-            public float lerpValue;
-            public uint id;
-            public float yRotation;
-            public float xRotation;
-
-            public int shotTick;
-
-            public Vector3 cheatEyesPos;
-            public Vector3 cheatEnemyPos;
-
-            public ShootMessage(float lerpValue, uint id, float yRotation, float xRotation, int shotTick, Vector3 cheatEyesPos, Vector3 cheatEnemyPos)
-            {
-                this.lerpValue = lerpValue;
-                this.id = id;
-                this.yRotation = yRotation;
-                this.xRotation = xRotation;
-                this.shotTick = shotTick;
-                this.cheatEyesPos = cheatEyesPos;
-                this.cheatEnemyPos = cheatEnemyPos;
-            }
-
-            public void Verify(float min, float max)
-            {
-                lerpValue = Mathf.Clamp(lerpValue, 0f, 1f);
-
-                xRotation = Mathf.Clamp(xRotation, min, max);
+                pendingShootMessages.RemoveAt(i);
+                TargetSyncCooldown(connectionToClient, cooldownTimer, NetworkTime.time);
             }
         }
     }

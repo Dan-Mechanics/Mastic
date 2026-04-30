@@ -4,12 +4,17 @@ using UnityEngine.UI;
 
 namespace Mastic
 {
+    public interface IDamagable
+    {
+        void Damage(float amount);
+    }
+    
     /// <summary>
     /// Note to self: while respawning, all bullet will reconsile because the local client
     /// cannot predict WHEN he will die. This makes sense because you cannot shoot bullets while you are dead
     /// and this is one of many "acceptable reconsile noregs".
     /// </summary>
-    public class PlayerHealth : NetworkBehaviour
+    public class PlayerHealth : NetworkBehaviour, IDamagable
     {
         [SerializeField] private CharacterController controller = null;
         //[SerializeField] private Transform respawn = null; // Add rotation to respawn ??
