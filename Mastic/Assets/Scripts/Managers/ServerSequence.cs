@@ -41,10 +41,14 @@ namespace Mastic
             lagCompensation.RecordFrame();
             foreach (Player player in players)
             {
+                // MAKE SURE THE PLAYER CAN'T SHOOT HIMSELF.
+                player.entity.EnableHitbox(false);
                 for (int i = 0; i < player.shootables.Length; i++)
                 {
                     player.shootables[i].DoShootTick(player.networkMovement.MovementTick);
                 }
+
+                player.entity.EnableHitbox(true);
             }
 
             lagCompensation.ReturnToPresent();
@@ -70,13 +74,15 @@ namespace Mastic
             public NetworkMovement networkMovement;
             public Transform eyes;
             public Transform transform;
-            public IShootable[] shootables;
+            public IShootTickable[] shootables;
+            public PlayerEntity entity;
             public int stateBufferIndex;
 
             public Player(Transform transform)
             {
                 this.transform = transform;
-                shootables = transform.GetComponents<IShootable>();
+                shootables = transform.GetComponents<IShootTickable>();
+                entity = transform.GetComponent<PlayerEntity>();
                 networkMovement = transform.GetComponent<NetworkMovement>();
                 eyes = transform.Find("eyes");
             }

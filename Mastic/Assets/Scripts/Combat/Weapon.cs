@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class Weapon : NetworkBehaviour, IShootable
+    public class Weapon : NetworkBehaviour, IShootTickable
     {
         /// <summary>
         /// Meaning that the local client has dealed damage to an enemy on the server.
@@ -20,8 +20,6 @@ namespace Mastic
 
         [SerializeField] private EasyBinding primaryFire = default;
         [SerializeField] private LayerMask mask = default;
-        [SerializeField] private int playerLayer = default;
-        [SerializeField] private int intangibleLayer = default;
         [SerializeField] private float range = default;
         [SerializeField] private float damage = default;
 
@@ -49,7 +47,6 @@ namespace Mastic
             rb = GetComponent<Rigidbody>();
             pos = transform.position;
             prevPos = pos;
-            gameObject.layer = playerLayer;
         }
 
         public void DoClientUpdate(int movementTick, int rollbackTick)
@@ -91,11 +88,10 @@ namespace Mastic
             cam.rotation = eyes.rotation;
             interpolation.Interject(pos, prevPos, vel);
             interpolation.SetValue(shootMessage.lerpValue);
-            gameObject.layer = intangibleLayer;
 
             if (cam.position != shootMessage.origin)
             {
-                Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin})");
+                Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin}) | {(cam.position - shootMessage.origin) / Time.fixedDeltaTime}");
                 cam.position = shootMessage.origin;
             }
 
@@ -108,8 +104,6 @@ namespace Mastic
                     hit.transform.root.GetComponent<PlayerHealth>().Damage(damage);
                 }
             }
-
-            gameObject.layer = playerLayer;
         }
 
         /// <summary>

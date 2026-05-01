@@ -1,6 +1,6 @@
 ﻿namespace Mastic
 {
-    public interface IShootable
+    public interface IShootTickable
     {
         void DoShootTick(int movementTick);
     }

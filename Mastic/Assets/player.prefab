@@ -300,6 +300,7 @@ GameObject:
   - component: {fileID: 8815636318867098599}
   - component: {fileID: -1140434863641568140}
   - component: {fileID: 1417728271743360921}
+  - component: {fileID: 9211630360903548100}
   m_Layer: 3
   m_Name: player
   m_TagString: Player
@@ -453,7 +454,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  eyes: {fileID: 2720431899970827215}
   disconnect: {fileID: 11400000, guid: 76fa061607a567d45bc7219f92c14f6f, type: 2}
   standardTickrate: 64
 --- !u!114 &2546578394722574111
@@ -603,6 +603,24 @@ MonoBehaviour:
     m_Bits: 9
   range: 1000
   damage: 26
+--- !u!114 &9211630360903548100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f022a7b5c3a4f342acf1bd7be0c0abc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  playerLook: {fileID: 3751572637676758940}
+  playerLayerName: Player
+  intangibleLayerName: Intangible
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0

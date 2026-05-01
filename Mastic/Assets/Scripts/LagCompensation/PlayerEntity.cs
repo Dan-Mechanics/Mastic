@@ -15,6 +15,10 @@ namespace Mastic
         public int RollbackTick => tick;
         
         [SerializeField] private PlayerLook playerLook = default;
+        [SerializeField] private string playerLayerName = default;
+        [SerializeField] private string intangibleLayerName = default;
+        private int intangibleLayer;
+        private int playerLayer;
         private Frame[] recording;
         private Frame present;
         private int tick;
@@ -24,6 +28,9 @@ namespace Mastic
         {
             recording = new Frame[lagCompensation.MaxRecordingLength];
             lagCompensation.Register(this);
+            playerLayer = LayerMask.NameToLayer(playerLayerName);
+            intangibleLayer = LayerMask.NameToLayer(intangibleLayerName);
+            EnableHitbox(true);
         }
 
         private void SetAsFrame(Frame frame)
@@ -77,6 +84,19 @@ namespace Mastic
 
         [Server]
         public void ReturnToPresent() => SetAsFrame(present);
+
+        [Server]
+        public void EnableHitbox(bool value)
+        {
+            if (value)
+            {
+                gameObject.layer = playerLayer;
+            }
+            else
+            {
+                gameObject.layer = intangibleLayer;
+            }
+        }
 
         private struct Frame
         {
