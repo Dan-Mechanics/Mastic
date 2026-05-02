@@ -45,7 +45,7 @@ namespace Mastic
                 player.entity.EnableHitbox(false);
                 for (int i = 0; i < player.shootables.Length; i++)
                 {
-                    player.shootables[i].DoShootTick(player.networkMovement.MovementTick);
+                    player.shootables[i].DoServerTick(player.networkMovement.MovementTick);
                 }
 
                 player.entity.EnableHitbox(true);
@@ -72,19 +72,17 @@ namespace Mastic
         private class Player 
         {
             public NetworkMovement networkMovement;
-            public Transform eyes;
             public Transform transform;
-            public IShootTickable[] shootables;
+            public IWeapon[] shootables;
             public PlayerEntity entity;
             public int stateBufferIndex;
 
             public Player(Transform transform)
             {
                 this.transform = transform;
-                shootables = transform.GetComponents<IShootTickable>();
+                shootables = transform.GetComponents<IWeapon>();
                 entity = transform.GetComponent<PlayerEntity>();
                 networkMovement = transform.GetComponent<NetworkMovement>();
-                eyes = transform.Find("eyes");
             }
         }
     }

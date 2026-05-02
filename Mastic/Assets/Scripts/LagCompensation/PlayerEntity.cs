@@ -14,7 +14,7 @@ namespace Mastic
         /// </summary>
         public int RollbackTick => tick;
         
-        [SerializeField] private PlayerLook playerLook = default;
+        [SerializeField] private MouseLook mouseLook = default;
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
         private int intangibleLayer;
@@ -36,7 +36,7 @@ namespace Mastic
         private void SetAsFrame(Frame frame)
         {
             transform.position = frame.position;
-            playerLook.SetAsRotation(frame.xRotation, frame.yRotation);
+            mouseLook.SetAsRotation(frame.xRotation, frame.yRotation);
             
             // THIS IS WHERE LOOKBONE SHOULD GO.
             // INCLUDING HITBOX IF THAT IS NOT ATTACHED TO LOOKBONE.
@@ -45,7 +45,7 @@ namespace Mastic
         [Server]
         public void RecordFrame(int tick)
         {
-            present.SetValues(transform.position, playerLook.RotationX, playerLook.RotationY);
+            present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             recording[tick % recording.Length] = present;
             RpcSendAuthState(present, tick);
         }
@@ -75,7 +75,7 @@ namespace Mastic
         [Server]
         public void RefreshBuffer()
         {
-            present.SetValues(transform.position, playerLook.RotationX, playerLook.RotationY);
+            present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             for (int i = 0; i < recording.Length; i++)
             {
                 recording[i] = present;

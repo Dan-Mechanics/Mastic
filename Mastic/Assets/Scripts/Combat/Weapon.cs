@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class Weapon : NetworkBehaviour, IShootTickable
+    public class Weapon : NetworkBehaviour, IWeapon
     {
         /// <summary>
         /// Meaning that the local client has dealed damage to an enemy on the server.
@@ -27,7 +27,7 @@ namespace Mastic
         private ICameraInterpolation interpolation;
         private LagCompensation lagCompensation;
         private ShootMessage shootMessage;
-        private PlayerLook playerLook;
+        private MouseLook mouseLook;
         private Rigidbody rb;
         private Transform eyes;
         private Transform cam;
@@ -35,40 +35,39 @@ namespace Mastic
         private Vector3 prevPos;
         private Vector3 vel;
 
-        public void Setup(Transform cam, Transform eyes, ICameraInterpolation interpolation, LagCompensation lagCompensation)
+        private void Awake()
         {
-            this.cam = cam;
-            this.eyes = eyes;
-            this.interpolation = interpolation;
-            this.lagCompensation = lagCompensation;
-
+            eyes = transform.Find("eyes");
+            cam = GameObject.FindWithTag("MainCamera").transform;
+            interpolation = cam.GetComponent<ICameraInterpolation>();
+            lagCompensation = FindAnyObjectByType<LagCompensation>();
             pendingShootMessages = new List<ShootMessage>();
-            playerLook = GetComponent<PlayerLook>();
+            mouseLook = GetComponent<MouseLook>();
             rb = GetComponent<Rigidbody>();
             pos = transform.position;
             prevPos = pos;
         }
 
-        public void DoClientUpdate(int movementTick, int rollbackTick)
+        public void DoLocalTick(int movementTick, int rollbackTick)
         {
             if (!primaryFire.WasPressed)
                 return;
 
-            shootMessage.SetRotation(playerLook.RotationX, playerLook.RotationY);
-            shootMessage.SetTicks(movementTick, rollbackTick);
-            shootMessage.SetPosition(cam.position, interpolation.LerpValue);
-            CmdShoot(shootMessage);
+            shootMessage.SetValues(mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, movementTick, rollbackTick);
+            shootMessage.SetDebugFields(cam.position, Vector3.zero);
             // CmdShoot(new ShootMessage(cameraInterpolation.lerpValue, movement.id - 1,
             //    playerLook.RotationY, playerLook.RotationY, movement.currentTick - 1));
 
-            if (!Physics.Raycast(cam.position, cam.forward,
-                out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
-                return;
+            if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
+            {
+                if (hit.transform.root.TryGetComponent(out IDamagable damagable))
+                {
+                    OnPredictDamage?.Invoke(damage);
+                    shootMessage.SetDebugFields(cam.position, hit.transform.root.position);
+                }
+            }
 
-            if (!hit.transform.root.TryGetComponent(out IDamagable damagable))
-                return;
-
-            OnPredictDamage?.Invoke(damage);
+            CmdShoot(shootMessage);
         }
 
         [TargetRpc]
@@ -84,24 +83,35 @@ namespace Mastic
             
             // WE DON'T HAVE TO MOVE THE PLAYER HERE
             // BECAUSE RAYCASTS OF A 
-            playerLook.SetAsRotation(shootMessage.xRotation, shootMessage.yRotation);
+            mouseLook.SetAsRotation(shootMessage.xRotation, shootMessage.yRotation);
             cam.rotation = eyes.rotation;
             interpolation.Interject(pos, prevPos, vel);
             interpolation.SetValue(shootMessage.lerpValue);
 
-            if (cam.position != shootMessage.origin)
+            // FOR DEBUG.
+            if (cam.position != shootMessage.debugEyesPos)
             {
-                Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin}) | {(cam.position - shootMessage.origin) / Time.fixedDeltaTime}");
-                cam.position = shootMessage.origin;
+                Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.debugEyesPos})");
+                Debug.LogWarning($"{(cam.position - shootMessage.debugEyesPos) / Time.fixedDeltaTime}");
+                //cam.position = shootMessage.eyesPos;
+
+                // FUTURE: ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
             }
 
-            if (Physics.Raycast(cam.position, cam.forward,  out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
             {
                 if (hit.transform.root.TryGetComponent(out IDamagable damagable))
                 {
                     damagable.Damage(damage);
                     TargetDisplayHitPip(connectionToClient, damage);
                     hit.transform.root.GetComponent<PlayerHealth>().Damage(damage);
+
+                    // FOR DEBUG.
+                    if (shootMessage.debugEnemyPos != Vector3.zero && shootMessage.debugEnemyPos != hit.transform.root.position)
+                    {
+                        Debug.LogWarning($"Recreated enemy pos was not the same as on the client. correct: {shootMessage.debugEnemyPos}, recreated: {hit.transform.root.position}");
+                        Debug.LogWarning($"{(shootMessage.debugEnemyPos - hit.transform.root.position) / Time.fixedDeltaTime}");
+                    }
                 }
             }
         }
@@ -112,13 +122,11 @@ namespace Mastic
         /// door open for cheats... See if this works first.
         /// </summary>
         [Server]
-        public void DoShootTick(int movementTick)
+        public void DoServerTick(int movementTick)
         {
-            // TODO: MAKE SURE THIS IS CORRECT.
             prevPos = pos;
             pos = transform.position;
             vel = rb.linearVelocity;
-
             for (int i = pendingShootMessages.Count - 1; i >= 0; i--)
             {
                 if (movementTick >= pendingShootMessages[i].movementTick)

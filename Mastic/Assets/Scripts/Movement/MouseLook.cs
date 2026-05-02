@@ -3,7 +3,7 @@ using Mirror;
 
 namespace Mastic
 {
-    public class PlayerLook : NetworkBehaviour
+    public class MouseLook : NetworkBehaviour
     {
         public float RotationX => rotation.x;
         public float RotationY => rotation.x;

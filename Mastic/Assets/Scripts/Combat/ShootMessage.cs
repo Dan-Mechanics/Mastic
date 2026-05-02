@@ -9,24 +9,22 @@ namespace Mastic
         public float lerpValue;
         public int movementTick;
         public int rollbackTick;
-        public Vector3 origin;
+        public Vector3 debugEyesPos;
+        public Vector3 debugEnemyPos;
 
-        public void SetRotation(float xRotation, float yRotation)
+        public void SetValues(float xRotation, float yRotation, float lerpValue, int movementTick, int rollbackTick)
         {
             this.xRotation = xRotation;
             this.yRotation = yRotation;
-        }
-
-        public void SetTicks(int movementTick, int rollbackTick)
-        {
+            this.lerpValue = lerpValue;
             this.movementTick = movementTick;
             this.rollbackTick = rollbackTick;
         }
 
-        public void SetPosition(Vector3 origin, float lerpValue)
+        public void SetDebugFields(Vector3 debugEyesPos, Vector3 debugEnemyPos)
         {
-            this.origin = origin;
-            this.lerpValue = lerpValue;
+            this.debugEyesPos = debugEyesPos;
+            this.debugEnemyPos = debugEnemyPos;
         }
     }
 }

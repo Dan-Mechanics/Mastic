@@ -22,7 +22,7 @@ namespace Mastic
 
         [SerializeField] private Rigidbody rb = default;
         [SerializeField] private Transform eyes = default;
-        [SerializeField] private PlayerLook playerLook = default;
+        [SerializeField] private MouseLook mouseLook = default;
         [SerializeField] private PhysicsMovement physicsMovement = default;
         [SerializeField] private GameObject authGraphicPrefab = default;
         [SerializeField] private EasyBinding forward = default;
@@ -136,7 +136,7 @@ namespace Mastic
                 d = right.IsHeld;
             }
 
-            inputBuffer[inputBufferIndex].SetValues(w, a, s, d, playerLook.RotationX, playerLook.RotationY, currentTick);
+            inputBuffer[inputBufferIndex].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, currentTick);
 
             Move(inputBuffer[inputBufferIndex], true);
 
@@ -173,7 +173,7 @@ namespace Mastic
 
                 if (inputMessageToProcess.tick < 0)
                 {
-                    inputMessageToProcess = GiveDefaultedTick();
+                    inputMessageToProcess = GetDefaultTick();
                 }
                 else
                 {
@@ -183,8 +183,7 @@ namespace Mastic
             }
             else
             {
-                inputMessageToProcess = GiveDefaultedTick();
-
+                inputMessageToProcess = GetDefaultTick();
             }
 
             int stateBufferIndex = inputMessageToProcess.tick % BUFFER_SIZE;
@@ -227,11 +226,10 @@ namespace Mastic
         /// </summary>
         public void LimitSpeed() => physicsMovement.LimitSpeed();
 
-        private InputMessage GiveDefaultedTick()
+        private InputMessage GetDefaultTick()
         {
             InputMessage inputMessageToProcess = previousInputMessage;
             inputMessageToProcess.tick++;
-
             return inputMessageToProcess;
         }
 
@@ -347,7 +345,7 @@ namespace Mastic
 
         private void Move(InputMessage input, bool assignToCamera)
         {
-            playerLook.SetAsRotation(input.xRotation, input.yRotation);
+            mouseLook.SetAsRotation(input.xRotation, input.yRotation);
             physicsMovement.Move(standardInterval, input);
 
             if (isClient)

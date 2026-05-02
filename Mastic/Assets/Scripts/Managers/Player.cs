@@ -1,4 +1,5 @@
 using Mirror;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mastic
@@ -15,36 +16,28 @@ namespace Mastic
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
         private ICameraInterpolation interpolation;
-        private LagCompensation lagCompensation;
         private PlayerSetup playerSetup;
-        private PlayerLook playerLook;
-        private Weapon weapon;
-        private Transform eyes;
-        private Transform cam;
+        private MouseLook mouseLook;
+        private IWeapon[] weapons;
 
         private void Awake()
         {
-            eyes = transform.Find("eyes");
-            cam = GameObject.FindWithTag("MainCamera").transform;
-
-            weapon = GetComponent<Weapon>();
+            weapons = GetComponents<IWeapon>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             physicsMovement = GetComponent<PhysicsMovement>();
             playerSetup = GetComponent<PlayerSetup>();
             playerEntity = GetComponent<PlayerEntity>();
-            playerLook = GetComponent<PlayerLook>();
+            mouseLook = GetComponent<MouseLook>();
             movementDebugHUD = GetComponent<MovementDebugHUD>();
             networkMovement = GetComponent<NetworkMovement>();
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();
-            lagCompensation = FindAnyObjectByType<LagCompensation>();
-            interpolation = cam.GetComponent<ICameraInterpolation>();
+            interpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
         }
 
         private void Setup()
         {
-            weapon.Setup(cam, eyes, interpolation, lagCompensation);
             physicsMovement.Setup();
-            playerLook.Setup();
+            mouseLook.Setup();
             adaptiveTickrate.Setup(networkManager, standardTickrate);
             movementDebugHUD.Setup(standardTickrate);
             networkMovement.Setup(standardTickrate, interpolation);
@@ -86,7 +79,11 @@ namespace Mastic
             if (!isLocalPlayer)
                 return;
 
-            weapon.DoClientUpdate(networkMovement.MovementTick, playerEntity.RollbackTick);
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                weapons[i].DoLocalTick(networkMovement.MovementTick, playerEntity.RollbackTick);
+            }
+
             if (disconnect.WasPressed)
                 connectionToServer.Disconnect();
         }
