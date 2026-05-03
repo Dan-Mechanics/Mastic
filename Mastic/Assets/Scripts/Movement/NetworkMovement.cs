@@ -212,12 +212,17 @@ namespace Mastic
             return stateBufferIndex;
         }
 
+        /// <summary>
+        /// This needs to be here because of the difference
+        /// in ordering of Physics.Simulate between the server and client.
+        /// </summary>
         [Server]
         public void SendAuthStateToClient(int stateBufferIndex) 
         {
+            // REFRESH THE POS AND VEL TO MAKE IT CORRECT.
             stateBuffer[stateBufferIndex].position = transform.position;
             stateBuffer[stateBufferIndex].velocity = rb.linearVelocity;
-            TargetSendAuthState(connectionToClient, stateBuffer[stateBufferIndex]);
+            TargetSendStateMessageToClient(connectionToClient, stateBuffer[stateBufferIndex]);
         }
 
         /// <summary>
@@ -228,9 +233,9 @@ namespace Mastic
 
         private InputMessage GetDefaultedInputMessage()
         {
-            InputMessage inputMessageToProcess = previousInputMessage;
-            inputMessageToProcess.tick++;
-            return inputMessageToProcess;
+            InputMessage inputMessage = previousInputMessage;
+            inputMessage.tick++;
+            return inputMessage;
         }
 
         [Command]
@@ -248,6 +253,7 @@ namespace Mastic
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
+            // MAKE SURE THIS IS CORRECT.
             if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
@@ -276,7 +282,7 @@ namespace Mastic
         }
 
         [TargetRpc(channel = Channels.Unreliable)]
-        private void TargetSendAuthState(NetworkConnectionToClient conn, StateMessage stateMessage)
+        private void TargetSendStateMessageToClient(NetworkConnectionToClient conn, StateMessage stateMessage)
         {
             if (stateMessage.tick > currentTick - 1)
             {

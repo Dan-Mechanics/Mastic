@@ -84,7 +84,7 @@ namespace Mastic
 
             if (!isStunned) 
             {
-                movement = transform.right * input.GetHorizontalInput() + transform.forward * input.GetVerticalInput();
+                movement = (transform.right * input.GetHorizontalInput()) + (transform.forward * input.GetVerticalInput());
                 movement.Normalize();
             }
 

@@ -6,7 +6,7 @@ namespace Mastic
     public class MouseLook : NetworkBehaviour
     {
         public float RotationX => rotation.x;
-        public float RotationY => rotation.x;
+        public float RotationY => rotation.y;
         
         [SerializeField] private Transform eyes = default;
         [SerializeField] private float sensitivity = default;
@@ -15,7 +15,7 @@ namespace Mastic
         [SerializeField] private Vector2 rotation = default;
         private Transform cam;
 
-        public void Setup()
+        private void Awake()
         {
             cam = GameObject.FindWithTag("MainCamera").transform;
             if (minCamAngle > maxCamAngle)

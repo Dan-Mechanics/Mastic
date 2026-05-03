@@ -17,7 +17,6 @@ namespace Mastic
         private NetworkMovement networkMovement;
         private ICameraInterpolation interpolation;
         private PlayerSetup playerSetup;
-        private MouseLook mouseLook;
         private IWeapon[] weapons;
 
         private void Awake()
@@ -27,7 +26,6 @@ namespace Mastic
             physicsMovement = GetComponent<PhysicsMovement>();
             playerSetup = GetComponent<PlayerSetup>();
             playerEntity = GetComponent<PlayerEntity>();
-            mouseLook = GetComponent<MouseLook>();
             movementDebugHUD = GetComponent<MovementDebugHUD>();
             networkMovement = GetComponent<NetworkMovement>();
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();
@@ -37,7 +35,6 @@ namespace Mastic
         private void Setup()
         {
             physicsMovement.Setup();
-            mouseLook.Setup();
             adaptiveTickrate.Setup(networkManager, standardTickrate);
             movementDebugHUD.Setup(standardTickrate);
             networkMovement.Setup(standardTickrate, interpolation);

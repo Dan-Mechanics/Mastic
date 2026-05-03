@@ -125,7 +125,7 @@ namespace Mastic
         public void DoServerTick(int movementTick)
         {
             prevPos = pos;
-            pos = transform.position;
+            pos = eyes.position;
             vel = rb.linearVelocity;
             for (int i = pendingShootMessages.Count - 1; i >= 0; i--)
             {

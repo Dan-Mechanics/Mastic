@@ -434,6 +434,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
+      propertyPath: maxConnections
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3229349398631652857, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_Name
       value: simple_network_manager
@@ -722,6 +726,10 @@ PrefabInstance:
     - target: {fileID: 2857262702044904297, guid: e58735b1d2b7d734f89c67911ff0acb5, type: 3}
       propertyPath: m_Name
       value: scene_setup
+      objectReference: {fileID: 0}
+    - target: {fileID: 6103662349769157085, guid: e58735b1d2b7d734f89c67911ff0acb5, type: 3}
+      propertyPath: framerateLimit
+      value: 100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
