@@ -511,15 +511,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b67f0b1dbb85e54a82f67c58ac7ad35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isSmiting: 0
-  isStunned: 0
   rb: {fileID: 3497393699691843500}
   eyes: {fileID: 2720431899970827215}
   networkPhysicsMovement: {fileID: 2546578394722574111}
-  walkingSpeed: 6
+  speed: 6
   acceleration: 25
   multiplier: 0.35
-  speedLimit: 25
+  topSpeed: 25
   mask:
     serializedVersion: 2
     m_Bits: 1

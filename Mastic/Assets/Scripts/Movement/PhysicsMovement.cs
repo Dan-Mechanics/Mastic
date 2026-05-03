@@ -3,37 +3,26 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public interface IMovement
-    {
-        bool GetIsGrounded();
-        void Move(float interval, InputMessage inputMessage);
-        void Teleport(StateMessage stateMessage);
-    }
-    
     /// <summary>
-    /// In theory I would like to make this an interface.
+    /// TODO: make a good interface here.
     /// </summary>
-    public class PhysicsMovement : MonoBehaviour, IMovement
+    public class PhysicsMovement : MonoBehaviour
     {
-        public bool isSmiting;
-        public bool isStunned;
-        
-        public float SpeedLimit => speedLimit;
         public SimpleMovementAbility JumpAbility => jumpAbility;
         public SimpleMovementAbility DashAbility => dashAbility;
 
         [Header("References")]
+        [SerializeField] private Rigidbody rb = default;
+        [SerializeField] private Transform eyes = default;
 
-        [SerializeField] private Rigidbody rb = null;
-        [SerializeField] private Transform eyes = null;
-        [SerializeField] private NetworkMovement networkPhysicsMovement = null;
-       //  [SerializeField] private Smite smite = null;
+        // REMOVE THIS !!
+        [SerializeField] private NetworkMovement networkPhysicsMovement = default;
 
         [Header("Movement Settings")]
-        [SerializeField] private float walkingSpeed = 0f;
-        [SerializeField] private float acceleration = 0f;
-        [SerializeField] private float multiplier = 0f;
-        [SerializeField] private float speedLimit = 0f;
+        [SerializeField] private float speed = default;
+        [SerializeField] private float acceleration = default;
+        [SerializeField] private float multiplier = default;
+        [SerializeField] private float topSpeed = default;
 
         [Header("Grounded Settings")]
         [SerializeField] private LayerMask mask = default;
@@ -42,17 +31,22 @@ namespace Mastic
         [SerializeField] private float slopeLimit = default;
 
         [Header("Magic Settings")]
-
-        [SerializeField] private SimpleMovementAbility jumpAbility = null;
-        [SerializeField] private SimpleMovementAbility dashAbility = null;
-        //[SerializeField] private SimpleMovementAbility smiteAbility = null;
+        [SerializeField] private SimpleMovementAbility jumpAbility = default;
+        [SerializeField] private SimpleMovementAbility dashAbility = default;
+        private bool controllable;
+        private bool hasGravity;
 
         public void Setup()
         {
             rb.sleepThreshold = 0f;
+            EnableGravity(true);
+            EnableControl(true);
             jumpAbility.OnPerform += Jump;
             dashAbility.OnPerform += Dash;
         }
+
+        public void EnableGravity(bool hasGravity) => this.hasGravity = hasGravity;
+        public void EnableControl(bool controllable) => this.controllable = controllable;
 
         private void Dash()
         {
@@ -72,59 +66,74 @@ namespace Mastic
             rb.AddForce(force, ForceMode.VelocityChange);
         }
 
-        public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, speedLimit);
-
-        public void Move(float interval, InputMessage input)
+        /// <summary>
+        /// Without this the max speed of the player
+        /// isn't deterministic and that causes bad reconsiles.
+        /// </summary>
+        public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, topSpeed);
+        
+        /// <summary>
+        /// Todo: remove tick here !!.
+        /// </summary>
+        public void Move(float vertical, float horizontal, float interval, int tick)
         {
-            bool isGrounded = GetIsGrounded();
-
-            float accel = isGrounded ? acceleration : acceleration * multiplier;
-
-            Vector3 movement = Vector3.zero;
-
-            if (!isStunned) 
+            if (!controllable)
             {
-                movement = (transform.right * input.GetHorizontalInput()) + (transform.forward * input.GetVerticalInput());
-                movement.Normalize();
+                vertical = 0f;
+                horizontal = 0f;
             }
+            
+            bool isGrounded = GetIsGrounded();
+            float currAccel = isGrounded ? acceleration : acceleration * multiplier;
 
-            if (!isSmiting) { rb.AddForce(Physics.gravity, ForceMode.Acceleration); }
+            Vector3 movement = (transform.forward * vertical) + (transform.right * horizontal);
+            movement.Normalize();
 
-            Vector3 velocity = rb.linearVelocity;
-            velocity.y = 0f;
+            if (hasGravity)
+                rb.AddForce(Physics.gravity, ForceMode.Acceleration);
 
-            float mag = velocity.magnitude;
-
-            if (mag < walkingSpeed)
+            Vector3 velocity = Flatten(rb.linearVelocity);
+            float magnitude = velocity.magnitude;
+            if (magnitude < speed)
             {
-                rb.AddForce(Vector3.ClampMagnitude(accel * interval * movement, walkingSpeed - mag), ForceMode.VelocityChange);
+                movement = Vector3.ClampMagnitude(currAccel * interval * movement, speed - magnitude);
             }
             else if (isGrounded)
             {
-                rb.AddForce(Vector3.ClampMagnitude(accel * interval * -velocity.normalized, mag - walkingSpeed), ForceMode.VelocityChange);
+                movement = Vector3.ClampMagnitude(currAccel * interval * -velocity.normalized, magnitude - speed);
             }
 
-            Vector3 counterMovement = accel * interval * multiplier * -(velocity.normalized - movement);
+            rb.AddForce(movement, ForceMode.VelocityChange);
 
-            if (mag != 0f && counterMovement.magnitude > mag) { counterMovement = -velocity; }
+            Vector3 counterMovement = currAccel * interval * multiplier * -(velocity.normalized - movement);
+            if (magnitude != 0f && counterMovement.magnitude > magnitude)
+                counterMovement = -velocity;
 
             rb.AddForce(counterMovement, ForceMode.VelocityChange);
             
+            // ===
+
             if (isGrounded) 
             {
-                jumpAbility.Try(networkPhysicsMovement, input.tick);
+                jumpAbility.Try(networkPhysicsMovement, tick);
             }
 
-            dashAbility.Try(networkPhysicsMovement, input.tick);
+            dashAbility.Try(networkPhysicsMovement, tick);
         }
 
-        public void Teleport(StateMessage stateMessage)
+        public void Teleport(Vector3 position, Vector3 velocity)
         {
-            transform.position = stateMessage.position;
-            rb.linearVelocity = stateMessage.velocity;
+            transform.position = position;
+            rb.linearVelocity = velocity;
         }
 
-        public bool GetIsGrounded()
+        private Vector3 Flatten(Vector3 vec)
+        {
+            vec.y = 0f;
+            return vec;
+        }
+
+        private bool GetIsGrounded()
         {
             RaycastHit[] hits = Physics.SphereCastAll(transform.position, radius,
                 Vector3.down, offset, mask, QueryTriggerInteraction.Ignore);

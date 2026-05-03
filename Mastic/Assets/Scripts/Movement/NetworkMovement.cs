@@ -327,7 +327,7 @@ namespace Mastic
             //Debug.LogWarning(Vector3.Distance(mostRecentServerStateMessage.position, stateBuffer[serverStateBufferIndex].position).ToString());
             
             //Teleport(mostRecentServerStateMessage.position, mostRecentServerStateMessage.velocity);
-            physicsMovement.Teleport(mostRecentServerStateMessage);
+            physicsMovement.Teleport(mostRecentServerStateMessage.position, mostRecentServerStateMessage.velocity);
 
             stateBuffer[serverStateBufferIndex] = mostRecentServerStateMessage;
 
@@ -352,7 +352,7 @@ namespace Mastic
         private void Move(InputMessage input, bool assignToCamera)
         {
             mouseLook.SetAsRotation(input.xRotation, input.yRotation);
-            physicsMovement.Move(standardInterval, input);
+            physicsMovement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval, input.tick);
 
             if (isClient)
             {
