@@ -173,7 +173,7 @@ namespace Mastic
 
                 if (inputMessageToProcess.tick < 0)
                 {
-                    inputMessageToProcess = GetDefaultTick();
+                    inputMessageToProcess = GetDefaultedInputMessage();
                 }
                 else
                 {
@@ -183,7 +183,7 @@ namespace Mastic
             }
             else
             {
-                inputMessageToProcess = GetDefaultTick();
+                inputMessageToProcess = GetDefaultedInputMessage();
             }
 
             int stateBufferIndex = inputMessageToProcess.tick % BUFFER_SIZE;
@@ -226,7 +226,7 @@ namespace Mastic
         /// </summary>
         public void LimitSpeed() => physicsMovement.LimitSpeed();
 
-        private InputMessage GetDefaultTick()
+        private InputMessage GetDefaultedInputMessage()
         {
             InputMessage inputMessageToProcess = previousInputMessage;
             inputMessageToProcess.tick++;
