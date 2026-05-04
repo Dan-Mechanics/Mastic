@@ -10,7 +10,7 @@ namespace Mastic
         private LagCompensation lagCompensation;
         private float timer;
 
-        public void Setup(LagCompensation lagCompensation) => this.lagCompensation = lagCompensation;
+        private void Awake() => lagCompensation = FindAnyObjectByType<LagCompensation>();
 
         [ServerCallback]
         private void Update()
@@ -43,9 +43,9 @@ namespace Mastic
             {
                 // MAKE SURE THE PLAYER CAN'T SHOOT HIMSELF.
                 player.entity.EnableHitbox(false);
-                for (int i = 0; i < player.shootables.Length; i++)
+                for (int i = 0; i < player.attacks.Length; i++)
                 {
-                    player.shootables[i].DoServerTick(player.networkMovement.MovementTick);
+                    player.attacks[i].DoServerTick(player.networkMovement.MovementTick);
                 }
 
                 player.entity.EnableHitbox(true);
@@ -73,14 +73,14 @@ namespace Mastic
         {
             public NetworkMovement networkMovement;
             public Transform transform;
-            public IWeapon[] shootables;
+            public IAttack[] attacks;
             public PlayerEntity entity;
             public int stateBufferIndex;
 
             public Player(Transform transform)
             {
                 this.transform = transform;
-                shootables = transform.GetComponents<IWeapon>();
+                attacks = transform.GetComponents<IAttack>();
                 entity = transform.GetComponent<PlayerEntity>();
                 networkMovement = transform.GetComponent<NetworkMovement>();
             }

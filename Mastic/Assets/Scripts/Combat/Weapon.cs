@@ -5,17 +5,9 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class Weapon : NetworkBehaviour, IWeapon
+    public class Weapon : NetworkBehaviour, IAttack
     {
-        /// <summary>
-        /// Meaning that the local client has dealed damage to an enemy on the server.
-        /// </summary>
         public event Action<float> OnDealDamage;
-
-        /// <summary>
-        /// Meaning that the local client has hit an enemy on his screen,
-        /// but this has not yet been confirmed by the server.
-        /// </summary>
         public event Action<float> OnPredictDamage;
 
         [SerializeField] private EasyBinding primaryFire = default;

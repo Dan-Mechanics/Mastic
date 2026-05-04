@@ -7,13 +7,16 @@ namespace Mastic
     public class SceneSetup : MonoBehaviour
     {
         [SerializeField, Min(1)] private int framerateLimit = default;
+        [SerializeField, Min(1)] private int tickrate = default;
         [SerializeField] private SimulationMode simulationMode = default;
 
-        public void Setup(int standardTickrate)
+        public void SetTickrate(int tickrate) => this.tickrate = tickrate;
+
+        public void Setup()
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Application.targetFrameRate = framerateLimit;
-            Time.fixedDeltaTime = 1f / standardTickrate;
+            Time.fixedDeltaTime = 1f / tickrate;
             Physics.simulationMode = simulationMode;
 
             QualitySettings.SetQualityLevel(0, false);

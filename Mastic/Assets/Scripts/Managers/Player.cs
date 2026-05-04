@@ -17,11 +17,11 @@ namespace Mastic
         private NetworkMovement networkMovement;
         private ICameraInterpolation interpolation;
         private PlayerSetup playerSetup;
-        private IWeapon[] weapons;
+        private IAttack[] attacks;
 
         private void Awake()
         {
-            weapons = GetComponents<IWeapon>();
+            attacks = GetComponents<IAttack>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             physicsMovement = GetComponent<PhysicsMovement>();
             playerSetup = GetComponent<PlayerSetup>();
@@ -76,9 +76,9 @@ namespace Mastic
             if (!isLocalPlayer)
                 return;
 
-            for (int i = 0; i < weapons.Length; i++)
+            for (int i = 0; i < attacks.Length; i++)
             {
-                weapons[i].DoLocalTick(networkMovement.MovementTick, playerEntity.RollbackTick);
+                attacks[i].DoLocalTick(networkMovement.MovementTick, playerEntity.RollbackTick);
             }
 
             if (disconnect.WasPressed)

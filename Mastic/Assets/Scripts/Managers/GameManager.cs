@@ -17,22 +17,22 @@ namespace Mastic
         private SimpleNetworkManager networkManager;
         private ServerSequence serverSequence;
         private Transform spawnpoint;
-        private LagCompensation lagCompensation;
 
         private void Awake()
         {
             sceneSetup = FindAnyObjectByType<SceneSetup>();
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();   
             serverSequence = FindAnyObjectByType<ServerSequence>();
-            lagCompensation = FindAnyObjectByType<LagCompensation>();
             spawnpoint = GameObject.FindWithTag(spawnpointTag).transform;
         }
 
         private void Start()
         {
-            sceneSetup.Setup(standardTickrate);
-            serverSequence.Setup(lagCompensation);
-            networkManager.Setup(spawnpoint, standardTickrate);
+            // MAKE SURE THE SCENE SETUP IS DONE FIRST.
+            sceneSetup.SetTickrate(standardTickrate);
+            sceneSetup.Setup();
+
+            networkManager.AssignValues(spawnpoint, standardTickrate);
             networkManager.OnRegisterPlayer += serverSequence.Register;
             networkManager.OnReload += serverSequence.Clear;
         }

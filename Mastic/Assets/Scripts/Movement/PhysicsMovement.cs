@@ -8,8 +8,8 @@ namespace Mastic
     /// </summary>
     public class PhysicsMovement : MonoBehaviour
     {
-        public SimpleMovementAbility JumpAbility => jumpAbility;
-        public SimpleMovementAbility DashAbility => dashAbility;
+        public MovementAbility JumpAbility => jumpAbility;
+        public MovementAbility DashAbility => dashAbility;
 
         [Header("References")]
         [SerializeField] private Rigidbody rb = default;
@@ -31,8 +31,8 @@ namespace Mastic
         [SerializeField] private float slopeLimit = default;
 
         [Header("Magic Settings")]
-        [SerializeField] private SimpleMovementAbility jumpAbility = default;
-        [SerializeField] private SimpleMovementAbility dashAbility = default;
+        [SerializeField] private MovementAbility jumpAbility = default;
+        [SerializeField] private MovementAbility dashAbility = default;
         private bool controllable;
         private bool hasGravity;
 
@@ -41,8 +41,8 @@ namespace Mastic
             rb.sleepThreshold = 0f;
             EnableGravity(true);
             EnableControl(true);
-            jumpAbility.OnPerform += Jump;
-            dashAbility.OnPerform += Dash;
+            jumpAbility.OnCast += Jump;
+            dashAbility.OnCast += Dash;
         }
 
         public void EnableGravity(bool hasGravity) => this.hasGravity = hasGravity;
@@ -50,7 +50,7 @@ namespace Mastic
 
         private void Dash()
         {
-            Vector3 force = eyes.forward * dashAbility.Speed;
+            Vector3 force = eyes.forward * dashAbility.speed;
             if (force.y >= 0f && rb.linearVelocity.y < 0f)
                 force.y -= rb.linearVelocity.y;
 
@@ -59,7 +59,7 @@ namespace Mastic
 
         private void Jump()
         {
-            Vector3 force = Vector3.up * jumpAbility.Speed;
+            Vector3 force = Vector3.up * jumpAbility.speed;
             if (rb.linearVelocity.y < 0f)
                 force.y -= rb.linearVelocity.y;
 
@@ -111,14 +111,12 @@ namespace Mastic
 
             rb.AddForce(counterMovement, ForceMode.VelocityChange);
             
-            // ===
+            // MAGIC ====
 
-            if (isGrounded) 
-            {
-                jumpAbility.Try(networkPhysicsMovement, tick);
-            }
+            if (isGrounded)
+                jumpAbility.CastOnTick(tick, networkPhysicsMovement);
 
-            dashAbility.Try(networkPhysicsMovement, tick);
+            dashAbility.CastOnTick(tick, networkPhysicsMovement);
         }
 
         public void Teleport(Vector3 position, Vector3 velocity)

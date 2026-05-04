@@ -111,14 +111,14 @@ namespace Mastic
         private void DoClientTick()
         {
             // grounded ?? --> no
-            if (Input.GetKey(KeyCode.Space) && physicsMovement.JumpAbility.CanPerform(this))
+            if (Input.GetKey(KeyCode.Space) && physicsMovement.JumpAbility.CanCast(this))
             {
                 physicsMovement.JumpAbility.AddRequestTick(currentTick);
                 CmdSendJumpTick(currentTick);
             }
 
             // COOLDOWN !!!!!
-            if (Input.GetKey(KeyCode.LeftShift) && physicsMovement.DashAbility.CanPerform(this))
+            if (Input.GetKey(KeyCode.LeftShift) && physicsMovement.DashAbility.CanCast(this))
             {
                 physicsMovement.DashAbility.AddRequestTick(currentTick);
                 CmdSendDashTick(currentTick);
@@ -160,6 +160,7 @@ namespace Mastic
         public int DoServerTick()
         {
             //TryApplyEffect();
+            // OR YOU COULD TURN THIS INTO A CLASS BUT NOT MONOBEHAVIOUR
             OnPendingBufferChanged?.Invoke(hasReceivedFirstMessage, pendingInputMessages.Count);
 
             InputMessage inputMessageToProcess;
@@ -191,6 +192,8 @@ namespace Mastic
             previousEyePos = eyes.position;
             Move(inputMessageToProcess, false);
 
+            // technically speaking this doesnt need to be here but it is useful i guess.
+            // if you wanna reduce server memory you would for sure remove this !!
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputMessageToProcess);
             //TargetSendAuthState(connectionToClient, stateBuffer[stateBufferIndex]);
             //RpcSendStateMessageToClients(transform.position, transform.rotation, eyes.localRotation);
@@ -353,7 +356,6 @@ namespace Mastic
         {
             mouseLook.SetAsRotation(input.xRotation, input.yRotation);
             physicsMovement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval, input.tick);
-
             if (isClient)
             {
                 Physics.Simulate(standardInterval);
