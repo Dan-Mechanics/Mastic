@@ -8,16 +8,17 @@ namespace Mastic
         public float RotationX => rotation.x;
         public float RotationY => rotation.y;
         
-        [SerializeField] private Transform eyes = default;
         [SerializeField] private float sensitivity = default;
         [SerializeField] private float minCamAngle = default;
         [SerializeField] private float maxCamAngle = default;
         [SerializeField] private Vector2 rotation = default;
+        private Transform eyes;
         private Transform cam;
 
-        private void Awake()
+        public void Initialize()
         {
             cam = GameObject.FindWithTag("MainCamera").transform;
+            eyes = transform.Find("eyes");
             if (minCamAngle > maxCamAngle)
                 (minCamAngle, maxCamAngle) = (maxCamAngle, minCamAngle);
         }

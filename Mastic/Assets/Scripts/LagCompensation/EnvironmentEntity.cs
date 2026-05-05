@@ -12,7 +12,7 @@ namespace Mastic
         private Frame present;
 
         [Server]
-        public void Setup(LagCompensation lagCompensation)
+        public void Initialize(LagCompensation lagCompensation)
         {
             recording = new Frame[lagCompensation.MaxRecordingLength];
             lagCompensation.Register(this);

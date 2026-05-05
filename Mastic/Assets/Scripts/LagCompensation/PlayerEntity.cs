@@ -24,7 +24,7 @@ namespace Mastic
         private int tick;
 
         [Server]
-        public void Setup(LagCompensation lagCompensation)
+        public void Initialize(LagCompensation lagCompensation)
         {
             recording = new Frame[lagCompensation.MaxRecordingLength];
             lagCompensation.Register(this);
@@ -56,14 +56,9 @@ namespace Mastic
         [ClientRpc(channel = Channels.Unreliable)]
         private void RpcSendAuthState(Frame frame, int tick)
         {
-            if (isLocalPlayer)
-            {
-                this.tick = tick;
-            }
-            else
-            {
+            this.tick = tick;
+            if (!isLocalPlayer)
                 SetAsFrame(frame);
-            }
         }
 
         /// <summary>

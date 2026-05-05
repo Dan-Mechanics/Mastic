@@ -2,7 +2,7 @@
 {
     public interface IEntity
     {
-        void Setup(LagCompensation lagCompensation);
+        void Initialize(LagCompensation lagCompensation);
         void RecordFrame(int tick);
         void SetAsTick(int tick);
         void ReturnToPresent();

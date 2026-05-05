@@ -7,7 +7,7 @@ namespace Mastic
 {
     public class AdaptiveTickrate : NetworkBehaviour
     {
-        public event Action<int> OnTickrateChanged;
+        public event Action<int> OnDisplayTickrate;
 
         [SerializeField] private float minTimeDilationTime = default;
         [SerializeField] private int drainedTickrateOffset = default;
@@ -19,7 +19,7 @@ namespace Mastic
         private int currentTickrate;
         private bool hasTimeDilation;
 
-        public void Setup(NetworkManager networkManager, int standardTickrate)
+        public void Initialize(NetworkManager networkManager, int standardTickrate)
         {
             this.standardTickrate = standardTickrate;
             this.networkManager = networkManager;
@@ -83,7 +83,7 @@ namespace Mastic
             Time.fixedDeltaTime = 1f / tickrate;
             networkManager.sendRate = tickrate;
 
-            OnTickrateChanged?.Invoke(currentTickrate);
+            OnDisplayTickrate?.Invoke(currentTickrate);
 
             CancelInvoke(nameof(CmdStopTimeDilation));
             Invoke(nameof(CmdStopTimeDilation), minTimeDilationTime);

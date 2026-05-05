@@ -10,82 +10,80 @@ namespace Mastic
     {
         public int MovementTick => currentTick;
 
-        public event Action<bool, int> OnPendingBufferChanged;
-        public event Action<int> OnCurrentTickChanged;
-        public event Action<string> OnCheatsChanged;
-        public event Action<bool> OnReconsileStateChanged;
-        public event Action<StateMessage> OnReceiveAuthoritativeState;
+        public event Action<int> OnDisplayTick;
+        public event Action<string> OnDisplayCheats;
+        public event Action<bool> OnDisplayReconsile;
+        public event Action<StateMessage> OnDisplayServerState;
 
-        [HideInInspector] public int processedTick;
-        [HideInInspector] public uint id;
-        [HideInInspector] public Vector3 previousEyePos;
-
-        [SerializeField] private Rigidbody rb = default;
-        [SerializeField] private Transform eyes = default;
-        [SerializeField] private MouseLook mouseLook = default;
-        [SerializeField] private PhysicsMovement physicsMovement = default;
-        [SerializeField] private GameObject authGraphicPrefab = default;
         [SerializeField] private EasyBinding forward = default;
         [SerializeField] private EasyBinding left = default;
         [SerializeField] private EasyBinding backward = default;
         [SerializeField] private EasyBinding right = default;
+        [SerializeField] private int bufferSize = default;
+        [SerializeField] private float tolerance = default;
+        [SerializeField] private int maxPendingInputMessages = default;
         [SerializeField] private UnityEvent onReconsile = default;
 
-        private int currentTick;
-
-        private int clientPacketMultiplier;
-        //private bool clientDropMessage;
-        private Transform serverAuthGraphic;
+        private Rigidbody rb;
+        private Transform eyes;
+        private MouseLook mouseLook;
+        private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation interpolation;
-
-        public const int BUFFER_SIZE = 64;
-        public const int MAX_PENDING_INPUT_COUNT = 8;
-        public const float TOLERANCE = 0.001f;
-
-        private readonly List<InputMessage> pendingInputMessages = new List<InputMessage>();
-        private readonly StateMessage[] stateBuffer = new StateMessage[BUFFER_SIZE];
-        private readonly InputMessage[] inputBuffer = new InputMessage[BUFFER_SIZE];
-
-        private StateMessage mostRecentServerStateMessage;
+        private IMovement movement;
+        private List<InputMessage> pendingInputMessages;
+        private StateMessage[] stateBuffer;
+        private InputMessage[] inputBuffer;
+        private StateMessage serverStateMessage;
         private InputMessage previousInputMessage;
 
-        private int receivedTick = -1; // CARE: this used to be 0.
-        private bool hasReceivedFirstMessage;
-
-        private bool bufferHasTicks;
+        private bool hasReceivedFirstMessage; 
+        private bool bufferHasTicks; 
+        private int currentTick;
+        private int receivedTick;
         private float standardInterval;
-
         private bool w, a, s, d;
         private float timer;
 
-        public void Setup(int standardTickrate, ICameraInterpolation interpolation)
+        public void Initialize(int standardTickrate, ICameraInterpolation interpolation, IMovement movement)
         {
-            standardInterval = 1f / standardTickrate;
             this.interpolation = interpolation;
+            this.movement = movement;
+
+            rb = GetComponent<Rigidbody>();
+            mouseLook = GetComponent<MouseLook>();
+            eyes = transform.Find("eyes");
+            adaptiveTickrate = GetComponent<AdaptiveTickrate>();
+
+            // IN THEORY YOU COULD OMIT SOME OF THESE
+            // DEPENDING ON IF LOCAL OR SERVER ETC.
+            pendingInputMessages = new List<InputMessage>();
+            stateBuffer = new StateMessage[bufferSize];
+            inputBuffer = new InputMessage[bufferSize];
+
+            standardInterval = 1f / standardTickrate;
+            receivedTick = -1;
         }
 
         public override void OnStartLocalPlayer()
         {
             base.OnStartLocalPlayer();
-
-            serverAuthGraphic = Instantiate(authGraphicPrefab, Vector3.zero, Quaternion.identity).transform;
-
-            //SetTickrate(fullTickrate, true);
-
+            previousInputMessage.tick = -1; 
             for (int i = 0; i < stateBuffer.Length; i++)
             {
                 stateBuffer[i].position = transform.position;
             }
-
-            previousInputMessage.tick = -1;
         }
 
+        /// <summary>
+        /// A lot of the code here is meant to break new
+        /// features so I don't get bugs down the line.
+        /// </summary>
         private void Update()
         {
             if (!isLocalPlayer)
                 return;
 
-            // if (Input.GetKeyDown(KeyCode.Mouse3)) { clientDropMessage = true; }
+            int clientPacketMultiplier;
             if (Input.GetKey(KeyCode.Mouse4)) { clientPacketMultiplier = 2; }
             else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
             else { clientPacketMultiplier = 1; }
@@ -95,39 +93,21 @@ namespace Mastic
             {
                 timer -= Time.fixedDeltaTime;
 
-                OnCheatsChanged?.Invoke($"cheats: {clientPacketMultiplier}");
-
+                OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier}");
                 for (int i = 0; i < clientPacketMultiplier; i++)
                 {
-                    DoClientTick();
+                    DoLocalTick();
                 }
             }
 
-            /*if (Input.GetKeyDown(KeyCode.UpArrow)) { currentTick += 10; Debug.LogWarning("+10"); }
-            if (Input.GetKeyDown(KeyCode.DownArrow)) { currentTick -= 10; Debug.LogWarning("-10"); }*/
+            if (Input.GetKeyDown(KeyCode.UpArrow)) { currentTick += 10; Debug.LogWarning("+10"); }
+            if (Input.GetKeyDown(KeyCode.DownArrow)) { currentTick -= 10; Debug.LogWarning("-10"); }
         }
 
         [Client]
-        private void DoClientTick()
+        private void DoLocalTick()
         {
-            // grounded ?? --> no
-            if (Input.GetKey(KeyCode.Space) && physicsMovement.JumpAbility.CanCast(this))
-            {
-                physicsMovement.JumpAbility.AddRequestTick(currentTick);
-                CmdSendJumpTick(currentTick);
-            }
-
-            // COOLDOWN !!!!!
-            if (Input.GetKey(KeyCode.LeftShift) && physicsMovement.DashAbility.CanCast(this))
-            {
-                physicsMovement.DashAbility.AddRequestTick(currentTick);
-                CmdSendDashTick(currentTick);
-            }
-
-
-
-            int inputBufferIndex = currentTick % BUFFER_SIZE;
-
+            // MAKE IT SO THAT IF YOU ALT+TAB YOU KEEP MOVING.
             if (Application.isFocused) 
             {
                 w = forward.IsHeld;
@@ -136,83 +116,69 @@ namespace Mastic
                 d = right.IsHeld;
             }
 
-            inputBuffer[inputBufferIndex].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, currentTick);
+            int index = currentTick % bufferSize;
+            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, currentTick);
+            Move(inputBuffer[index], true);
 
-            Move(inputBuffer[inputBufferIndex], true);
+            stateBuffer[index].SetValues(transform.position, rb.linearVelocity, inputBuffer[index]);
+            CmdSendInputMessageToServer(inputBuffer[index]);
 
-            stateBuffer[inputBufferIndex].SetValues(transform.position, rb.linearVelocity, inputBuffer[inputBufferIndex]);
-
-            /*if (!clientDropMessage && !Input.GetKey(KeyCode.E)) { CmdSendInputMessageToServer(inputBuffer[ringBufferIndex]); }
-            else { OnCheatsChanged?.Invoke("not sending ..."); clientDropMessage = false; }*/
-
-            CmdSendInputMessageToServer(inputBuffer[inputBufferIndex]);
-
-            // we do it here because then the first is 0.
-            OnCurrentTickChanged?.Invoke(currentTick);
+            OnDisplayTick?.Invoke(currentTick);
             currentTick++;
         }
 
-        /// <summary>
-        /// Process player on the server.
-        /// </summary>
-        /// <returns>stateBufferIndex</returns>
         [Server]
         public int DoServerTick()
         {
-            //TryApplyEffect();
-            // OR YOU COULD TURN THIS INTO A CLASS BUT NOT MONOBEHAVIOUR
-            OnPendingBufferChanged?.Invoke(hasReceivedFirstMessage, pendingInputMessages.Count);
-
-            InputMessage inputMessageToProcess;
-
+            adaptiveTickrate.ApplyTimeDilation(hasReceivedFirstMessage, pendingInputMessages.Count);
             bufferHasTicks = false;
 
+            InputMessage inputMessage = GetNextInputMessage();
+            int stateBufferIndex = inputMessage.tick % bufferSize;
+            Move(inputMessage, false);
+            stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputMessage);
+
+            if (previousInputMessage.tick != inputMessage.tick - 1)
+            {
+                Debug.LogWarning($"We have skipped a tick on the server ...");
+                Debug.LogWarning($"if (previousInputMessage.tick != inputMessage.tick - 1) || if ({previousInputMessage.tick} != {inputMessage.tick - 1})");
+            }
+
+            previousInputMessage = inputMessage;
+            currentTick++;
+            return stateBufferIndex;
+        }
+
+        private InputMessage GetNextInputMessage()
+        {
+            InputMessage inputMessage;
             if (pendingInputMessages.Count > 0)
             {
-                inputMessageToProcess = pendingInputMessages[0];
+                inputMessage = pendingInputMessages[0];
                 pendingInputMessages.RemoveAt(0);
-
-                if (inputMessageToProcess.tick < 0)
+                if (inputMessage.tick >= 0)
                 {
-                    inputMessageToProcess = GetDefaultedInputMessage();
+                    hasReceivedFirstMessage = true;
+                    bufferHasTicks = true;
                 }
                 else
                 {
-                    bufferHasTicks = true;
-                    hasReceivedFirstMessage = true;
+                    inputMessage = GetDefaultInputMessage();
                 }
             }
             else
             {
-                inputMessageToProcess = GetDefaultedInputMessage();
+                inputMessage = GetDefaultInputMessage();
             }
 
-            int stateBufferIndex = inputMessageToProcess.tick % BUFFER_SIZE;
+            return inputMessage;
+        }
 
-            previousEyePos = eyes.position;
-            Move(inputMessageToProcess, false);
-
-            // technically speaking this doesnt need to be here but it is useful i guess.
-            // if you wanna reduce server memory you would for sure remove this !!
-            stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputMessageToProcess);
-            //TargetSendAuthState(connectionToClient, stateBuffer[stateBufferIndex]);
-            //RpcSendStateMessageToClients(transform.position, transform.rotation, eyes.localRotation);
-
-            processedTick = inputMessageToProcess.tick;
-
-            physicsMovement.CleanTicks(processedTick);
-
-            // ??
-            if (previousInputMessage.tick != processedTick - 1) 
-            { 
-                Debug.LogWarning($"we made a tick jump on the input tick --> if ({previousInputMessage.tick} != {processedTick - 1})");
-            }
-
-            previousInputMessage = inputMessageToProcess;
-
-            currentTick++;
-
-            return stateBufferIndex;
+        private InputMessage GetDefaultInputMessage()
+        {
+            InputMessage inputMessage = previousInputMessage;
+            inputMessage.tick++;
+            return inputMessage;
         }
 
         /// <summary>
@@ -222,41 +188,21 @@ namespace Mastic
         [Server]
         public void SendAuthStateToClient(int stateBufferIndex) 
         {
-            // REFRESH THE POS AND VEL TO MAKE IT CORRECT.
             stateBuffer[stateBufferIndex].position = transform.position;
             stateBuffer[stateBufferIndex].velocity = rb.linearVelocity;
             TargetSendStateMessageToClient(connectionToClient, stateBuffer[stateBufferIndex]);
         }
 
         /// <summary>
-        /// This is because afte the simulation step
-        /// the velocity is unstable, so we limit it.
+        /// This is because afte the simulation step, the velocity is unstable. 
+        /// We limit it to make sure it doesn't cause reconsiles.
         /// </summary>
-        public void LimitSpeed() => physicsMovement.LimitSpeed();
-
-        private InputMessage GetDefaultedInputMessage()
-        {
-            InputMessage inputMessage = previousInputMessage;
-            inputMessage.tick++;
-            return inputMessage;
-        }
-
-        [Command]
-        private void CmdSendJumpTick(int tick) 
-        {
-            physicsMovement.JumpAbility.AddRequestTick(tick);
-        }
-
-        [Command]
-        private void CmdSendDashTick(int tick)
-        {
-            physicsMovement.DashAbility.AddRequestTick(tick);
-        }
+        public void LimitSpeed() => movement.LimitSpeed();
 
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
-            // MAKE SURE THIS IS CORRECT.
+            // MAKE SURE MESSAGES ARE NOT OUT OF ORDER OR INCORRECT.
             if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
@@ -267,18 +213,17 @@ namespace Mastic
                     InputMessage clone = inputMessage;
                     clone.tick -= i + 1;
 
-                    // if we already defaulted this, then there's no point !
+                    // IF WE ALREADY DEFAULTED THIS, THEN THERE'S NO POINT.
                     if (clone.tick > previousInputMessage.tick)
                         pendingInputMessages.Add(clone);
                 }
             }
 
             receivedTick = inputMessage.tick;
-
             pendingInputMessages.Add(inputMessage);
 
-            // remove if too many pending ...
-            while (pendingInputMessages.Count > MAX_PENDING_INPUT_COUNT)
+            // REMOVE IF TOO MANY.
+            while (pendingInputMessages.Count > maxPendingInputMessages)
             {
                 pendingInputMessages.RemoveAt(pendingInputMessages.Count - 1);
             }
@@ -287,66 +232,60 @@ namespace Mastic
         [TargetRpc(channel = Channels.Unreliable)]
         private void TargetSendStateMessageToClient(NetworkConnectionToClient conn, StateMessage stateMessage)
         {
+            // MAKE SURE MESSAGES ARE NOT OUT OF ORDER.
             if (stateMessage.tick > currentTick - 1)
             {
-                Debug.LogWarning("we have to return here since the positions are stored in a ringbuffer and otherwise would wrap around and completely break the reconsile.");
+                Debug.LogWarning("We have to return here since the positions are stored in a ringbuffer and otherwise would wrap around and completely break the reconsile.");
                 return;
             }
 
-            // we might need to remove this if we use server ticks.
-            if (stateMessage.tick <= mostRecentServerStateMessage.tick)
+            if (stateMessage.tick <= serverStateMessage.tick)
             {
-                Debug.LogWarning("we have to return here since we already reconsiled on this tick and we cant do it twice, yes this means we have the possibility of missing reconsiles but that's acceptable since we get the next message next.");
+                Debug.LogWarning("We have to return here since we already reconsiled on this tick and we cant do it twice, yes this means we have the possibility of missing reconsiles but that's acceptable since we get the next message next.");
                 return;
             }
 
-            mostRecentServerStateMessage = stateMessage;
-            OnReceiveAuthoritativeState?.Invoke(mostRecentServerStateMessage);
-
-            physicsMovement.CleanTicks(mostRecentServerStateMessage.tick);
-
-            TryReconsiliation();
+            serverStateMessage = stateMessage;
+            OnDisplayServerState?.Invoke(serverStateMessage);
+            CheckReconsiliation();
         }
 
         [Client]
-        private void TryReconsiliation()
+        private void CheckReconsiliation()
         {
-            int serverStateBufferIndex = mostRecentServerStateMessage.tick % BUFFER_SIZE;
+            int serverStateBufferIndex = serverStateMessage.tick % bufferSize;
+            bool reconsile = Vector3.Distance(serverStateMessage.position, stateBuffer[serverStateBufferIndex].position) > tolerance;
+            if (reconsile)
+            {
+                Debug.LogWarning($"We have to reconcile for {serverStateMessage.tick} | if ({serverStateMessage.position} != {stateBuffer[serverStateBufferIndex].position}).");
+                if (Application.isFocused)
+                    onReconsile?.Invoke();
 
-            bool shouldReconsile = Vector3.Distance(mostRecentServerStateMessage.position, stateBuffer[serverStateBufferIndex].position) > TOLERANCE;
+                DoReconsile(serverStateBufferIndex);
+            }
 
-            if (shouldReconsile) { DoReconsile(serverStateBufferIndex); }
-
-            OnReconsileStateChanged?.Invoke(shouldReconsile);
+            OnDisplayReconsile?.Invoke(reconsile);
         }
 
         [Client]
-        private void DoReconsile(int serverStateBufferIndex)
+        private void DoReconsile(int stateBufferIndex)
         {
-            if (Application.isFocused)
-                onReconsile?.Invoke();
+            // TELEPORT.
+            transform.position = serverStateMessage.position;
+            rb.linearVelocity = serverStateMessage.velocity;
 
-            Debug.LogWarning($"We have to reconcile for {mostRecentServerStateMessage.tick} | if ({mostRecentServerStateMessage.position} != {stateBuffer[serverStateBufferIndex].position}).");
-            //Debug.LogWarning(Vector3.Distance(mostRecentServerStateMessage.position, stateBuffer[serverStateBufferIndex].position).ToString());
-            
-            //Teleport(mostRecentServerStateMessage.position, mostRecentServerStateMessage.velocity);
-            physicsMovement.Teleport(mostRecentServerStateMessage.position, mostRecentServerStateMessage.velocity);
+            stateBuffer[stateBufferIndex] = serverStateMessage;
 
-            stateBuffer[serverStateBufferIndex] = mostRecentServerStateMessage;
-
-            int tickToProcess = mostRecentServerStateMessage.tick + 1;
-
+            int tickToProcess = serverStateMessage.tick + 1;
             while (tickToProcess < currentTick)
             {
-                int stateBufferIndex = tickToProcess % BUFFER_SIZE;
+                int index = tickToProcess % bufferSize;
 
                 Vector3 prev = eyes.position;
-
-                Move(inputBuffer[stateBufferIndex], false);
+                Move(inputBuffer[index], false);
 
                 interpolation.Interject(eyes.position, prev, rb.linearVelocity);
-
-                stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputBuffer[stateBufferIndex]);
+                stateBuffer[index].SetValues(transform.position, rb.linearVelocity, inputBuffer[index]);
 
                 tickToProcess++;
             }
@@ -355,7 +294,10 @@ namespace Mastic
         private void Move(InputMessage input, bool assignToCamera)
         {
             mouseLook.SetAsRotation(input.xRotation, input.yRotation);
-            physicsMovement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval, input.tick);
+
+            // checking for abilties needs to go somehwere here --> 
+            // crossreference project thunder move for more insight.
+            movement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval);
             if (isClient)
             {
                 Physics.Simulate(standardInterval);

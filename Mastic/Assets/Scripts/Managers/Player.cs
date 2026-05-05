@@ -7,68 +7,86 @@ namespace Mastic
     public class Player : NetworkBehaviour
     {
         [SerializeField] private EasyBinding disconnect = default;
+        [SerializeField] private string playerName = default;
         [SerializeField, Min(1)] private int standardTickrate = default;
+        [SerializeField] private List<Object> localRemove = default;
+        [SerializeField] private List<Object> unlocalRemove = default;
+        [SerializeField] private List<Object> serverRemove = default;
 
+        private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
-        private MovementDebugHUD movementDebugHUD;
-        private PlayerEntity playerEntity;
-        private NetworkManager networkManager;
+        private DebugHUD debugHUD;
+        private PlayerEntity entity;
+        private SimpleNetworkManager simpleNetworkManager;
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
-        private ICameraInterpolation interpolation;
-        private PlayerSetup playerSetup;
+        private LagCompensation lagCompensation;
+        private CameraHandlerExtrapolate cameraHandlerExtrapolate;
         private IAttack[] attacks;
 
         private void Awake()
         {
-            attacks = GetComponents<IAttack>();
-            adaptiveTickrate = GetComponent<AdaptiveTickrate>();
-            physicsMovement = GetComponent<PhysicsMovement>();
-            playerSetup = GetComponent<PlayerSetup>();
-            playerEntity = GetComponent<PlayerEntity>();
-            movementDebugHUD = GetComponent<MovementDebugHUD>();
-            networkMovement = GetComponent<NetworkMovement>();
-            networkManager = FindAnyObjectByType<SimpleNetworkManager>();
-            interpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
+            GetReferences();
+            Initialize();
         }
 
-        private void Setup()
+        private void GetReferences()
         {
-            physicsMovement.Setup();
-            adaptiveTickrate.Setup(networkManager, standardTickrate);
-            movementDebugHUD.Setup(standardTickrate);
-            networkMovement.Setup(standardTickrate, interpolation);
+            attacks = GetComponents<IAttack>();
+            mouseLook = GetComponent<MouseLook>();
+            adaptiveTickrate = GetComponent<AdaptiveTickrate>();
+            physicsMovement = GetComponent<PhysicsMovement>();
+            entity = GetComponent<PlayerEntity>();
+            lagCompensation = FindAnyObjectByType<LagCompensation>();
+            debugHUD = GetComponent<DebugHUD>();
+            networkMovement = GetComponent<NetworkMovement>();
+            simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();
+            cameraHandlerExtrapolate = GameObject.FindWithTag("MainCamera").GetComponent<CameraHandlerExtrapolate>();
+        }
+
+        /// <summary>
+        /// For server, local and unlocal client.
+        /// </summary>
+        private void Initialize()
+        {
+            adaptiveTickrate.Initialize(simpleNetworkManager, standardTickrate);
+            debugHUD.Initialize(standardTickrate);
+            mouseLook.Initialize();
+            entity.Initialize(lagCompensation);
+            physicsMovement.Initialize();
+            networkMovement.Initialize(standardTickrate, cameraHandlerExtrapolate, physicsMovement);
         }
 
         public override void OnStartServer()
         {
             base.OnStartServer();
-            Setup();
-
-            playerSetup.Setup(true, false);
-            networkMovement.OnPendingBufferChanged += adaptiveTickrate.ApplyTimeDilation;
+            gameObject.name = $"{playerName} | server";
+            serverRemove.ForEach(x => Destroy(x));
+            print($"{gameObject.name}: setup completed".ToUpperInvariant());
         }
 
         public override void OnStartClient()
         {
             base.OnStartClient();
-            Setup();
-
             if (isLocalPlayer)
             {
                 Utils.LockMouse();
-                playerSetup.Setup(false, true);
+                gameObject.name = $"{playerName} | local client";
+                localRemove.ForEach(x => Destroy(x));
 
-                networkMovement.OnReceiveAuthoritativeState += movementDebugHUD.DisplayServerState;
-                adaptiveTickrate.OnTickrateChanged += movementDebugHUD.DisplayTickrate;
-                networkMovement.OnCurrentTickChanged += movementDebugHUD.DisplayTick;
-                networkMovement.OnCheatsChanged += movementDebugHUD.DisplayCheats;
-                networkMovement.OnReconsileStateChanged += movementDebugHUD.IndicateReconsile;
+                networkMovement.OnDisplayServerState += debugHUD.DisplayServerState;
+                adaptiveTickrate.OnDisplayTickrate += debugHUD.DisplayTickrate;
+                networkMovement.OnDisplayTick += debugHUD.DisplayTick;
+                networkMovement.OnDisplayCheats += debugHUD.DisplayCheats;
+                networkMovement.OnDisplayReconsile += debugHUD.DisplayReconsile;
             }
             else
             {
-                playerSetup.Setup(false, false);
+                gameObject.name = $"{playerName} | unlocal client";
+                unlocalRemove.ForEach(x => Destroy(x));
             }
+
+            print($"{gameObject.name}: setup completed".ToUpperInvariant());
         }
 
         private void Update()
@@ -78,7 +96,7 @@ namespace Mastic
 
             for (int i = 0; i < attacks.Length; i++)
             {
-                attacks[i].DoLocalTick(networkMovement.MovementTick, playerEntity.RollbackTick);
+                attacks[i].DoLocalTick(networkMovement.MovementTick, entity.RollbackTick);
             }
 
             if (disconnect.WasPressed)

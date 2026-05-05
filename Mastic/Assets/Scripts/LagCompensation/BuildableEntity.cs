@@ -14,7 +14,7 @@ namespace Mastic
         private bool active;
 
         [Server]
-        public void Setup(LagCompensation lagCompensation)
+        public void Initialize(LagCompensation lagCompensation)
         {
             recording = new Frame[lagCompensation.MaxRecordingLength];
             EnableCollision(true);

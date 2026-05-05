@@ -1,24 +1,10 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Mastic
 {
-    /// <summary>
-    /// TODO: make a good interface here.
-    /// </summary>
-    public class PhysicsMovement : MonoBehaviour
+    public class PhysicsMovement : MonoBehaviour, IMovement
     {
-        public MovementAbility JumpAbility => jumpAbility;
-        public MovementAbility DashAbility => dashAbility;
-
-        [Header("References")]
-        [SerializeField] private Rigidbody rb = default;
-        [SerializeField] private Transform eyes = default;
-
-        // REMOVE THIS !!
-        [SerializeField] private NetworkMovement networkPhysicsMovement = default;
-
-        [Header("Movement Settings")]
+        [Header("Settings")]
         [SerializeField] private float speed = default;
         [SerializeField] private float acceleration = default;
         [SerializeField] private float multiplier = default;
@@ -30,52 +16,25 @@ namespace Mastic
         [SerializeField] private float offset = default;
         [SerializeField] private float slopeLimit = default;
 
-        [Header("Magic Settings")]
-        [SerializeField] private MovementAbility jumpAbility = default;
-        [SerializeField] private MovementAbility dashAbility = default;
+        private Rigidbody rb;
         private bool controllable;
         private bool hasGravity;
 
-        public void Setup()
+        public void Initialize()
         {
+            rb = GetComponent<Rigidbody>();
             rb.sleepThreshold = 0f;
+            rb.useGravity = false;
             EnableGravity(true);
             EnableControl(true);
-            jumpAbility.OnCast += Jump;
-            dashAbility.OnCast += Dash;
         }
 
         public void EnableGravity(bool hasGravity) => this.hasGravity = hasGravity;
         public void EnableControl(bool controllable) => this.controllable = controllable;
-
-        private void Dash()
-        {
-            Vector3 force = eyes.forward * dashAbility.speed;
-            if (force.y >= 0f && rb.linearVelocity.y < 0f)
-                force.y -= rb.linearVelocity.y;
-
-            rb.AddForce(force, ForceMode.VelocityChange);
-        }
-
-        private void Jump()
-        {
-            Vector3 force = Vector3.up * jumpAbility.speed;
-            if (rb.linearVelocity.y < 0f)
-                force.y -= rb.linearVelocity.y;
-
-            rb.AddForce(force, ForceMode.VelocityChange);
-        }
-
-        /// <summary>
-        /// Without this the max speed of the player
-        /// isn't deterministic and that causes bad reconsiles.
-        /// </summary>
         public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, topSpeed);
-        
-        /// <summary>
-        /// Todo: remove tick here !!.
-        /// </summary>
-        public void Move(float vertical, float horizontal, float interval, int tick)
+        public void AddForce(Vector3 velocityChange) => rb.AddForce(velocityChange, ForceMode.VelocityChange);
+
+        public void Move(float vertical, float horizontal, float interval)
         {
             if (!controllable)
             {
@@ -92,7 +51,9 @@ namespace Mastic
             if (hasGravity)
                 rb.AddForce(Physics.gravity, ForceMode.Acceleration);
 
-            Vector3 velocity = Flatten(rb.linearVelocity);
+            Vector3 velocity = rb.linearVelocity;
+            velocity.y = 0f;
+
             float magnitude = velocity.magnitude;
             if (magnitude < speed)
             {
@@ -110,25 +71,6 @@ namespace Mastic
                 counterMovement = -velocity;
 
             rb.AddForce(counterMovement, ForceMode.VelocityChange);
-            
-            // MAGIC ====
-
-            if (isGrounded)
-                jumpAbility.CastOnTick(tick, networkPhysicsMovement);
-
-            dashAbility.CastOnTick(tick, networkPhysicsMovement);
-        }
-
-        public void Teleport(Vector3 position, Vector3 velocity)
-        {
-            transform.position = position;
-            rb.linearVelocity = velocity;
-        }
-
-        private Vector3 Flatten(Vector3 vec)
-        {
-            vec.y = 0f;
-            return vec;
         }
 
         private bool GetIsGrounded()
@@ -145,16 +87,10 @@ namespace Mastic
             return false;
         }
 
-        public void CleanTicks(int tick) 
-        {
-            jumpAbility.CleanRequests(tick);
-            dashAbility.CleanRequests(tick);
-        }
-
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
             Color color = Color.Lerp(Color.green, Color.white, 0.5f);
-            color.a = 0.5f;
+            color.a = 0.3f;
             Gizmos.color = color;
             Gizmos.DrawSphere(transform.position + (Vector3.down * offset), radius);
         }
