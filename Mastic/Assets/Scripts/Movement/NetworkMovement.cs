@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Mastic
 {
@@ -10,6 +9,7 @@ namespace Mastic
     {
         public int MovementTick => currentTick;
 
+        public event Action OnPlayReconsileSound;
         public event Action<int> OnDisplayTick;
         public event Action<string> OnDisplayCheats;
         public event Action<bool> OnDisplayReconsile;
@@ -22,7 +22,6 @@ namespace Mastic
         [SerializeField] private int bufferSize = default;
         [SerializeField] private float tolerance = default;
         [SerializeField] private int maxPendingInputMessages = default;
-        [SerializeField] private UnityEvent onReconsile = default;
 
         private Rigidbody rb;
         private Transform eyes;
@@ -259,7 +258,7 @@ namespace Mastic
             {
                 Debug.LogWarning($"We have to reconcile for {serverStateMessage.tick} | if ({serverStateMessage.position} != {stateBuffer[serverStateBufferIndex].position}).");
                 if (Application.isFocused)
-                    onReconsile?.Invoke();
+                    OnPlayReconsileSound?.Invoke();
 
                 DoReconsile(serverStateBufferIndex);
             }

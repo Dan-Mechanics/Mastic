@@ -13,24 +13,18 @@ namespace Mastic
         [SerializeField] private List<Object> unlocalRemove = default;
         [SerializeField] private List<Object> serverRemove = default;
 
+        private IAttack[] attacks;
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
-        private DebugHUD debugHUD;
+        private DebugHandler debugHandler;
         private PlayerEntity entity;
         private SimpleNetworkManager simpleNetworkManager;
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
         private LagCompensation lagCompensation;
         private CameraHandlerExtrapolate cameraHandlerExtrapolate;
-        private IAttack[] attacks;
 
         private void Awake()
-        {
-            GetReferences();
-            Initialize();
-        }
-
-        private void GetReferences()
         {
             attacks = GetComponents<IAttack>();
             mouseLook = GetComponent<MouseLook>();
@@ -38,10 +32,11 @@ namespace Mastic
             physicsMovement = GetComponent<PhysicsMovement>();
             entity = GetComponent<PlayerEntity>();
             lagCompensation = FindAnyObjectByType<LagCompensation>();
-            debugHUD = GetComponent<DebugHUD>();
+            debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();
             cameraHandlerExtrapolate = GameObject.FindWithTag("MainCamera").GetComponent<CameraHandlerExtrapolate>();
+            Initialize();
         }
 
         /// <summary>
@@ -50,7 +45,7 @@ namespace Mastic
         private void Initialize()
         {
             adaptiveTickrate.Initialize(simpleNetworkManager, standardTickrate);
-            debugHUD.Initialize(standardTickrate);
+            debugHandler.Initialize(standardTickrate);
             mouseLook.Initialize();
             entity.Initialize(lagCompensation);
             physicsMovement.Initialize();
@@ -74,11 +69,13 @@ namespace Mastic
                 gameObject.name = $"{playerName} | local client";
                 localRemove.ForEach(x => Destroy(x));
 
-                networkMovement.OnDisplayServerState += debugHUD.DisplayServerState;
-                adaptiveTickrate.OnDisplayTickrate += debugHUD.DisplayTickrate;
-                networkMovement.OnDisplayTick += debugHUD.DisplayTick;
-                networkMovement.OnDisplayCheats += debugHUD.DisplayCheats;
-                networkMovement.OnDisplayReconsile += debugHUD.DisplayReconsile;
+                adaptiveTickrate.OnDisplayTickrate += debugHandler.DisplayTickrate;
+                adaptiveTickrate.OnPlayTickrateChangedSound += debugHandler.PlayTickrateChangedSound;
+                networkMovement.OnDisplayServerState += debugHandler.DisplayServerState;
+                networkMovement.OnDisplayTick += debugHandler.DisplayTick;
+                networkMovement.OnDisplayCheats += debugHandler.DisplayCheats;
+                networkMovement.OnDisplayReconsile += debugHandler.DisplayReconsile;
+                networkMovement.OnPlayReconsileSound += debugHandler.PlayReconsileSound;
             }
             else
             {

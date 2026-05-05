@@ -1,19 +1,18 @@
 ﻿using Mirror;
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Mastic
 {
     public class AdaptiveTickrate : NetworkBehaviour
     {
+        public event Action OnPlayTickrateChangedSound;
         public event Action<int> OnDisplayTickrate;
 
         [SerializeField] private float minTimeDilationTime = default;
         [SerializeField] private int drainedTickrateOffset = default;
         [SerializeField] private int fullTickrateOffset = default;
         [SerializeField] private int idealPendingCount = default;
-        [SerializeField] private UnityEvent onTickrateChanged = default;
         private NetworkManager networkManager;
         private int standardTickrate;
         private int currentTickrate;
@@ -77,7 +76,7 @@ namespace Mastic
         private void SetTickrate(int tickrate, bool calledFromStart = false)
         {
             if (tickrate != standardTickrate && Application.isFocused && !calledFromStart)
-                onTickrateChanged?.Invoke();
+                OnPlayTickrateChangedSound?.Invoke();
 
             currentTickrate = tickrate;
             Time.fixedDeltaTime = 1f / tickrate;
