@@ -39,17 +39,15 @@ namespace Mastic
 
         public void Move(float vertical, float horizontal, float interval)
         {
-            if (!controllable)
-            {
-                vertical = 0f;
-                horizontal = 0f;
-            }
-            
             isGrounded = GetIsGrounded();
-            float currAccel = isGrounded ? acceleration : acceleration * multiplier;
+            float accel = isGrounded ? acceleration : acceleration * multiplier;
 
-            Vector3 movement = (transform.forward * vertical) + (transform.right * horizontal);
-            movement.Normalize();
+            Vector3 movement = Vector3.zero;
+            if (controllable)
+            {
+                movement = (transform.forward * vertical) + (transform.right * horizontal);
+                movement.Normalize();
+            }
 
             if (hasGravity)
                 rb.AddForce(Physics.gravity, ForceMode.Acceleration);
@@ -57,20 +55,19 @@ namespace Mastic
             Vector3 velocity = rb.linearVelocity;
             velocity.y = 0f;
 
-            float magnitude = velocity.magnitude;
-            if (magnitude < speed)
+            float mag = velocity.magnitude;
+            if (mag < speed)
             {
-                movement = Vector3.ClampMagnitude(currAccel * interval * movement, speed - magnitude);
+                rb.AddForce(Vector3.ClampMagnitude(accel * interval * movement, speed - mag), ForceMode.VelocityChange);
             }
             else if (isGrounded)
             {
-                movement = Vector3.ClampMagnitude(currAccel * interval * -velocity.normalized, magnitude - speed);
+                rb.AddForce(Vector3.ClampMagnitude(accel * interval * -velocity.normalized, mag - speed), ForceMode.VelocityChange);
             }
 
-            rb.AddForce(movement, ForceMode.VelocityChange);
+            Vector3 counterMovement = accel * interval * multiplier * -(velocity.normalized - movement);
 
-            Vector3 counterMovement = currAccel * interval * multiplier * -(velocity.normalized - movement);
-            if (magnitude != 0f && counterMovement.magnitude > magnitude)
+            if (mag != 0f && counterMovement.magnitude > mag)
                 counterMovement = -velocity;
 
             rb.AddForce(counterMovement, ForceMode.VelocityChange);

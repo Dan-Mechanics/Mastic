@@ -29,7 +29,7 @@ namespace Mastic
         private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation interpolation;
         private IMovement movement;
-       // private IMovementAbility[] movementAbilities;
+        private List<IMovementAbility> movementAbilities;
         private List<InputMessage> pendingInputMessages;
         private StateMessage[] stateBuffer;
         private InputMessage[] inputBuffer;
@@ -43,19 +43,17 @@ namespace Mastic
         private float standardInterval;
         private bool w, a, s, d;
         private float timer;
-        private Jump jump;
 
-        public void Initialize(int standardTickrate, ICameraInterpolation interpolation, IMovement movement, IMovementAbility[] movementAbilities)
+        public void Initialize(int standardTickrate, ICameraInterpolation interpolation, IMovement movement, List<IMovementAbility> movementAbilities)
         {
             this.interpolation = interpolation;
-            SetMovement(movement);
+            this.movementAbilities = movementAbilities;
 
+            SetMovement(movement);
             rb = GetComponent<Rigidbody>();
             mouseLook = GetComponent<MouseLook>();
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
-            //this.movementAbilities = movementAbilities;
-            jump = GetComponent<Jump>();
 
             // IN THEORY YOU COULD OMIT SOME OF THESE
             // DEPENDING ON IF LOCAL OR SERVER ETC.
@@ -86,12 +84,11 @@ namespace Mastic
             if (!isLocalPlayer)
                 return;
 
-            jump.DoLocalUpdate(currentTick);
+            movementAbilities.ForEach(x => x.DoLocalUpdate(currentTick));
 
-            int clientPacketMultiplier;
+            int clientPacketMultiplier = 1;
             if (Input.GetKey(KeyCode.Mouse4)) { clientPacketMultiplier = 2; }
             else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
-            else { clientPacketMultiplier = 1; }
             
             timer += Time.deltaTime;
             while (timer >= Time.fixedDeltaTime)
@@ -145,7 +142,7 @@ namespace Mastic
             Move(inputMessage, false);
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputMessage);
 
-            jump.CleanTicks(inputMessage.tick);
+            movementAbilities.ForEach(x => x.CleanTicks(inputMessage.tick));
 
             if (previousInputMessage.tick != inputMessage.tick - 1)
             {
@@ -256,7 +253,7 @@ namespace Mastic
             }
 
             serverStateMessage = stateMessage;
-            jump.CleanTicks(serverStateMessage.tick);
+            movementAbilities.ForEach(x => x.CleanTicks(serverStateMessage.tick));
             OnDisplayServerState?.Invoke(serverStateMessage);
             CheckReconsiliation();
         }
@@ -306,10 +303,10 @@ namespace Mastic
 
         private void Move(InputMessage input, bool assignToCamera)
         {
-            // RECREATE THE ROTATION OF THE PLAYER.
+            // RECREATE THE MOVEMENT OF THE PLAYER IN THIS MOMENT.
             mouseLook.SetAsRotation(input.xRotation, input.yRotation);
             movement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval);
-            jump.CheckAgainstTick(input.tick, movement);
+            movementAbilities.ForEach(x => x.CheckAgainstTick(input.tick, movement));
 
             // APPLY CHANGES.
             if (isClient)

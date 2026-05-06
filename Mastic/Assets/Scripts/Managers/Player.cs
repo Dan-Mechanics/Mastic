@@ -1,5 +1,6 @@
 using Mirror;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Mastic
@@ -14,7 +15,7 @@ namespace Mastic
         [SerializeField] private List<Object> serverRemove = default;
 
         private IAttack[] attacks;
-        private IMovementAbility[] movementAbilities;
+        private List<IMovementAbility> movementAbilities;
         private Jump jump;
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
@@ -29,7 +30,7 @@ namespace Mastic
         private void Awake()
         {
             attacks = GetComponents<IAttack>();
-            movementAbilities = GetComponents<IMovementAbility>();
+            movementAbilities = GetComponents<IMovementAbility>().ToList();
             jump = GetComponent<Jump>();
             mouseLook = GetComponent<MouseLook>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();

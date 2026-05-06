@@ -301,6 +301,7 @@ GameObject:
   - component: {fileID: 9211630360903548100}
   - component: {fileID: -5600370486124146712}
   - component: {fileID: 8685740675525256336}
+  - component: {fileID: -5984394209105652319}
   m_Layer: 3
   m_Name: player
   m_TagString: Player
@@ -560,8 +561,8 @@ MonoBehaviour:
   syncInterval: 0
   cooldowns:
   - value: 0
-    minRequired: 5
-    maxValue: 5
+    minRequired: 2
+    maxValue: 2
   - value: 0
     minRequired: 5
     maxValue: 5
@@ -591,6 +592,24 @@ MonoBehaviour:
   syncInterval: 0
   speed: 5
   jump: {fileID: 11400000, guid: 7662ac226c6d5ff4bb582f02a9f12a2c, type: 2}
+  maxPendingRequests: 8
+--- !u!114 &-5984394209105652319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab09fb64d149e1946bfc82a23813ed09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  speed: 8
+  ability1: {fileID: 11400000, guid: 00ce751e8eeaaf241bc6e06f96db00e0, type: 2}
   maxPendingRequests: 8
 --- !u!1 &3970219889359651778
 GameObject:

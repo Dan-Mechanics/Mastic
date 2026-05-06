@@ -10,7 +10,7 @@ namespace Mastic
         [SerializeField] private EasyBinding jump = default;
         [SerializeField] private int maxPendingRequests = default;
 
-        private readonly List<int> requestTicks = new List<int>();
+        private readonly List<int> pendingRequests = new List<int>();
         private int previousTick;
         private Rigidbody rb;
 
@@ -25,7 +25,7 @@ namespace Mastic
         {
             if (jump.WasPressed)
             {
-                requestTicks.Add(movementTick);
+                pendingRequests.Add(movementTick);
                 CmdRequestJump(movementTick);
             }
         }
@@ -33,29 +33,29 @@ namespace Mastic
         [Command]
         private void CmdRequestJump(int tick)
         {
-            if (requestTicks.Count >= maxPendingRequests || tick <= previousTick)
+            if (pendingRequests.Count >= maxPendingRequests || tick <= previousTick)
                 return;
 
-            requestTicks.Add(tick);
+            pendingRequests.Add(tick);
             previousTick = tick;
             Debug.LogWarning($"{gameObject.name}: requested jump {tick} ...");
         }
 
         public void CheckAgainstTick(int tick, IMovement movement)
         {
-            for (int i = 0; i < requestTicks.Count; i++)
+            for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (tick == requestTicks[i])
+                if (tick == pendingRequests[i])
                     CheckJump(movement);
             }
         }
 
         public void CleanTicks(int upTo)
         {
-            for (int i = requestTicks.Count - 1; i >= 0; i--)
+            for (int i = pendingRequests.Count - 1; i >= 0; i--)
             {
-                if (requestTicks[i] <= upTo)
-                    requestTicks.RemoveAt(i);
+                if (pendingRequests[i] <= upTo)
+                    pendingRequests.RemoveAt(i);
             }
         }
 
