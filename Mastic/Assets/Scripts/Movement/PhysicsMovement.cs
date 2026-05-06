@@ -4,6 +4,8 @@ namespace Mastic
 {
     public class PhysicsMovement : MonoBehaviour, IMovement
     {
+        public bool IsGrounded => isGrounded;
+        
         [Header("Settings")]
         [SerializeField] private float speed = default;
         [SerializeField] private float acceleration = default;
@@ -16,6 +18,7 @@ namespace Mastic
         [SerializeField] private float offset = default;
         [SerializeField] private float slopeLimit = default;
 
+        private bool isGrounded;
         private Rigidbody rb;
         private bool controllable;
         private bool hasGravity;
@@ -42,7 +45,7 @@ namespace Mastic
                 horizontal = 0f;
             }
             
-            bool isGrounded = GetIsGrounded();
+            isGrounded = GetIsGrounded();
             float currAccel = isGrounded ? acceleration : acceleration * multiplier;
 
             Vector3 movement = (transform.forward * vertical) + (transform.right * horizontal);

@@ -29,6 +29,7 @@ namespace Mastic
         private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation interpolation;
         private IMovement movement;
+       // private IMovementAbility[] movementAbilities;
         private List<InputMessage> pendingInputMessages;
         private StateMessage[] stateBuffer;
         private InputMessage[] inputBuffer;
@@ -42,16 +43,19 @@ namespace Mastic
         private float standardInterval;
         private bool w, a, s, d;
         private float timer;
+        private Jump jump;
 
-        public void Initialize(int standardTickrate, ICameraInterpolation interpolation, IMovement movement)
+        public void Initialize(int standardTickrate, ICameraInterpolation interpolation, IMovement movement, IMovementAbility[] movementAbilities)
         {
             this.interpolation = interpolation;
-            this.movement = movement;
+            SetMovement(movement);
 
             rb = GetComponent<Rigidbody>();
             mouseLook = GetComponent<MouseLook>();
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
+            //this.movementAbilities = movementAbilities;
+            jump = GetComponent<Jump>();
 
             // IN THEORY YOU COULD OMIT SOME OF THESE
             // DEPENDING ON IF LOCAL OR SERVER ETC.
@@ -82,6 +86,8 @@ namespace Mastic
             if (!isLocalPlayer)
                 return;
 
+            jump.DoLocalUpdate(currentTick);
+
             int clientPacketMultiplier;
             if (Input.GetKey(KeyCode.Mouse4)) { clientPacketMultiplier = 2; }
             else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
@@ -102,6 +108,8 @@ namespace Mastic
             if (Input.GetKeyDown(KeyCode.UpArrow)) { currentTick += 10; Debug.LogWarning("+10"); }
             if (Input.GetKeyDown(KeyCode.DownArrow)) { currentTick -= 10; Debug.LogWarning("-10"); }
         }
+
+        public void SetMovement(IMovement movement) => this.movement = movement;
 
         [Client]
         private void DoLocalTick()
@@ -137,10 +145,13 @@ namespace Mastic
             Move(inputMessage, false);
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputMessage);
 
+            jump.CleanTicks(inputMessage.tick);
+
             if (previousInputMessage.tick != inputMessage.tick - 1)
             {
                 Debug.LogWarning($"We have skipped a tick on the server ...");
                 Debug.LogWarning($"if (previousInputMessage.tick != inputMessage.tick - 1) || if ({previousInputMessage.tick} != {inputMessage.tick - 1})");
+                Debug.LogWarning("This is acceptable for spawn because the buffer is very empty");
             }
 
             previousInputMessage = inputMessage;
@@ -245,6 +256,7 @@ namespace Mastic
             }
 
             serverStateMessage = stateMessage;
+            jump.CleanTicks(serverStateMessage.tick);
             OnDisplayServerState?.Invoke(serverStateMessage);
             CheckReconsiliation();
         }
@@ -253,10 +265,12 @@ namespace Mastic
         private void CheckReconsiliation()
         {
             int serverStateBufferIndex = serverStateMessage.tick % bufferSize;
-            bool reconsile = Vector3.Distance(serverStateMessage.position, stateBuffer[serverStateBufferIndex].position) > tolerance;
+            float distance = Vector3.Distance(serverStateMessage.position, stateBuffer[serverStateBufferIndex].position);
+            bool reconsile = distance > tolerance;
             if (reconsile)
             {
                 Debug.LogWarning($"We have to reconcile for {serverStateMessage.tick} | if ({serverStateMessage.position} != {stateBuffer[serverStateBufferIndex].position}).");
+                Debug.LogWarning($"Distance: {distance}, in actual: {distance / Time.fixedDeltaTime}.");
                 if (Application.isFocused)
                     OnPlayReconsileSound?.Invoke();
 
@@ -292,11 +306,12 @@ namespace Mastic
 
         private void Move(InputMessage input, bool assignToCamera)
         {
+            // RECREATE THE ROTATION OF THE PLAYER.
             mouseLook.SetAsRotation(input.xRotation, input.yRotation);
-
-            // checking for abilties needs to go somehwere here --> 
-            // crossreference project thunder move for more insight.
             movement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval);
+            jump.CheckAgainstTick(input.tick, movement);
+
+            // APPLY CHANGES.
             if (isClient)
             {
                 Physics.Simulate(standardInterval);

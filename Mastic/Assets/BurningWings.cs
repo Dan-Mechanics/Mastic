@@ -4,17 +4,7 @@ using UnityEngine.UI;
 
 namespace Mastic
 {
-    public interface IMovable
-    {
-        void Move(float vert, float hori, float interval);
-    }
-
-    public interface IMovementAbility
-    {
-        bool DoTick(int tick);
-    }
-
-    public class BurningWings : NetworkBehaviour, IMovable, IMovementAbility
+    public class BurningWings : NetworkBehaviour, IMovement
     {
         public int tickDuration;
         public float speed;
@@ -25,6 +15,8 @@ namespace Mastic
         private Transform eyes;
         private int startingTick;
 
+        public bool IsGrounded => false;
+
         private void Awake()
         {
             networkMovement = GetComponent<NetworkMovement>();
@@ -34,14 +26,13 @@ namespace Mastic
         }
 
 
-        public bool DoTick(int tick)
+        public bool DoLocalTick(int tick)
         {
             throw new System.NotImplementedException();
         }
 
-        public void Move(float vert, float hori, float interval)
-        {
-            rb.linearVelocity = eyes.forward * speed;
-        }
+        public void Move(float vert, float hori, float interval) => rb.linearVelocity = eyes.forward * speed;
+        public void LimitSpeed() { }
+        public void AddForce(Vector3 velocityChange) { }
     }
 }

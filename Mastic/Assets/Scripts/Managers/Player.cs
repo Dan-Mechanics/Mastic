@@ -14,6 +14,8 @@ namespace Mastic
         [SerializeField] private List<Object> serverRemove = default;
 
         private IAttack[] attacks;
+        private IMovementAbility[] movementAbilities;
+        private Jump jump;
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
         private DebugHandler debugHandler;
@@ -27,6 +29,8 @@ namespace Mastic
         private void Awake()
         {
             attacks = GetComponents<IAttack>();
+            movementAbilities = GetComponents<IMovementAbility>();
+            jump = GetComponent<Jump>();
             mouseLook = GetComponent<MouseLook>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             physicsMovement = GetComponent<PhysicsMovement>();
@@ -47,9 +51,10 @@ namespace Mastic
             adaptiveTickrate.Initialize(simpleNetworkManager, standardTickrate);
             debugHandler.Initialize(standardTickrate);
             mouseLook.Initialize();
+            jump.Initialize();
             entity.Initialize(lagCompensation);
             physicsMovement.Initialize();
-            networkMovement.Initialize(standardTickrate, cameraHandlerExtrapolate, physicsMovement);
+            networkMovement.Initialize(standardTickrate, cameraHandlerExtrapolate, physicsMovement, movementAbilities);
         }
 
         public override void OnStartServer()
