@@ -41,10 +41,6 @@ namespace Mastic
             if (pendingRequests.Count >= maxPendingRequests || tick <= previousTick)
                 return;
 
-            if (!cooldownHandler.CanCast(0))
-                return;
-
-            cooldownHandler.Cast(0);
             pendingRequests.Add(tick);
             previousTick = tick;
             Debug.LogWarning($"{gameObject.name}: requested gust {tick} ...");
@@ -55,7 +51,17 @@ namespace Mastic
             for (int i = 0; i < pendingRequests.Count; i++)
             {
                 if (tick == pendingRequests[i])
-                    CheckGust(movement);
+                {
+                    if (isServer && cooldownHandler.CanCast(0))
+                    {
+                        cooldownHandler.Cast(0);
+                        DoGust(movement);
+                    }
+                    else
+                    {
+                        DoGust(movement);
+                    }
+                }
             }
         }
 
@@ -68,7 +74,7 @@ namespace Mastic
             }
         }
 
-        private void CheckGust(IMovement movement)
+        private void DoGust(IMovement movement)
         {
             Vector3 force = eyes.forward * speed;
             if (force.y >= 0f && rb.linearVelocity.y < 0f)
