@@ -21,6 +21,7 @@ namespace Mastic
         private AdaptiveTickrate adaptiveTickrate;
         private DebugHandler debugHandler;
         private PlayerEntity entity;
+        private CooldownHandler cooldownHandler;
         private SimpleNetworkManager simpleNetworkManager;
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
@@ -33,6 +34,7 @@ namespace Mastic
             movementAbilities = GetComponents<IMovementAbility>().ToList();
             jump = GetComponent<Jump>();
             mouseLook = GetComponent<MouseLook>();
+            cooldownHandler = GetComponent<CooldownHandler>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             physicsMovement = GetComponent<PhysicsMovement>();
             entity = GetComponent<PlayerEntity>();
@@ -99,7 +101,13 @@ namespace Mastic
 
             for (int i = 0; i < attacks.Length; i++)
             {
-                attacks[i].DoLocalTick(networkMovement.MovementTick, entity.RollbackTick);
+                attacks[i].DoLocalUpdate(networkMovement.MovementTick, entity.RollbackTick);
+            }
+
+            int ticks = networkMovement.DoLocalUpdate();
+            for (int i = 0; i < ticks; i++)
+            {
+                cooldownHandler.Charge();
             }
 
             if (disconnect.WasPressed)

@@ -40,13 +40,13 @@ namespace Mastic
             prevPos = pos;
         }
 
-        public void DoLocalTick(int movementTick, int rollbackTick)
+        public void DoLocalUpdate(int movementTick, int rollbackTick)
         {
             if (!primaryFire.WasPressed)
                 return;
 
             shootMessage.SetValues(mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, movementTick, rollbackTick);
-            shootMessage.SetDebugFields(cam.position, Vector3.zero);
+            shootMessage.SetDebugValues(cam.position, Vector3.zero);
             // CmdShoot(new ShootMessage(cameraInterpolation.lerpValue, movement.id - 1,
             //    playerLook.RotationY, playerLook.RotationY, movement.currentTick - 1));
 
@@ -55,7 +55,7 @@ namespace Mastic
                 if (hit.transform.root.TryGetComponent(out IDamagable damagable))
                 {
                     OnPredictDamage?.Invoke(damage);
-                    shootMessage.SetDebugFields(cam.position, hit.transform.root.position);
+                    shootMessage.SetDebugValues(cam.position, hit.transform.root.position);
                 }
             }
 

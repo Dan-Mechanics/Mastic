@@ -7,7 +7,7 @@ namespace Mastic
         event Action<float> OnDealDamage;
         event Action<float> OnPredictDamage;
 
-        void DoLocalTick(int movementTick, int rollbackTick);
+        void DoLocalUpdate(int movementTick, int rollbackTick);
         void DoServerTick(int movementTick);
     }
 }

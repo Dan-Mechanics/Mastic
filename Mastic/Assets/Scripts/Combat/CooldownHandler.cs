@@ -5,9 +5,8 @@ namespace Mastic
 {
     public class CooldownHandler : NetworkBehaviour
     {
+        public int Last => cooldowns.Length - 1;
         [SerializeField] private Cooldown[] cooldowns = default;
-
-        private void FixedUpdate() => ChargeCooldowns(Time.fixedDeltaTime);
 
         public bool CanCast(int index)
         {
@@ -27,48 +26,48 @@ namespace Mastic
 
             cooldowns[index].value -= cooldowns[index].minRequired;
             cooldowns[index].Clamp();
-
-            if (isServer)
-                TargetSyncCooldown(connectionToClient, index, cooldowns[index].value, NetworkTime.time);
         }
 
         /// <summary>
-        /// Idea: hook this to respawn Action.
+        /// TODO: hook this to respawn Action.
         /// </summary>
         [Server]
-        public void RechargeCooldownsFully()
+        public void ChargeAllFully()
         {
             for (int i = 0; i < cooldowns.Length; i++)
             {
                 cooldowns[i].value = cooldowns[i].maxValue;
-                TargetSyncCooldown(connectionToClient, i, cooldowns[i].value, NetworkTime.time);
             }
+
+            TargetChargeAllFully(connectionToClient);
         }
 
-        public void ChargeCooldowns(float interval)
+        public void Charge()
         {
             for (int i = 0; i < cooldowns.Length; i++)
             {
-                cooldowns[i].value += interval;
+                cooldowns[i].value++;
                 cooldowns[i].Clamp();
             }
         }
 
         [TargetRpc]
-        private void TargetSyncCooldown(NetworkConnectionToClient conn, int index, float cooldown, double sendTime)
+        private void TargetChargeAllFully(NetworkConnectionToClient conn)
         {
-            cooldowns[index].value = cooldown + (float)(NetworkTime.time - sendTime);
-            cooldowns[index].Clamp();
+            for (int i = 0; i < cooldowns.Length; i++)
+            {
+                cooldowns[i].value = cooldowns[i].maxValue;
+            }
         }
 
         [System.Serializable]
         public struct Cooldown
         {
-            public float value;
-            public float minRequired;
-            public float maxValue;
+            public int value;
+            public int minRequired;
+            public int maxValue;
 
-            public void Clamp() => value = Mathf.Clamp(value, 0f, maxValue);
+            public void Clamp() => value = Mathf.Clamp(value, 0, maxValue);
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Mastic
         [SerializeField] private float speed = default;
         [SerializeField] private EasyBinding ability1 = default;
         [SerializeField] private int maxPendingRequests = default;
+        [SerializeField] private int cooldownIndex = default;
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
@@ -25,12 +26,12 @@ namespace Mastic
         }
 
         [Client]
-        public void DoLocalUpdate(int movementTick)
+        public void DoLocalTick(int movementTick, IMovement movement)
         {
-            if (ability1.WasPressed && cooldownHandler.CanCast(0))
+            if (ability1.IsHeld && cooldownHandler.CanCast(cooldownIndex))
             {
+                cooldownHandler.Cast(cooldownIndex);
                 pendingRequests.Add(movementTick);
-                cooldownHandler.Cast(0);
                 CmdRequestGust(movementTick);
             }
         }
@@ -48,20 +49,36 @@ namespace Mastic
 
         public void CheckAgainstTick(int tick, IMovement movement)
         {
+            if (isServer)
+            {
+                CheckAgainstTickServer(tick, movement);
+            }
+            else
+            {
+                CheckAgainstTickClient(tick, movement);
+            }
+        }
+
+        [Client]
+        private void CheckAgainstTickClient(int tick, IMovement movement)
+        {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
                 if (tick == pendingRequests[i])
-                {
-                    if (isServer && cooldownHandler.CanCast(0))
-                    {
-                        cooldownHandler.Cast(0);
-                        DoGust(movement);
-                    }
-                    else
-                    {
-                        DoGust(movement);
-                    }
-                }
+                    PerformGust(movement);
+            }
+        }
+
+        [Server]
+        private void CheckAgainstTickServer(int tick, IMovement movement)
+        {
+            for (int i = 0; i < pendingRequests.Count; i++)
+            {
+                if (tick != pendingRequests[i] || !cooldownHandler.CanCast(cooldownIndex))
+                    continue;
+
+                cooldownHandler.Cast(cooldownIndex);
+                PerformGust(movement);
             }
         }
 
@@ -74,7 +91,7 @@ namespace Mastic
             }
         }
 
-        private void DoGust(IMovement movement)
+        private void PerformGust(IMovement movement)
         {
             Vector3 force = eyes.forward * speed;
             if (force.y >= 0f && rb.linearVelocity.y < 0f)

@@ -457,7 +457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 6
-  acceleration: 25
+  acceleration: 35
   multiplier: 0.35
   topSpeed: 25
   mask:
@@ -561,20 +561,23 @@ MonoBehaviour:
   syncInterval: 0
   cooldowns:
   - value: 0
-    minRequired: 2
-    maxValue: 2
+    minRequired: 128
+    maxValue: 128
   - value: 0
-    minRequired: 5
-    maxValue: 5
+    minRequired: 64
+    maxValue: 64
   - value: 0
-    minRequired: 5
-    maxValue: 5
+    minRequired: 128
+    maxValue: 128
   - value: 0
-    minRequired: 5
-    maxValue: 5
+    minRequired: 128
+    maxValue: 128
   - value: 0
-    minRequired: 5
-    maxValue: 5
+    minRequired: 128
+    maxValue: 128
+  - value: 0
+    minRequired: 20
+    maxValue: 20
 --- !u!114 &8685740675525256336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -611,6 +614,7 @@ MonoBehaviour:
   speed: 8
   ability1: {fileID: 11400000, guid: 00ce751e8eeaaf241bc6e06f96db00e0, type: 2}
   maxPendingRequests: 8
+  cooldownIndex: 0
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0

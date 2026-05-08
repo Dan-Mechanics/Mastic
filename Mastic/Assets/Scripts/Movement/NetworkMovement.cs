@@ -75,21 +75,14 @@ namespace Mastic
             }
         }
 
-        /// <summary>
-        /// A lot of the code here is meant to break new
-        /// features so I don't get bugs down the line.
-        /// </summary>
-        private void Update()
+        [Client]
+        public int DoLocalUpdate()
         {
-            if (!isLocalPlayer)
-                return;
-
-            movementAbilities.ForEach(x => x.DoLocalUpdate(currentTick));
-
+            int ticks = 0;
             int clientPacketMultiplier = 1;
             if (Input.GetKey(KeyCode.Mouse4)) { clientPacketMultiplier = 2; }
             else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
-            
+
             timer += Time.deltaTime;
             while (timer >= Time.fixedDeltaTime)
             {
@@ -98,12 +91,16 @@ namespace Mastic
                 OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier}");
                 for (int i = 0; i < clientPacketMultiplier; i++)
                 {
+                    movementAbilities.ForEach(x => x.DoLocalTick(currentTick, movement));
                     DoLocalTick();
+                    ticks++;
                 }
             }
 
             if (Input.GetKeyDown(KeyCode.UpArrow)) { currentTick += 10; Debug.LogWarning("+10"); }
             if (Input.GetKeyDown(KeyCode.DownArrow)) { currentTick -= 10; Debug.LogWarning("-10"); }
+
+            return ticks;
         }
 
         public void SetMovement(IMovement movement) => this.movement = movement;

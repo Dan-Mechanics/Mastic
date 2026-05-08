@@ -36,6 +36,8 @@ namespace Mastic
             {
                 entities[i].ReturnToPresent();
             }
+
+            // Physics.SyncTransforms();
         }
 
         [Server]

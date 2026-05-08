@@ -21,7 +21,7 @@ namespace Mastic
             this.rollbackTick = rollbackTick;
         }
 
-        public void SetDebugFields(Vector3 debugEyesPos, Vector3 debugEnemyPos)
+        public void SetDebugValues(Vector3 debugEyesPos, Vector3 debugEnemyPos)
         {
             this.debugEyesPos = debugEyesPos;
             this.debugEnemyPos = debugEnemyPos;

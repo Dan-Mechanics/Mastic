@@ -11,20 +11,23 @@ namespace Mastic
         [SerializeField] private int maxPendingRequests = default;
 
         private readonly List<int> pendingRequests = new List<int>();
+        private CooldownHandler cooldownHandler;
         private int previousTick;
         private Rigidbody rb;
 
         public void Initialize()
         {
             rb = GetComponent<Rigidbody>();
+            cooldownHandler = GetComponent<CooldownHandler>();
             previousTick = -1;
         }
 
         [Client]
-        public void DoLocalUpdate(int movementTick)
+        public void DoLocalTick(int movementTick, IMovement movement)
         {
-            if (jump.WasPressed)
+            if (jump.IsHeld && CanJump(movement))
             {
+                cooldownHandler.Cast(cooldownHandler.Last);
                 pendingRequests.Add(movementTick);
                 CmdRequestJump(movementTick);
             }
@@ -43,10 +46,36 @@ namespace Mastic
 
         public void CheckAgainstTick(int tick, IMovement movement)
         {
+            if (isServer)
+            {
+                CheckAgainstTickServer(tick, movement);
+            }
+            else
+            {
+                CheckAgainstTickClient(tick, movement);
+            }
+        }
+
+        [Client]
+        private void CheckAgainstTickClient(int tick, IMovement movement)
+        {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
                 if (tick == pendingRequests[i])
-                    CheckJump(movement);
+                    PerformJump(movement);
+            }
+        }
+
+        [Server]
+        private void CheckAgainstTickServer(int tick, IMovement movement)
+        {
+            for (int i = 0; i < pendingRequests.Count; i++)
+            {
+                if (tick != pendingRequests[i] || !CanJump(movement))
+                    continue;
+
+                cooldownHandler.Cast(cooldownHandler.Last);
+                PerformJump(movement);
             }
         }
 
@@ -59,11 +88,14 @@ namespace Mastic
             }
         }
 
-        private void CheckJump(IMovement movement)
+        private bool CanJump(IMovement movement)
         {
-            if (!movement.IsGrounded)
-                return;
+            return movement.IsGrounded &&
+                cooldownHandler.CanCast(cooldownHandler.Last);
+        }
 
+        private void PerformJump(IMovement movement)
+        {
             Vector3 force = Vector3.up * speed;
             if (rb.linearVelocity.y < 0f)
                 force.y -= rb.linearVelocity.y;

@@ -2,7 +2,7 @@
 {
     public interface IMovementAbility
     {
-        void DoLocalUpdate(int movementTick);
+        void DoLocalTick(int movementTick, IMovement movement);
         void CheckAgainstTick(int tick, IMovement movement);
         void CleanTicks(int upTo);
     }
