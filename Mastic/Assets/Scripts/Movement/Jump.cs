@@ -44,20 +44,8 @@ namespace Mastic
             Debug.LogWarning($"{gameObject.name}: requested jump {tick} ...");
         }
 
-        public void CheckAgainstTick(int tick, IMovement movement)
-        {
-            if (isServer)
-            {
-                CheckAgainstTickServer(tick, movement);
-            }
-            else
-            {
-                CheckAgainstTickClient(tick, movement);
-            }
-        }
-
         [Client]
-        private void CheckAgainstTickClient(int tick, IMovement movement)
+        public void CheckAgainstTickClient(int tick, IMovement movement)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
@@ -67,7 +55,7 @@ namespace Mastic
         }
 
         [Server]
-        private void CheckAgainstTickServer(int tick, IMovement movement)
+        public void CheckAgainstTickServer(int tick, IMovement movement, int movementTick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {

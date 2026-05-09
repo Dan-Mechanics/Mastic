@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Mastic
@@ -19,9 +20,11 @@ namespace Mastic
         [SerializeField] private EasyBinding left = default;
         [SerializeField] private EasyBinding backward = default;
         [SerializeField] private EasyBinding right = default;
+        [SerializeField] private MovementSettings settings = default;
         [SerializeField] private int bufferSize = default;
         [SerializeField] private float tolerance = default;
         [SerializeField] private int maxPendingInputMessages = default;
+        [SerializeField] private byte standardMovementIndex = default;
 
         private Rigidbody rb;
         private Transform eyes;
@@ -29,7 +32,9 @@ namespace Mastic
         private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation interpolation;
         private IMovement movement;
+        private byte movementIndex;
         private List<IMovementAbility> movementAbilities;
+        private IMovement[] movements;
         private List<InputMessage> pendingInputMessages;
         private StateMessage[] stateBuffer;
         private InputMessage[] inputBuffer;
@@ -44,12 +49,19 @@ namespace Mastic
         private bool w, a, s, d;
         private float timer;
 
-        public void Initialize(int standardTickrate, ICameraInterpolation interpolation, IMovement movement, List<IMovementAbility> movementAbilities)
+        public void Initialize(int standardTickrate, ICameraInterpolation interpolation)
         {
+            standardInterval = 1f / standardTickrate;
             this.interpolation = interpolation;
-            this.movementAbilities = movementAbilities;
 
-            SetMovement(movement);
+            movements = GetComponents<IMovement>();
+            for (int i = 0; i < movements.Length; i++)
+            {
+                movements[i].Index = (byte)i;
+            }
+
+            movementAbilities = GetComponents<IMovementAbility>().ToList();
+            SetMovement(standardMovementIndex);
             rb = GetComponent<Rigidbody>();
             mouseLook = GetComponent<MouseLook>();
             eyes = transform.Find("eyes");
@@ -60,8 +72,6 @@ namespace Mastic
             pendingInputMessages = new List<InputMessage>();
             stateBuffer = new StateMessage[bufferSize];
             inputBuffer = new InputMessage[bufferSize];
-
-            standardInterval = 1f / standardTickrate;
             receivedTick = -1;
         }
 
@@ -103,7 +113,11 @@ namespace Mastic
             return ticks;
         }
 
-        public void SetMovement(IMovement movement) => this.movement = movement;
+        public void SetMovement(byte index)
+        {
+            movement = movements[index];
+            movementIndex = index;
+        }
 
         [Client]
         private void DoLocalTick()
@@ -121,7 +135,7 @@ namespace Mastic
             inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, currentTick);
             Move(inputBuffer[index], true);
 
-            stateBuffer[index].SetValues(transform.position, rb.linearVelocity, inputBuffer[index]);
+            stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
             CmdSendInputMessageToServer(inputBuffer[index]);
 
             OnDisplayTick?.Invoke(currentTick);
@@ -137,7 +151,7 @@ namespace Mastic
             InputMessage inputMessage = GetNextInputMessage();
             int stateBufferIndex = inputMessage.tick % bufferSize;
             Move(inputMessage, false);
-            stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, inputMessage);
+            stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, movementIndex, inputMessage);
 
             movementAbilities.ForEach(x => x.CleanTicks(inputMessage.tick));
 
@@ -201,7 +215,12 @@ namespace Mastic
         /// This is because afte the simulation step, the velocity is unstable. 
         /// We limit it to make sure it doesn't cause reconsiles.
         /// </summary>
-        public void LimitSpeed() => movement.LimitSpeed();
+        public void LimitSpeed()
+        {
+            Vector3 vel = rb.linearVelocity;
+            vel = Vector3.ClampMagnitude(vel, settings.topSpeed);
+            rb.linearVelocity = vel;
+        }
 
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
@@ -280,6 +299,7 @@ namespace Mastic
             // TELEPORT.
             transform.position = serverStateMessage.position;
             rb.linearVelocity = serverStateMessage.velocity;
+            SetMovement(serverStateMessage.movementIndex);
 
             stateBuffer[stateBufferIndex] = serverStateMessage;
 
@@ -292,7 +312,7 @@ namespace Mastic
                 Move(inputBuffer[index], false);
 
                 interpolation.Interject(eyes.position, prev, rb.linearVelocity);
-                stateBuffer[index].SetValues(transform.position, rb.linearVelocity, inputBuffer[index]);
+                stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
 
                 tickToProcess++;
             }
@@ -303,7 +323,15 @@ namespace Mastic
             // RECREATE THE MOVEMENT OF THE PLAYER IN THIS MOMENT.
             mouseLook.SetAsRotation(input.xRotation, input.yRotation);
             movement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval);
-            movementAbilities.ForEach(x => x.CheckAgainstTick(input.tick, movement));
+
+            if (isServer)
+            {
+                movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, currentTick));
+            }
+            else
+            {
+                movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick, movement));
+            }
 
             // APPLY CHANGES.
             if (isClient)

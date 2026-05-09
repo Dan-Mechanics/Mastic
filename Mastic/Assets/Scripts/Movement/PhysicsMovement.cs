@@ -4,20 +4,10 @@ namespace Mastic
 {
     public class PhysicsMovement : MonoBehaviour, IMovement
     {
+        public byte Index { get; set; }
         public bool IsGrounded => isGrounded;
-        
-        [Header("Settings")]
-        [SerializeField] private float speed = default;
-        [SerializeField] private float acceleration = default;
-        [SerializeField] private float multiplier = default;
-        [SerializeField] private float topSpeed = default;
 
-        [Header("Grounded Settings")]
-        [SerializeField] private LayerMask mask = default;
-        [SerializeField] private float radius = default;
-        [SerializeField] private float offset = default;
-        [SerializeField] private float slopeLimit = default;
-
+        [SerializeField] private MovementSettings settings = default;
         private bool isGrounded;
         private Rigidbody rb;
         private bool controllable;
@@ -34,18 +24,17 @@ namespace Mastic
 
         public void EnableGravity(bool hasGravity) => this.hasGravity = hasGravity;
         public void EnableControl(bool controllable) => this.controllable = controllable;
-        public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, topSpeed);
         public void AddForce(Vector3 velocityChange) => rb.AddForce(velocityChange, ForceMode.VelocityChange);
 
-        public void Move(float vertical, float horizontal, float interval)
+        public void Move(float vert, float hori, float interval)
         {
             isGrounded = GetIsGrounded();
-            float accel = isGrounded ? acceleration : acceleration * multiplier;
+            float accel = isGrounded ? settings.acceleration : settings.acceleration * settings.multiplier;
 
             Vector3 movement = Vector3.zero;
             if (controllable)
             {
-                movement = (transform.forward * vertical) + (transform.right * horizontal);
+                movement = (transform.forward * vert) + (transform.right * hori);
                 movement.Normalize();
             }
 
@@ -56,16 +45,16 @@ namespace Mastic
             velocity.y = 0f;
 
             float mag = velocity.magnitude;
-            if (mag < speed)
+            if (mag < settings.speed)
             {
-                rb.AddForce(Vector3.ClampMagnitude(accel * interval * movement, speed - mag), ForceMode.VelocityChange);
+                rb.AddForce(Vector3.ClampMagnitude(accel * interval * movement, settings.speed - mag), ForceMode.VelocityChange);
             }
             else if (isGrounded)
             {
-                rb.AddForce(Vector3.ClampMagnitude(accel * interval * -velocity.normalized, mag - speed), ForceMode.VelocityChange);
+                rb.AddForce(Vector3.ClampMagnitude(accel * interval * -velocity.normalized, mag - settings.speed), ForceMode.VelocityChange);
             }
 
-            Vector3 counterMovement = accel * interval * multiplier * -(velocity.normalized - movement);
+            Vector3 counterMovement = accel * interval * settings.multiplier * -(velocity.normalized - movement);
 
             if (mag != 0f && counterMovement.magnitude > mag)
                 counterMovement = -velocity;
@@ -75,12 +64,12 @@ namespace Mastic
 
         private bool GetIsGrounded()
         {
-            RaycastHit[] hits = Physics.SphereCastAll(transform.position, radius,
-                Vector3.down, offset, mask, QueryTriggerInteraction.Ignore);
+            RaycastHit[] hits = Physics.SphereCastAll(transform.position, settings.radius,
+                Vector3.down, settings.offset, settings.mask, QueryTriggerInteraction.Ignore);
 
             foreach (RaycastHit hit in hits)
             {
-                if (hit.distance > 0f && Vector3.Angle(Vector3.up, hit.normal) <= slopeLimit)
+                if (hit.distance > 0f && Vector3.Angle(Vector3.up, hit.normal) <= settings.slopeLimit)
                     return true;
             }
 
@@ -92,7 +81,7 @@ namespace Mastic
             Color color = Color.Lerp(Color.green, Color.white, 0.5f);
             color.a = 0.3f;
             Gizmos.color = color;
-            Gizmos.DrawSphere(transform.position + (Vector3.down * offset), radius);
+            Gizmos.DrawSphere(transform.position + (Vector3.down * settings.offset), settings.radius);
         }
     }
 }
