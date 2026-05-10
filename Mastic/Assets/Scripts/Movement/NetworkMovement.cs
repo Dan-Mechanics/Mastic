@@ -73,6 +73,7 @@ namespace Mastic
             stateBuffer = new StateMessage[bufferSize];
             inputBuffer = new InputMessage[bufferSize];
             receivedTick = -1;
+            previousInputMessage.tick = -1;
         }
 
         public override void OnStartLocalPlayer()
@@ -146,11 +147,10 @@ namespace Mastic
         public int DoServerTick()
         {
             adaptiveTickrate.ApplyTimeDilation(hasReceivedFirstMessage, pendingInputMessages.Count);
-            bufferHasTicks = false;
 
             InputMessage inputMessage = GetNextInputMessage();
-            int stateBufferIndex = inputMessage.tick % bufferSize;
             Move(inputMessage, false);
+            int stateBufferIndex = inputMessage.tick % bufferSize;
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, movementIndex, inputMessage);
 
             movementAbilities.ForEach(x => x.CleanTicks(inputMessage.tick));
@@ -162,14 +162,16 @@ namespace Mastic
                 Debug.LogWarning("This is acceptable for spawn because the buffer is very empty");
             }
 
-            previousInputMessage = inputMessage;
             currentTick++;
+            previousInputMessage = inputMessage;
             return stateBufferIndex;
         }
 
         private InputMessage GetNextInputMessage()
         {
+            bufferHasTicks = false;
             InputMessage inputMessage;
+
             if (pendingInputMessages.Count > 0)
             {
                 inputMessage = pendingInputMessages[0];
