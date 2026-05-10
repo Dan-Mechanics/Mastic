@@ -21,27 +21,33 @@ namespace Mastic
         [SerializeField] private EasyBinding backward = default;
         [SerializeField] private EasyBinding right = default;
         [SerializeField] private MovementSettings settings = default;
-        [SerializeField] private int bufferSize = default;
-        [SerializeField] private float tolerance = default;
-        [SerializeField] private int maxPendingInputMessages = default;
-        [SerializeField] private byte standardMovementIndex = default;
+        [SerializeField, Min(1)] private int bufferSize = default;
+        [SerializeField, Min(0f)] private float tolerance = default;
+        [SerializeField, Min(1)] private int maxPendingInputMessages = default;
+        [SerializeField, Min(0)] private byte standardMovementIndex = default;
 
         private Rigidbody rb;
         private Transform eyes;
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation interpolation;
-        private IMovement movement;
+
         private byte movementIndex;
-        private List<IMovementAbility> movementAbilities;
+        private IMovement movement;
         private IMovement[] movements;
+        private List<IMovementAbility> movementAbilities;
         private List<InputMessage> pendingInputMessages;
+
         private StateMessage[] stateBuffer;
         private InputMessage[] inputBuffer;
+
         private StateMessage serverStateMessage;
         private InputMessage previousInputMessage;
 
+        private bool firstInputMessageReceived; 
+        private bool hasInputMessages; 
         private int currentTick;
+        private int lastReceivedTick;
         private float standardInterval;
         private bool w, a, s, d;
         private float timer;
@@ -50,7 +56,6 @@ namespace Mastic
         {
             standardInterval = 1f / standardTickrate;
             this.interpolation = interpolation;
-            previousInputMessage.tick = -1;
 
             movements = GetComponents<IMovement>();
             for (int i = 0; i < movements.Length; i++)
@@ -64,6 +69,9 @@ namespace Mastic
             mouseLook = GetComponent<MouseLook>();
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
+
+            lastReceivedTick = -1;
+            previousInputMessage.tick = -1;
         }
 
         public override void OnStartLocalPlayer()
@@ -80,6 +88,7 @@ namespace Mastic
         public override void OnStartServer()
         {
             base.OnStartServer();
+            inputBuffer = new InputMessage[bufferSize];
             stateBuffer = new StateMessage[bufferSize];
             pendingInputMessages = new List<InputMessage>();
         }
@@ -144,11 +153,9 @@ namespace Mastic
         [Server]
         public int DoServerTick()
         {
-            adaptiveTickrate.ApplyTimeDilation(previousInputMessage.tick >= 0, pendingInputMessages.Count);
+            adaptiveTickrate.ApplyTimeDilation(firstInputMessageReceived, pendingInputMessages.Count);
 
-            pendingInputMessages.Sort();
             InputMessage inputMessage = GetNextInputMessage();
-
             Move(inputMessage, false);
             int stateBufferIndex = inputMessage.tick % bufferSize;
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, movementIndex, inputMessage);
@@ -169,35 +176,31 @@ namespace Mastic
 
         private InputMessage GetNextInputMessage()
         {
+            hasInputMessages = false;
             InputMessage inputMessage;
             if (pendingInputMessages.Count > 0)
             {
-                int expected = previousInputMessage.tick + 1;
-                if (pendingInputMessages[0].tick > expected)
+                inputMessage = pendingInputMessages[0];
+                pendingInputMessages.RemoveAt(0);
+                if (inputMessage.tick >= 0)
                 {
-                    inputMessage = GetDefaultedInput();
-                }
-                else if (pendingInputMessages[0].tick < expected)
-                {
-                    // KEEP LOOKING UNTIL YOU FIND IT OR RUN OUT OF MESSAGES.
-                    pendingInputMessages.RemoveAt(0);
-                    inputMessage = GetNextInputMessage();
+                    firstInputMessageReceived = true;
+                    hasInputMessages = true;
                 }
                 else
                 {
-                    inputMessage = pendingInputMessages[0];
-                    pendingInputMessages.RemoveAt(0);
+                    inputMessage = GetRepeatInputMessage();
                 }
             }
             else
             {
-                inputMessage = GetDefaultedInput();
+                inputMessage = GetRepeatInputMessage();
             }
 
             return inputMessage;
         }
 
-        private InputMessage GetDefaultedInput()
+        private InputMessage GetRepeatInputMessage()
         {
             InputMessage inputMessage = previousInputMessage;
             inputMessage.tick++;
@@ -216,24 +219,60 @@ namespace Mastic
             TargetSendStateMessageToClient(connectionToClient, stateBuffer[stateBufferIndex]);
         }
 
+        /// <summary>
+        /// This is because afte the simulation step, the velocity is unstable. 
+        /// We limit it to make sure it doesn't cause reconsiles.
+        /// </summary>
         public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, settings.topSpeed);
         public void AddForce(Vector3 velocityChange) => movement.AddForce(velocityChange);
 
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
-            if (inputMessage.tick < 0 || inputMessage.tick <= previousInputMessage.tick)
+            // ALLOW DEFAULTED TICKS TO BE CORRECTED.
+            for (int i = 0; i < pendingInputMessages.Count; i++)
+            {
+                if (pendingInputMessages[i].tick == inputMessage.tick)
+                    pendingInputMessages[i] = inputMessage;
+            }
+
+            // VALIDATE INCOMING MESSAGES.
+            if (inputMessage.tick < 0 || inputMessage.tick <= lastReceivedTick)
                 return;
 
-            if (pendingInputMessages.Count >= maxPendingInputMessages)
-                return;
+            // FILL GAPS BETWEEN PACKETS, BECAUSE OF PACKET LOSS.
+            if (inputMessage.tick > lastReceivedTick + 1 && firstInputMessageReceived && hasInputMessages)
+            {
+                int packetsAdded = 0;
+                int packetsMissing = inputMessage.tick - lastReceivedTick - 1;
+                for (int i = packetsMissing - 1; i >= 0; i--)
+                {
+                    InputMessage clone = inputMessage;
+                    clone.tick -= i + 1;
+
+                    if (clone.tick <= previousInputMessage.tick)
+                        continue;
+
+                    pendingInputMessages.Add(clone);
+                    packetsAdded++;
+                    if (packetsAdded >= maxPendingInputMessages)
+                        break;
+                }
+            }
 
             pendingInputMessages.Add(inputMessage);
+            while (pendingInputMessages.Count > maxPendingInputMessages)
+            {
+                pendingInputMessages.RemoveAt(pendingInputMessages.Count - 1);
+            }
+
+            lastReceivedTick = pendingInputMessages[^1].tick;
         }
 
         [TargetRpc(channel = Channels.Unreliable)]
         private void TargetSendStateMessageToClient(NetworkConnectionToClient conn, StateMessage stateMessage)
         {
+            // MAKE SURE MESSAGES ARE NOT OUT OF ORDER.
             if (stateMessage.tick > currentTick - 1)
             {
                 Debug.LogWarning("We have to return here since the positions are stored in a ringbuffer and otherwise would wrap around and completely break the reconsile.");

@@ -570,8 +570,8 @@ MonoBehaviour:
     minRequired: 128
     maxValue: 128
   - value: 0
-    minRequired: 20
-    maxValue: 20
+    minRequired: 10
+    maxValue: 10
 --- !u!114 &8685740675525256336
 MonoBehaviour:
   m_ObjectHideFlags: 0
