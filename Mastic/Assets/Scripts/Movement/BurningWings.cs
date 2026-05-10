@@ -40,12 +40,12 @@ namespace Mastic
         [Client]
         public void DoLocalTick(int movementTick, IMovement movement)
         {
-            if (ability2.IsHeld && CanCast(movementTick))
-            {
-                cooldownHandler.Cast(cooldownIndex);
-                pendingRequests.Add(movementTick);
-                CmdRequestBurningWings(movementTick);
-            }
+            if (!ability2.IsHeld || !CanCast(movementTick))
+                return;
+
+            cooldownHandler.Cast(cooldownIndex);
+            pendingRequests.Add(movementTick);
+            CmdRequestBurningWings(movementTick);
         }
 
         private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
