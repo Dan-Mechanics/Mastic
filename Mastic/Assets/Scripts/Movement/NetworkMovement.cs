@@ -178,7 +178,6 @@ namespace Mastic
         {
             hasInputMessages = false;
             InputMessage inputMessage;
-
             if (pendingInputMessages.Count > 0)
             {
                 inputMessage = pendingInputMessages[0];
@@ -190,18 +189,18 @@ namespace Mastic
                 }
                 else
                 {
-                    inputMessage = GetDefaultedInputMessage();
+                    inputMessage = GetRepeatInputMessage();
                 }
             }
             else
             {
-                inputMessage = GetDefaultedInputMessage();
+                inputMessage = GetRepeatInputMessage();
             }
 
             return inputMessage;
         }
 
-        private InputMessage GetDefaultedInputMessage()
+        private InputMessage GetRepeatInputMessage()
         {
             InputMessage inputMessage = previousInputMessage;
             inputMessage.tick++;
@@ -241,9 +240,7 @@ namespace Mastic
             if (inputMessage.tick < 0 || inputMessage.tick <= lastReceivedTick)
                 return;
 
-            // FILL GAPS BETWEEN MESSAGES ( BECAUSE OF PACKET LOSS ) 
-            // WITH FILLER INPUT, HERE CALLED CLONES.
-            // ONLY IF IT IS REASONABLE TO DO SO GIVEN THE CONDITION OF THE PENDING INPUT BUFFER.
+            // FILL GAPS BETWEEN PACKETS, BECAUSE OF PACKET LOSS.
             if (inputMessage.tick > lastReceivedTick + 1 && firstInputMessageReceived && hasInputMessages)
             {
                 int packetsAdded = 0;

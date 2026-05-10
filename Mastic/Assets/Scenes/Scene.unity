@@ -725,7 +725,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6103662349769157085, guid: e58735b1d2b7d734f89c67911ff0acb5, type: 3}
       propertyPath: framerateLimit
-      value: 300
+      value: 100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
