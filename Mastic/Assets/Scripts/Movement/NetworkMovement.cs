@@ -232,31 +232,38 @@ namespace Mastic
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
             // ALLOW DEFAULTED TICKS TO BE CORRECTED.
-            for (int i = pendingInputMessages.Count - 1; i >= 0; i--)
+            for (int i = 0; i < pendingInputMessages.Count; i++)
             {
-                if (pendingInputMessages[i].tick != inputMessage.tick)
-                    continue;
-
-                pendingInputMessages[i] = inputMessage;
-                break;
+                if (pendingInputMessages[i].tick == inputMessage.tick)
+                    pendingInputMessages[i] = inputMessage;
             }
 
-            // MAKE SURE MESSAGES ARE NOT OUT OF ORDER OR INCORRECT.
+            // VALIDATE INCOMING MESSAGES.
             if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
+            // FILL GAPS BETWEEN MESSAGES ( BECAUSE OF PACKET LOSS ) 
+            // WITH FILLER INPUT, HERE CALLED CLONES.
+            // ONLY IF IT IS REASONABLE TO DO SO GIVEN THE CONDITION OF THE PENDING INPUT BUFFER.
             if (inputMessage.tick > receivedTick + 1 && firstInputMessageReceived && hasInputMessages)
             {
-                int clonesToAdd = Mathf.Min(maxFilledTickDifference, inputMessage.tick - receivedTick - 1);
-                for (int i = 0; i < clonesToAdd; i++)
+                int clonesAdded = 0;
+                int count = inputMessage.tick - receivedTick - 1;
+                for (int i = 0; i < count; i++)
                 {
                     InputMessage clone = inputMessage;
                     clone.tick -= i + 1;
 
-                    // IF WE ALREADY DEFAULTED THIS, THEN THERE'S NO POINT.
-                    if (clone.tick > previousInputMessage.tick)
-                        pendingInputMessages.Add(clone);
+                    if (clone.tick <= previousInputMessage.tick)
+                        continue;
+
+                    pendingInputMessages.Add(clone);
+                    clonesAdded++;
+                    if (clonesAdded >= maxPendingInputMessages)
+                        break;
                 }
+
+                
             }
 
             receivedTick = inputMessage.tick;
