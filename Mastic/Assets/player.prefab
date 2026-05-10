@@ -446,6 +446,7 @@ MonoBehaviour:
   bufferSize: 64
   tolerance: 0.001
   maxPendingInputMessages: 8
+  maxFilledTickDifference: 16
   standardMovementIndex: 0
 --- !u!114 &6891286507384332386
 MonoBehaviour:

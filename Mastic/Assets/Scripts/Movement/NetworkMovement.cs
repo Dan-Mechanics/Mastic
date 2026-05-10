@@ -24,6 +24,7 @@ namespace Mastic
         [SerializeField] private int bufferSize = default;
         [SerializeField] private float tolerance = default;
         [SerializeField] private int maxPendingInputMessages = default;
+        [SerializeField] private int maxFilledTickDifference = default;
         [SerializeField] private byte standardMovementIndex = default;
 
         private Rigidbody rb;
@@ -230,11 +231,14 @@ namespace Mastic
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
-            // ALLOW DEFAULTED TICKS TO BE CORRECTED. CONSIDER RETURNING WHEN FIRST IS FOUND.
-            for (int i = 0; i < pendingInputMessages.Count; i++)
+            // ALLOW DEFAULTED TICKS TO BE CORRECTED.
+            for (int i = pendingInputMessages.Count - 1; i >= 0; i--)
             {
-                if (pendingInputMessages[i].tick == inputMessage.tick)
-                    pendingInputMessages[i] = inputMessage;
+                if (pendingInputMessages[i].tick != inputMessage.tick)
+                    continue;
+
+                pendingInputMessages[i] = inputMessage;
+                break;
             }
 
             // MAKE SURE MESSAGES ARE NOT OUT OF ORDER OR INCORRECT.
@@ -243,7 +247,8 @@ namespace Mastic
 
             if (inputMessage.tick > receivedTick + 1 && firstInputMessageReceived && hasInputMessages)
             {
-                for (int i = 0; i < inputMessage.tick - receivedTick - 1; i++)
+                int clonesToAdd = Mathf.Min(maxFilledTickDifference, inputMessage.tick - receivedTick - 1);
+                for (int i = 0; i < clonesToAdd; i++)
                 {
                     InputMessage clone = inputMessage;
                     clone.tick -= i + 1;
