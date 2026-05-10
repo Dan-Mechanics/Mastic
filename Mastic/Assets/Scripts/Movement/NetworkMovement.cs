@@ -232,10 +232,13 @@ namespace Mastic
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
             // ALLOW DEFAULTED TICKS TO BE CORRECTED.
-            for (int i = 0; i < pendingInputMessages.Count; i++)
+            for (int i = pendingInputMessages.Count - 1; i >= 0; i--)
             {
-                if (pendingInputMessages[i].tick == inputMessage.tick)
-                    pendingInputMessages[i] = inputMessage;
+                if (pendingInputMessages[i].tick != inputMessage.tick)
+                    continue;
+
+                pendingInputMessages[i] = inputMessage;
+                break;
             }
 
             // MAKE SURE MESSAGES ARE NOT OUT OF ORDER OR INCORRECT.
@@ -244,7 +247,8 @@ namespace Mastic
 
             if (inputMessage.tick > receivedTick + 1 && firstInputMessageReceived && hasInputMessages)
             {
-                for (int i = 0; i < inputMessage.tick - receivedTick - 1; i++)
+                int clonesToAdd = Mathf.Min(maxFilledTickDifference, inputMessage.tick - receivedTick - 1);
+                for (int i = 0; i < clonesToAdd; i++)
                 {
                     InputMessage clone = inputMessage;
                     clone.tick -= i + 1;
