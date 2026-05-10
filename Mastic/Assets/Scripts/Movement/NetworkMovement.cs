@@ -204,7 +204,7 @@ namespace Mastic
         /// in ordering of Physics.Simulate between the server and client.
         /// </summary>
         [Server]
-        public void SendAuthStateToClient(int stateBufferIndex) 
+        public void SendStateMessageToClient(int stateBufferIndex) 
         {
             stateBuffer[stateBufferIndex].position = transform.position;
             stateBuffer[stateBufferIndex].velocity = rb.linearVelocity;
