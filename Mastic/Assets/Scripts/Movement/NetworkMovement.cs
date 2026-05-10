@@ -21,11 +21,10 @@ namespace Mastic
         [SerializeField] private EasyBinding backward = default;
         [SerializeField] private EasyBinding right = default;
         [SerializeField] private MovementSettings settings = default;
-        [SerializeField] private int bufferSize = default;
-        [SerializeField] private float tolerance = default;
-        [SerializeField] private int maxPendingInputMessages = default;
-        [SerializeField] private int maxFilledTickDifference = default;
-        [SerializeField] private byte standardMovementIndex = default;
+        [SerializeField, Min(1)] private int bufferSize = default;
+        [SerializeField, Min(0f)] private float tolerance = default;
+        [SerializeField, Min(1)] private int maxPendingInputMessages = default;
+        [SerializeField, Min(0)] private byte standardMovementIndex = default;
 
         private Rigidbody rb;
         private Transform eyes;
@@ -48,7 +47,7 @@ namespace Mastic
         private bool firstInputMessageReceived; 
         private bool hasInputMessages; 
         private int currentTick;
-        private int receivedTick;
+        private int lastReceivedTick;
         private float standardInterval;
         private bool w, a, s, d;
         private float timer;
@@ -71,7 +70,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
 
-            receivedTick = -1;
+            lastReceivedTick = -1;
             previousInputMessage.tick = -1;
         }
 
@@ -239,17 +238,17 @@ namespace Mastic
             }
 
             // VALIDATE INCOMING MESSAGES.
-            if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
+            if (inputMessage.tick < 0 || inputMessage.tick <= lastReceivedTick)
                 return;
 
             // FILL GAPS BETWEEN MESSAGES ( BECAUSE OF PACKET LOSS ) 
             // WITH FILLER INPUT, HERE CALLED CLONES.
             // ONLY IF IT IS REASONABLE TO DO SO GIVEN THE CONDITION OF THE PENDING INPUT BUFFER.
-            if (inputMessage.tick > receivedTick + 1 && firstInputMessageReceived && hasInputMessages)
+            if (inputMessage.tick > lastReceivedTick + 1 && firstInputMessageReceived && hasInputMessages)
             {
-                int clonesAdded = 0;
-                int count = inputMessage.tick - receivedTick - 1;
-                for (int i = 0; i < count; i++)
+                int packetsAdded = 0;
+                int packetsMissing = inputMessage.tick - lastReceivedTick - 1;
+                for (int i = packetsMissing - 1; i >= 0; i--)
                 {
                     InputMessage clone = inputMessage;
                     clone.tick -= i + 1;
@@ -258,29 +257,19 @@ namespace Mastic
                         continue;
 
                     pendingInputMessages.Add(clone);
-                    clonesAdded++;
-                    if (clonesAdded >= maxPendingInputMessages)
+                    packetsAdded++;
+                    if (packetsAdded >= maxPendingInputMessages)
                         break;
                 }
-
-                /*for (int i = count - 1; i >= 0; i--)
-                {
-                    if (pendingInputMessages[i].tick != inputMessage.tick)
-                        continue;
-
-                    pendingInputMessages[i] = inputMessage;
-                    break;
-                }*/
             }
 
-            receivedTick = inputMessage.tick;
             pendingInputMessages.Add(inputMessage);
-
-            // REMOVE IF TOO MANY.
             while (pendingInputMessages.Count > maxPendingInputMessages)
             {
                 pendingInputMessages.RemoveAt(pendingInputMessages.Count - 1);
             }
+
+            lastReceivedTick = pendingInputMessages[^1].tick;
         }
 
         [TargetRpc(channel = Channels.Unreliable)]
