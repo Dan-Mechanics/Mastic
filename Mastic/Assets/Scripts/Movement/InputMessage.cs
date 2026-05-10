@@ -1,4 +1,4 @@
-﻿using System;
+﻿using UnityEngine;
 
 namespace Mastic
 {
@@ -6,12 +6,14 @@ namespace Mastic
     /// Represents a tick of player movement input,
     /// including looking direction.
     /// </summary>
-    public struct InputMessage : IComparable<InputMessage>
+    public struct InputMessage
     {
         public bool w;
         public bool a;
         public bool s;
         public bool d;
+        // public bool space;
+
         public float xRotation;
         public float yRotation;
         public int tick;
@@ -26,8 +28,6 @@ namespace Mastic
             this.yRotation = yRotation;
             this.tick = tick;
         }
-
-        public int CompareTo(InputMessage other) => tick.CompareTo(other.tick);
 
         public float GetVerticalInput()
         {

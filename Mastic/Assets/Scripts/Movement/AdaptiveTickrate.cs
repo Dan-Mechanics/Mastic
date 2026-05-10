@@ -32,9 +32,9 @@ namespace Mastic
         }
 
         [Server]
-        public void ApplyTimeDilation(bool hasProcessedFirstMessage, int pendingCount)
+        public void ApplyTimeDilation(bool hasReceivedFirstMessage, int pendingCount)
         {
-            if (!hasProcessedFirstMessage || hasTimeDilation)
+            if (!hasReceivedFirstMessage || hasTimeDilation)
                 return;
 
             hasTimeDilation = true;

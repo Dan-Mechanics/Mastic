@@ -41,7 +41,10 @@ namespace Mastic
         private StateMessage serverStateMessage;
         private InputMessage previousInputMessage;
 
+        private bool hasReceivedFirstMessage; 
+        private bool bufferHasTicks; 
         private int currentTick;
+        private int receivedTick;
         private float standardInterval;
         private bool w, a, s, d;
         private float timer;
@@ -49,7 +52,6 @@ namespace Mastic
         public void Initialize(int standardTickrate, ICameraInterpolation interpolation)
         {
             standardInterval = 1f / standardTickrate;
-            previousInputMessage.tick = -1;
             this.interpolation = interpolation;
 
             movements = GetComponents<IMovement>();
@@ -70,11 +72,13 @@ namespace Mastic
             pendingInputMessages = new List<InputMessage>();
             stateBuffer = new StateMessage[bufferSize];
             inputBuffer = new InputMessage[bufferSize];
+            receivedTick = -1;
         }
 
         public override void OnStartLocalPlayer()
         {
             base.OnStartLocalPlayer();
+            previousInputMessage.tick = -1; 
             for (int i = 0; i < stateBuffer.Length; i++)
             {
                 stateBuffer[i].position = transform.position;
@@ -141,13 +145,12 @@ namespace Mastic
         [Server]
         public int DoServerTick()
         {
-            adaptiveTickrate.ApplyTimeDilation(previousInputMessage.tick >= 0, pendingInputMessages.Count);
+            adaptiveTickrate.ApplyTimeDilation(hasReceivedFirstMessage, pendingInputMessages.Count);
+            bufferHasTicks = false;
 
-            pendingInputMessages.Sort();
             InputMessage inputMessage = GetNextInputMessage();
-
-            Move(inputMessage, false);
             int stateBufferIndex = inputMessage.tick % bufferSize;
+            Move(inputMessage, false);
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, movementIndex, inputMessage);
 
             movementAbilities.ForEach(x => x.CleanTicks(inputMessage.tick));
@@ -159,8 +162,8 @@ namespace Mastic
                 Debug.LogWarning("This is acceptable for spawn because the buffer is very empty");
             }
 
-            currentTick++;
             previousInputMessage = inputMessage;
+            currentTick++;
             return stateBufferIndex;
         }
 
@@ -169,32 +172,27 @@ namespace Mastic
             InputMessage inputMessage;
             if (pendingInputMessages.Count > 0)
             {
-                int expected = previousInputMessage.tick + 1;
-                if (pendingInputMessages[0].tick > expected)
+                inputMessage = pendingInputMessages[0];
+                pendingInputMessages.RemoveAt(0);
+                if (inputMessage.tick >= 0)
                 {
-                    inputMessage = GetDefaultedInput();
-                }
-                else if (pendingInputMessages[0].tick < expected)
-                {
-                    // KEEP LOOKING UNTIL YOU FIND IT OR RUN OUT OF MESSAGES.
-                    pendingInputMessages.RemoveAt(0);
-                    inputMessage = GetNextInputMessage();
+                    hasReceivedFirstMessage = true;
+                    bufferHasTicks = true;
                 }
                 else
                 {
-                    inputMessage = pendingInputMessages[0];
-                    pendingInputMessages.RemoveAt(0);
+                    inputMessage = GetDefaultInputMessage();
                 }
             }
             else
             {
-                inputMessage = GetDefaultedInput();
+                inputMessage = GetDefaultInputMessage();
             }
 
             return inputMessage;
         }
 
-        private InputMessage GetDefaultedInput()
+        private InputMessage GetDefaultInputMessage()
         {
             InputMessage inputMessage = previousInputMessage;
             inputMessage.tick++;
@@ -213,24 +211,52 @@ namespace Mastic
             TargetSendStateMessageToClient(connectionToClient, stateBuffer[stateBufferIndex]);
         }
 
+        /// <summary>
+        /// This is because afte the simulation step, the velocity is unstable. 
+        /// We limit it to make sure it doesn't cause reconsiles.
+        /// </summary>
         public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, settings.topSpeed);
         public void AddForce(Vector3 velocityChange) => movement.AddForce(velocityChange);
 
+        /// <summary>
+        /// Consider making it so that the InputMessage is inserted 
+        /// where it is according to the order. Alternitively, you 
+        /// could also sort the pending on DoServerTick() , and fill in the gaps ??
+        /// </summary>
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
-            if (inputMessage.tick < 0 || inputMessage.tick <= previousInputMessage.tick)
+            // MAKE SURE MESSAGES ARE NOT OUT OF ORDER OR INCORRECT.
+            if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
-            if (pendingInputMessages.Count >= maxPendingInputMessages)
-                return;
+            if (inputMessage.tick > receivedTick + 1 && hasReceivedFirstMessage && bufferHasTicks)
+            {
+                for (int i = 0; i < inputMessage.tick - receivedTick - 1; i++)
+                {
+                    InputMessage clone = inputMessage;
+                    clone.tick -= i + 1;
 
+                    // IF WE ALREADY DEFAULTED THIS, THEN THERE'S NO POINT.
+                    if (clone.tick > previousInputMessage.tick)
+                        pendingInputMessages.Add(clone);
+                }
+            }
+
+            receivedTick = inputMessage.tick;
             pendingInputMessages.Add(inputMessage);
+
+            // REMOVE IF TOO MANY.
+            while (pendingInputMessages.Count > maxPendingInputMessages)
+            {
+                pendingInputMessages.RemoveAt(pendingInputMessages.Count - 1);
+            }
         }
 
         [TargetRpc(channel = Channels.Unreliable)]
         private void TargetSendStateMessageToClient(NetworkConnectionToClient conn, StateMessage stateMessage)
         {
+            // MAKE SURE MESSAGES ARE NOT OUT OF ORDER.
             if (stateMessage.tick > currentTick - 1)
             {
                 Debug.LogWarning("We have to return here since the positions are stored in a ringbuffer and otherwise would wrap around and completely break the reconsile.");
