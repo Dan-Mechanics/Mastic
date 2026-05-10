@@ -215,13 +215,14 @@ namespace Mastic
         /// This is because afte the simulation step, the velocity is unstable. 
         /// We limit it to make sure it doesn't cause reconsiles.
         /// </summary>
-        public void LimitSpeed()
-        {
-            Vector3 vel = rb.linearVelocity;
-            vel = Vector3.ClampMagnitude(vel, settings.topSpeed);
-            rb.linearVelocity = vel;
-        }
+        public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, settings.topSpeed);
+        public void AddForce(Vector3 velocityChange) => movement.AddForce(velocityChange);
 
+        /// <summary>
+        /// Consider making it so that the InputMessage is inserted 
+        /// where it is according to the order. Alternitively, you 
+        /// could also sort the pending on DoServerTick() , and fill in the gaps ??
+        /// </summary>
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
