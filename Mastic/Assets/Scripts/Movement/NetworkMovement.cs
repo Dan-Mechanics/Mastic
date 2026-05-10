@@ -31,13 +31,16 @@ namespace Mastic
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation interpolation;
-        private IMovement movement;
+
         private byte movementIndex;
-        private List<IMovementAbility> movementAbilities;
+        private IMovement movement;
         private IMovement[] movements;
+        private List<IMovementAbility> movementAbilities;
         private List<InputMessage> pendingInputMessages;
+
         private StateMessage[] stateBuffer;
         private InputMessage[] inputBuffer;
+
         private StateMessage serverStateMessage;
         private InputMessage previousInputMessage;
 
@@ -67,11 +70,6 @@ namespace Mastic
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
 
-            // IN THEORY YOU COULD OMIT SOME OF THESE
-            // DEPENDING ON IF LOCAL OR SERVER ETC.
-            pendingInputMessages = new List<InputMessage>();
-            stateBuffer = new StateMessage[bufferSize];
-            inputBuffer = new InputMessage[bufferSize];
             receivedTick = -1;
             previousInputMessage.tick = -1;
         }
@@ -79,11 +77,20 @@ namespace Mastic
         public override void OnStartLocalPlayer()
         {
             base.OnStartLocalPlayer();
-            previousInputMessage.tick = -1; 
+            inputBuffer = new InputMessage[bufferSize];
+            stateBuffer = new StateMessage[bufferSize];
             for (int i = 0; i < stateBuffer.Length; i++)
             {
                 stateBuffer[i].position = transform.position;
             }
+        }
+
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            inputBuffer = new InputMessage[bufferSize];
+            stateBuffer = new StateMessage[bufferSize];
+            pendingInputMessages = new List<InputMessage>();
         }
 
         [Client]
@@ -220,11 +227,6 @@ namespace Mastic
         public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, settings.topSpeed);
         public void AddForce(Vector3 velocityChange) => movement.AddForce(velocityChange);
 
-        /// <summary>
-        /// Consider making it so that the InputMessage is inserted 
-        /// where it is according to the order. Alternitively, you 
-        /// could also sort the pending on DoServerTick() , and fill in the gaps ??
-        /// </summary>
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
