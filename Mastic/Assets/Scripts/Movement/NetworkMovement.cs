@@ -44,8 +44,8 @@ namespace Mastic
         private StateMessage serverStateMessage;
         private InputMessage previousInputMessage;
 
-        private bool hasReceivedFirstMessage; 
-        private bool bufferHasTicks; 
+        private bool firstInputMessageReceived; 
+        private bool hasInputMessages; 
         private int currentTick;
         private int receivedTick;
         private float standardInterval;
@@ -153,7 +153,7 @@ namespace Mastic
         [Server]
         public int DoServerTick()
         {
-            adaptiveTickrate.ApplyTimeDilation(hasReceivedFirstMessage, pendingInputMessages.Count);
+            adaptiveTickrate.ApplyTimeDilation(firstInputMessageReceived, pendingInputMessages.Count);
 
             InputMessage inputMessage = GetNextInputMessage();
             Move(inputMessage, false);
@@ -176,7 +176,7 @@ namespace Mastic
 
         private InputMessage GetNextInputMessage()
         {
-            bufferHasTicks = false;
+            hasInputMessages = false;
             InputMessage inputMessage;
 
             if (pendingInputMessages.Count > 0)
@@ -185,23 +185,23 @@ namespace Mastic
                 pendingInputMessages.RemoveAt(0);
                 if (inputMessage.tick >= 0)
                 {
-                    hasReceivedFirstMessage = true;
-                    bufferHasTicks = true;
+                    firstInputMessageReceived = true;
+                    hasInputMessages = true;
                 }
                 else
                 {
-                    inputMessage = GetDefaultInputMessage();
+                    inputMessage = GetDefaultedInputMessage();
                 }
             }
             else
             {
-                inputMessage = GetDefaultInputMessage();
+                inputMessage = GetDefaultedInputMessage();
             }
 
             return inputMessage;
         }
 
-        private InputMessage GetDefaultInputMessage()
+        private InputMessage GetDefaultedInputMessage()
         {
             InputMessage inputMessage = previousInputMessage;
             inputMessage.tick++;
@@ -230,11 +230,18 @@ namespace Mastic
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
         {
+            // ALLOW DEFAULTED TICKS TO BE CORRECTED. CONSIDER RETURNING WHEN FIRST IS FOUND.
+            for (int i = 0; i < pendingInputMessages.Count; i++)
+            {
+                if (pendingInputMessages[i].tick == inputMessage.tick)
+                    pendingInputMessages[i] = inputMessage;
+            }
+
             // MAKE SURE MESSAGES ARE NOT OUT OF ORDER OR INCORRECT.
             if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
-            if (inputMessage.tick > receivedTick + 1 && hasReceivedFirstMessage && bufferHasTicks)
+            if (inputMessage.tick > receivedTick + 1 && firstInputMessageReceived && hasInputMessages)
             {
                 for (int i = 0; i < inputMessage.tick - receivedTick - 1; i++)
                 {
