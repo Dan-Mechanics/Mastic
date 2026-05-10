@@ -36,7 +36,7 @@ namespace Mastic
             foreach (Player player in players)
             {
                 player.networkMovement.LimitSpeed();
-                player.networkMovement.SendAuthStateToClient(player.stateBufferIndex);
+                player.networkMovement.SendStateMessageToClient(player.stateBufferIndex);
             }
 
             lagCompensation.Clean();

@@ -49,8 +49,8 @@ namespace Mastic
         public void Initialize(int standardTickrate, ICameraInterpolation interpolation)
         {
             standardInterval = 1f / standardTickrate;
-            previousInputMessage.tick = -1;
             this.interpolation = interpolation;
+            previousInputMessage.tick = -1;
 
             movements = GetComponents<IMovement>();
             for (int i = 0; i < movements.Length; i++)
@@ -64,21 +64,24 @@ namespace Mastic
             mouseLook = GetComponent<MouseLook>();
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
-
-            // IN THEORY YOU COULD OMIT SOME OF THESE
-            // DEPENDING ON IF LOCAL OR SERVER ETC.
-            pendingInputMessages = new List<InputMessage>();
-            stateBuffer = new StateMessage[bufferSize];
-            inputBuffer = new InputMessage[bufferSize];
         }
 
         public override void OnStartLocalPlayer()
         {
             base.OnStartLocalPlayer();
+            inputBuffer = new InputMessage[bufferSize];
+            stateBuffer = new StateMessage[bufferSize];
             for (int i = 0; i < stateBuffer.Length; i++)
             {
                 stateBuffer[i].position = transform.position;
             }
+        }
+
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            stateBuffer = new StateMessage[bufferSize];
+            pendingInputMessages = new List<InputMessage>();
         }
 
         [Client]
@@ -206,7 +209,7 @@ namespace Mastic
         /// in ordering of Physics.Simulate between the server and client.
         /// </summary>
         [Server]
-        public void SendAuthStateToClient(int stateBufferIndex) 
+        public void SendStateMessageToClient(int stateBufferIndex) 
         {
             stateBuffer[stateBufferIndex].position = transform.position;
             stateBuffer[stateBufferIndex].velocity = rb.linearVelocity;
