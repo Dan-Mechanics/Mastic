@@ -6,8 +6,6 @@ namespace Mastic
     {
         public float LerpValue { get; set; }
         public bool IsInterjected { get; set; }
-
-        [SerializeField] private float maxLerpValue = default;
         private Vector3 pos;
         private Vector3 vel;
         private float time;
@@ -37,7 +35,7 @@ namespace Mastic
 
         public void SetValue(float value)
         {
-            value = Mathf.Clamp(value, 0f, Time.fixedDeltaTime * maxLerpValue);
+            value = Mathf.Clamp(value, 0f, Time.fixedDeltaTime * ICameraInterpolation.MAX_LERP_VALUE);
             transform.position = pos + (vel * value);
         }
     }

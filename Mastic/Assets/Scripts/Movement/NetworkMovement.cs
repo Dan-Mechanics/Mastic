@@ -47,7 +47,7 @@ namespace Mastic
         private bool firstInputMessageReceived; 
         private bool hasInputMessages; 
         private int currentTick;
-        private int lastReceivedTick;
+        private int receivedTick;
         private float standardInterval;
         private bool w, a, s, d;
         private float timer;
@@ -70,7 +70,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
 
-            lastReceivedTick = -1;
+            receivedTick = -1;
             previousInputMessage.tick = -1;
         }
 
@@ -236,14 +236,14 @@ namespace Mastic
             }
 
             // VALIDATE INCOMING MESSAGES.
-            if (inputMessage.tick < 0 || inputMessage.tick <= lastReceivedTick)
+            if (inputMessage.tick < 0 || inputMessage.tick <= receivedTick)
                 return;
 
             // FILL GAPS BETWEEN PACKETS, BECAUSE OF PACKET LOSS.
-            if (inputMessage.tick > lastReceivedTick + 1 && firstInputMessageReceived && hasInputMessages)
+            if (inputMessage.tick > receivedTick + 1 && firstInputMessageReceived && hasInputMessages)
             {
                 int packetsAdded = 0;
-                int packetsMissing = inputMessage.tick - lastReceivedTick - 1;
+                int packetsMissing = inputMessage.tick - receivedTick - 1;
                 for (int i = packetsMissing - 1; i >= 0; i--)
                 {
                     InputMessage clone = inputMessage;
@@ -265,7 +265,7 @@ namespace Mastic
                 pendingInputMessages.RemoveAt(pendingInputMessages.Count - 1);
             }
 
-            lastReceivedTick = pendingInputMessages[^1].tick;
+            receivedTick = pendingInputMessages[^1].tick;
         }
 
         [TargetRpc(channel = Channels.Unreliable)]
