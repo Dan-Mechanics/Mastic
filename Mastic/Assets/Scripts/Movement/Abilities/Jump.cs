@@ -4,56 +4,53 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class Gust : NetworkBehaviour, IMovementAbility
+    public class Jump : NetworkBehaviour, IMovementAbility
     {
         [SerializeField] private float speed = default;
-        [SerializeField] private EasyBinding ability1 = default;
+        [SerializeField] private EasyBinding jump = default;
         [SerializeField] private int maxPendingRequests = default;
-        [SerializeField] private int cooldownIndex = default;
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
         private int previousTick;
-        private Transform eyes;
         private Rigidbody rb;
 
-        private void Awake()
+        public void Initialize()
         {
             rb = GetComponent<Rigidbody>();
             cooldownHandler = GetComponent<CooldownHandler>();
-            eyes = transform.Find("eyes");
             previousTick = -1;
         }
 
         [Client]
         public void DoLocalTick(int movementTick, IMovement movement)
         {
-            if (ability1.IsHeld && cooldownHandler.CanCast(cooldownIndex))
+            if (jump.IsHeld && CanJump(movement))
             {
-                cooldownHandler.Cast(cooldownIndex);
+                cooldownHandler.Cast(cooldownHandler.Last);
                 pendingRequests.Add(movementTick);
-                CmdRequestGust(movementTick);
+                CmdRequestJump(movementTick);
             }
         }
 
         [Command]
-        private void CmdRequestGust(int tick)
+        private void CmdRequestJump(int tick)
         {
             if (pendingRequests.Count >= maxPendingRequests || tick <= previousTick)
                 return;
 
             pendingRequests.Add(tick);
             previousTick = tick;
-            Debug.LogWarning($"{gameObject.name}: requested gust {tick} ...");
+            Debug.LogWarning($"{gameObject.name}: requested jump {tick} ...");
         }
 
         [Client]
-        public void CheckAgainstTickClient(int tick, IMovement movement)
+        public void CheckAgainstTickClient(int tick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
                 if (tick == pendingRequests[i])
-                    PerformGust(movement);
+                    PerformJump();
             }
         }
 
@@ -62,11 +59,11 @@ namespace Mastic
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (tick != pendingRequests[i] || !cooldownHandler.CanCast(cooldownIndex))
+                if (tick != pendingRequests[i] || !CanJump(movement))
                     continue;
 
-                cooldownHandler.Cast(cooldownIndex);
-                PerformGust(movement);
+                cooldownHandler.Cast(cooldownHandler.Last);
+                PerformJump();
             }
         }
 
@@ -79,13 +76,19 @@ namespace Mastic
             }
         }
 
-        private void PerformGust(IMovement movement)
+        private bool CanJump(IMovement movement)
         {
-            Vector3 force = eyes.forward * speed;
-            if (force.y >= 0f && rb.linearVelocity.y < 0f)
+            return movement.IsGrounded &&
+                cooldownHandler.CanCast(cooldownHandler.Last);
+        }
+
+        private void PerformJump()
+        {
+            Vector3 force = Vector3.up * speed;
+            if (rb.linearVelocity.y < 0f)
                 force.y -= rb.linearVelocity.y;
 
-            movement.AddForce(force);
+            rb.AddForce(force, ForceMode.VelocityChange);
         }
     }
 }

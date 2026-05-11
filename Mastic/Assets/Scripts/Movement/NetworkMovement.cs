@@ -224,7 +224,6 @@ namespace Mastic
         /// We limit it to make sure it doesn't cause reconsiles.
         /// </summary>
         public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, settings.topSpeed);
-        public void AddForce(Vector3 velocityChange) => movement.AddForce(velocityChange);
 
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
@@ -341,17 +340,17 @@ namespace Mastic
             mouseLook.SetAsRotation(input.xRotation, input.yRotation);
             movement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval);
 
-            if (isServer)
+            if (isLocalPlayer)
             {
-                movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, currentTick));
+                movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick));
             }
             else
             {
-                movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick, movement));
+                movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, currentTick));
             }
 
             // APPLY CHANGES.
-            if (isClient)
+            if (isLocalPlayer)
             {
                 Physics.Simulate(standardInterval);
                 LimitSpeed();

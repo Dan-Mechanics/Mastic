@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94cb6ba14336a14283a5bce92835469, type: 3}
   m_Name: movement
   m_EditorClassIdentifier: 
-  speed: 6
-  acceleration: 35
-  multiplier: 0.35
+  speed: 5.75
+  acceleration: 40
+  multiplier: 0.325
   topSpeed: 25
   mask:
     serializedVersion: 2

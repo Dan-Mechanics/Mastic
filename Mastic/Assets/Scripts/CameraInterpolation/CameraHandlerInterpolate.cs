@@ -7,6 +7,7 @@ namespace Mastic
         public float LerpValue { get; set; }
         public bool IsInterjected { get; set; }
 
+        [SerializeField] private float maxLerpValue = default;
         private Vector3 pos;
         private Vector3 prevPos;
         private float time;
@@ -43,9 +44,8 @@ namespace Mastic
         /// </summary>
         public void SetValue(float value)
         {
-            // SINCE WE ARE NOT USING UNCLAMPED LERP HERE,
-            // WE DON'T HAVE TO CLAMP ANYTHING.
-            transform.position = Vector3.Lerp(prevPos, pos, value);
+            value = Mathf.Clamp(value, 0f, maxLerpValue);
+            transform.position = Vector3.LerpUnclamped(prevPos, pos, value);
         }
     }
 }

@@ -24,7 +24,6 @@ namespace Mastic
 
         public void EnableGravity(bool hasGravity) => this.hasGravity = hasGravity;
         public void EnableControl(bool controllable) => this.controllable = controllable;
-        public void AddForce(Vector3 velocityChange) => rb.AddForce(velocityChange, ForceMode.VelocityChange);
 
         public void Move(float vert, float hori, float interval)
         {

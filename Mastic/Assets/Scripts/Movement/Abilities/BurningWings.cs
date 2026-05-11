@@ -48,6 +48,7 @@ namespace Mastic
             CmdRequestBurningWings(movementTick);
         }
 
+        public void Move(float vert, float hori, float interval) => rb.linearVelocity = eyes.forward * speed;
         private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
 
         [Command]
@@ -62,7 +63,7 @@ namespace Mastic
         }
 
         [Client]
-        public void CheckAgainstTickClient(int tick, IMovement movement)
+        public void CheckAgainstTickClient(int tick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
@@ -108,8 +109,5 @@ namespace Mastic
             startingTick = tick;
             endingTick = startingTick + tickDuration;
         }
-
-        public void Move(float vert, float hori, float interval) => rb.linearVelocity = eyes.forward * speed;
-        public void AddForce(Vector3 velocityChange) { }
     }
 }

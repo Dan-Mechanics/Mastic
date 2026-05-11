@@ -555,8 +555,8 @@ MonoBehaviour:
   syncInterval: 0
   cooldowns:
   - value: 0
-    minRequired: 128
-    maxValue: 128
+    minRequired: 10
+    maxValue: 10
   - value: 0
     minRequired: 64
     maxValue: 64

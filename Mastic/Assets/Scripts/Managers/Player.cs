@@ -25,7 +25,7 @@ namespace Mastic
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
         private LagCompensation lagCompensation;
-        private CameraHandlerExtrapolate cameraHandlerExtrapolate;
+        private ICameraInterpolation cameraInterpolation;
 
         private void Awake()
         {
@@ -40,7 +40,7 @@ namespace Mastic
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();
-            cameraHandlerExtrapolate = GameObject.FindWithTag("MainCamera").GetComponent<CameraHandlerExtrapolate>();
+            cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
             Initialize();
         }
 
@@ -55,7 +55,7 @@ namespace Mastic
             jump.Initialize();
             entity.Initialize(lagCompensation);
             physicsMovement.Initialize();
-            networkMovement.Initialize(standardTickrate, cameraHandlerExtrapolate);
+            networkMovement.Initialize(standardTickrate, cameraInterpolation);
         }
 
         public override void OnStartServer()

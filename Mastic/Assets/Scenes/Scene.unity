@@ -260,6 +260,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5b3e5b7039271c4781e9734b95755bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1399234151 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3129894886814924649, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+  m_PrefabInstance: {fileID: 1861253640}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1399234157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1399234151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30575d744a690e142b7bcd916b12427c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxLerpValue: 1.5
 --- !u!1001 &1861253640
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -324,10 +342,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1463896444, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3129894886814924649, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1399234157}
   m_SourcePrefab: {fileID: 100100000, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
 --- !u!1001 &2123367391152673316
 PrefabInstance:
@@ -723,10 +745,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: scene_setup
       objectReference: {fileID: 0}
-    - target: {fileID: 6103662349769157085, guid: e58735b1d2b7d734f89c67911ff0acb5, type: 3}
-      propertyPath: framerateLimit
-      value: 300
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -736,13 +754,13 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1861253640}
   - {fileID: 3229349398353710519}
   - {fileID: 5107819873165235031}
   - {fileID: 8338882804289220007}
-  - {fileID: 8925379699447923364}
   - {fileID: 2123367391152673316}
-  - {fileID: 1861253640}
   - {fileID: 1313093709}
+  - {fileID: 8925379699447923364}
   - {fileID: 6024181516489596686}
   - {fileID: 744171792}
   - {fileID: 5256125215055487970}
