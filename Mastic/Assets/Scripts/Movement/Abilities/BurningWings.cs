@@ -75,21 +75,23 @@ namespace Mastic
         }
 
         [Server]
-        public void CheckAgainstTickServer(int tick, IMovement movement, int movementTick)
+        public void CheckAgainstTickServer(int inputTick, IMovement movement, int movementTick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (tick != pendingRequests[i] || !CanCast(movementTick))
+                if (inputTick < pendingRequests[i] || !CanCast(movementTick))
                     continue;
 
                 cooldownHandler.Cast(cooldownIndex);
                 Cast(movementTick);
+                pendingRequests.RemoveAt(i);
+                break;
             }
 
             networkMovement.SetMovement(IsAbilityActive(movementTick) ? Index : physicsMovement.Index);
         }
 
-        public void CleanTicks(int upTo)
+        public void CleanPendingRequests(int upTo)
         {
             for (int i = pendingRequests.Count - 1; i >= 0; i--)
             {

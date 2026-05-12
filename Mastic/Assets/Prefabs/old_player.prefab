@@ -297,14 +297,15 @@ GameObject:
   - component: {fileID: 6891286507384332386}
   - component: {fileID: 8815636318867098599}
   - component: {fileID: -1140434863641568140}
+  - component: {fileID: 1417728271743360921}
   - component: {fileID: 9211630360903548100}
   - component: {fileID: -5600370486124146712}
   - component: {fileID: 8685740675525256336}
   - component: {fileID: -5984394209105652319}
-  - component: {fileID: -3213554778907423252}
+  - component: {fileID: 97195063464409851}
   - component: {fileID: 790473191979634726}
   m_Layer: 3
-  m_Name: player
+  m_Name: old_player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -499,6 +500,27 @@ MonoBehaviour:
   tickrateChangeSound: {fileID: 8300000, guid: e574a31a4283dc1469d6674a922e3f0e, type: 3}
   authPrefab: {fileID: 4866268349233265365, guid: 51629528fa6e51d4fbb2eddc7a1da3d4, type: 3}
   authOffset: {x: 0, y: 2.5, z: 0}
+--- !u!114 &1417728271743360921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69fe77c10f6ba0a48ab0baf773436b02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  primaryFire: {fileID: 0}
+  mask:
+    serializedVersion: 2
+    m_Bits: 9
+  range: 1000
+  damage: 26
 --- !u!114 &9211630360903548100
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -514,6 +536,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  mouseLook: {fileID: 3751572637676758940}
   playerLayerName: Player
   intangibleLayerName: Intangible
 --- !u!114 &-5600370486124146712
@@ -587,7 +610,7 @@ MonoBehaviour:
   ability1: {fileID: 11400000, guid: 00ce751e8eeaaf241bc6e06f96db00e0, type: 2}
   maxPendingRequests: 8
   cooldownIndex: 0
---- !u!114 &-3213554778907423252
+--- !u!114 &97195063464409851
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -596,19 +619,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 3751572637676758942}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93865cefa6edcc743b9efb29a61e55bd, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f5be428ca6c91646b9162c2d609827b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  speed: 12.5
   ability2: {fileID: 11400000, guid: c616e6e823b59d14b9712499bf992211, type: 2}
-  cloudPrefab: {fileID: 106363770380491094, guid: e1ca7f8cf71c3a64d89a2e01e7898476, type: 3}
-  force: {x: 0, y: 15, z: 0}
   maxPendingRequests: 8
-  expectedRigidbodies: 12
-  tickDuration: 640
-  standardTickrate: 64
+  tickDuration: 100
   cooldownIndex: 1
 --- !u!114 &790473191979634726
 MonoBehaviour:
@@ -625,12 +645,12 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  velocityChange: 12
   teleportRange: 500
+  explosionRadius: 6
   teleportMask:
     serializedVersion: 2
     m_Bits: 1
-  explosionForce: 12
-  explosionRadius: 6
   explosionMask:
     serializedVersion: 2
     m_Bits: 8

@@ -14,9 +14,9 @@ namespace Mastic
         /// </summary>
         public int RollbackTick => tick;
         
-        [SerializeField] private MouseLook mouseLook = default;
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
+        private MouseLook mouseLook;
         private int intangibleLayer;
         private int playerLayer;
         private Frame[] recording;
@@ -26,6 +26,7 @@ namespace Mastic
         [Server]
         public void Initialize(LagCompensation lagCompensation)
         {
+            mouseLook = GetComponent<MouseLook>();
             recording = new Frame[lagCompensation.MaxRecordingLength];
             lagCompensation.Register(this);
             playerLayer = LayerMask.NameToLayer(playerLayerName);

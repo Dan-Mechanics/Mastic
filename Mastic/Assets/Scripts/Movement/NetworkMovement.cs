@@ -162,7 +162,7 @@ namespace Mastic
             int stateBufferIndex = inputMessage.tick % bufferSize;
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, movementIndex, inputMessage);
 
-            movementAbilities.ForEach(x => x.CleanTicks(inputMessage.tick));
+            movementAbilities.ForEach(x => x.CleanPendingRequests(inputMessage.tick));
 
             if (previousInputMessage.tick != inputMessage.tick - 1)
             {
@@ -287,7 +287,7 @@ namespace Mastic
             }
 
             serverStateMessage = stateMessage;
-            movementAbilities.ForEach(x => x.CleanTicks(serverStateMessage.tick));
+            movementAbilities.ForEach(x => x.CleanPendingRequests(serverStateMessage.tick));
             OnDisplayServerState?.Invoke(serverStateMessage);
             CheckReconsiliation();
         }

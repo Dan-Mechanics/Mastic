@@ -58,19 +58,21 @@ namespace Mastic
         }
 
         [Server]
-        public void CheckAgainstTickServer(int tick, IMovement movement, int movementTick)
+        public void CheckAgainstTickServer(int inputTick, IMovement movement, int movementTick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (tick != pendingRequests[i] || !cooldownHandler.CanCast(cooldownIndex))
+                if (inputTick < pendingRequests[i] || !cooldownHandler.CanCast(cooldownIndex))
                     continue;
 
                 cooldownHandler.Cast(cooldownIndex);
                 PerformGust();
+                pendingRequests.RemoveAt(i);
+                break;
             }
         }
 
-        public void CleanTicks(int upTo)
+        public void CleanPendingRequests(int upTo)
         {
             for (int i = pendingRequests.Count - 1; i >= 0; i--)
             {

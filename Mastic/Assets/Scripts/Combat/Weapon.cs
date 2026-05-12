@@ -42,7 +42,7 @@ namespace Mastic
 
         public void DoLocalUpdate(int movementTick, int rollbackTick)
         {
-            if (primaryFire == null || !primaryFire.WasPressed)
+            if (!primaryFire.WasPressed)
                 return;
 
             shootMessage.SetValues(mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, movementTick, rollbackTick);
