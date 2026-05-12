@@ -26,5 +26,14 @@ namespace Mastic
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
+
+        public static Vector3 GetSafeNormal(Vector3 normal)
+        {
+            normal.Normalize();
+            if (normal == Vector3.zero)
+                normal = Vector3.up;
+
+            return normal;
+        }
     }
 }

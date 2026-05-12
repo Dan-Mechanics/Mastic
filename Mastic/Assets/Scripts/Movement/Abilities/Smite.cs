@@ -4,34 +4,36 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class BurningWings : NetworkBehaviour, IMovement, IMovementAbility
+    // at first im gonna implement this without the rollback for the shoot tick, aimed tick i mean
+    public class Smite : NetworkBehaviour, IMovementAbility
     {
-        public byte Index { get; set; }
-        public bool IsGrounded => false;
-
-        [SerializeField] private float speed = default;
-        [SerializeField] private EasyBinding ability2 = default;
+        [SerializeField] private float velocityChange = default;
+        [SerializeField] private float teleportRange = default;
+        [SerializeField] private float explosionRadius = default;
+        [SerializeField] private LayerMask teleportMask = default;
+        [SerializeField] private LayerMask explosionMask = default;
+        [SerializeField] private EasyBinding primaryFire = default;
         [SerializeField] private int maxPendingRequests = default;
         [SerializeField] private int tickDuration = default;
         [SerializeField] private int cooldownIndex = default;
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
-        private NetworkMovement networkMovement;
         private PhysicsMovement physicsMovement;
+        private PlayerEntity entity;
         private int previousTick;
         private int startingTick;
         private int endingTick;
-        private Transform eyes;
+        private Transform cam;
         private Rigidbody rb;
 
         private void Awake()
         {
+            cam = GameObject.FindWithTag("MainCamera").transform;
             rb = GetComponent<Rigidbody>();
-            networkMovement = GetComponent<NetworkMovement>();
-            eyes = transform.Find("eyes");
             physicsMovement = GetComponent<PhysicsMovement>();
             cooldownHandler = GetComponent<CooldownHandler>();
+            entity = GetComponent<PlayerEntity>();
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;
@@ -40,19 +42,18 @@ namespace Mastic
         [Client]
         public void DoLocalTick(int movementTick, IMovement movement)
         {
-            if (!ability2.IsHeld || !CanCast(movementTick))
+            if (!primaryFire.IsHeld || !CanCast(movementTick))
                 return;
 
             cooldownHandler.Cast(cooldownIndex);
             pendingRequests.Add(movementTick);
-            CmdRequestBurningWings(movementTick);
+            CmdRequestSmite(movementTick);
         }
 
-        public void Move(float vert, float hori, float interval) => rb.linearVelocity = eyes.forward * speed;
         private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
 
         [Command]
-        private void CmdRequestBurningWings(int tick)
+        private void CmdRequestSmite(int tick)
         {
             if (pendingRequests.Count >= maxPendingRequests || tick <= previousTick)
                 return;
@@ -71,7 +72,47 @@ namespace Mastic
                     Cast(tick);
             }
 
-            networkMovement.SetMovement(IsAbilityActive(tick) ? Index : physicsMovement.Index);
+            physicsMovement.EnableGravity(!IsAbilityActive(tick));
+            if (tick == endingTick)
+            {
+                Vector3 point = Vector3.zero;
+                if (GetTeleportPoint(ref point))
+                    Teleport(point);
+            }
+        }
+
+        private bool GetTeleportPoint(ref Vector3 point)
+        {
+            entity.EnableHitbox(false);
+            bool found = Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, teleportRange, teleportMask, QueryTriggerInteraction.Ignore);
+            entity.EnableHitbox(true);
+            if (found)
+                point = hit.point;
+
+            return found;
+        }
+
+        private void Teleport(Vector3 point)
+        {
+            Debug.LogWarning("(" + point.x + ", " + point.y + ", " + point.z + ")");
+            transform.position = point;
+            rb.linearVelocity = Vector3.zero;
+            if (!isServer)
+                return;
+
+            Collider[] colliders = Physics.OverlapSphere(point, explosionRadius, explosionMask, QueryTriggerInteraction.Ignore);
+            foreach (Collider coll in colliders)
+            {
+                Transform other = coll.transform;
+                if (other == transform)
+                    continue;
+
+                if (!other.TryGetComponent(out Rigidbody otherRb))
+                    continue;
+
+                Vector3 dir = other.position - transform.position;
+                otherRb.AddForce(Utils.GetSafeNormal(dir) * velocityChange, ForceMode.VelocityChange);
+            }
         }
 
         [Server]
@@ -86,7 +127,13 @@ namespace Mastic
                 Cast(movementTick);
             }
 
-            networkMovement.SetMovement(IsAbilityActive(movementTick) ? Index : physicsMovement.Index);
+            physicsMovement.EnableGravity(!IsAbilityActive(movementTick));
+            if (endingTick == movementTick)
+            {
+                Vector3 point = Vector3.zero;
+                if (GetTeleportPoint(ref point))
+                    Teleport(point);
+            }
         }
 
         public void CleanTicks(int upTo)

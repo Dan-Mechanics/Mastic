@@ -32,7 +32,6 @@ namespace Mastic
             float y = Input.GetAxisRaw("Mouse X");
             rotation += new Vector2(x, y) * sensitivity;
             SetAsRotation(rotation.x, rotation.y);
-            cam.rotation = eyes.rotation;
         }
 
         public void SetAsRotation(float xRotation, float yRotation)
@@ -43,6 +42,7 @@ namespace Mastic
 
             eyes.localRotation = Quaternion.AngleAxis(xRotation, Vector3.right);
             transform.rotation = Quaternion.AngleAxis(yRotation, Vector3.up);
+            cam.rotation = eyes.rotation;
         }
     }
 }

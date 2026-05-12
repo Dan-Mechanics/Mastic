@@ -77,10 +77,8 @@ namespace Mastic
 
         private void OnDrawGizmos()
         {
-            Color color = Color.Lerp(Color.green, Color.white, 0.5f);
-            color.a = 0.3f;
-            Gizmos.color = color;
-            Gizmos.DrawSphere(transform.position + (Vector3.down * settings.offset), settings.radius);
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position + (Vector3.down * settings.offset), settings.radius);
         }
     }
 }

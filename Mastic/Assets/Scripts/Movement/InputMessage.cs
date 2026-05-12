@@ -14,9 +14,10 @@ namespace Mastic
         public bool d;
         public float xRotation;
         public float yRotation;
+        public float lerpValue;
         public int tick;
 
-        public void SetValues(bool w, bool a, bool s, bool d, float xRotation, float yRotation, int tick)
+        public void SetValues(bool w, bool a, bool s, bool d, float xRotation, float yRotation, float lerpValue, int tick)
         {
             this.w = w;
             this.a = a;
@@ -24,6 +25,7 @@ namespace Mastic
             this.d = d;
             this.xRotation = xRotation;
             this.yRotation = yRotation;
+            this.lerpValue = lerpValue;
             this.tick = tick;
         }
 

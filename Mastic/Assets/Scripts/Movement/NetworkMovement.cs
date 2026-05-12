@@ -30,7 +30,7 @@ namespace Mastic
         private Transform eyes;
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
-        private ICameraInterpolation interpolation;
+        private ICameraInterpolation cameraInterpolation;
 
         private byte movementIndex;
         private IMovement movement;
@@ -44,6 +44,7 @@ namespace Mastic
         private StateMessage serverStateMessage;
         private InputMessage previousInputMessage;
 
+        private Vector3 prevEyePos;
         private bool firstInputMessageReceived; 
         private bool hasInputMessages; 
         private int currentTick;
@@ -52,10 +53,10 @@ namespace Mastic
         private bool w, a, s, d;
         private float timer;
 
-        public void Initialize(int standardTickrate, ICameraInterpolation interpolation)
+        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation)
         {
             standardInterval = 1f / standardTickrate;
-            this.interpolation = interpolation;
+            this.cameraInterpolation = cameraInterpolation;
 
             movements = GetComponents<IMovement>();
             for (int i = 0; i < movements.Length; i++)
@@ -70,6 +71,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
 
+            prevEyePos = eyes.position;
             receivedTick = -1;
             previousInputMessage.tick = -1;
         }
@@ -140,7 +142,7 @@ namespace Mastic
             }
 
             int index = currentTick % bufferSize;
-            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, currentTick);
+            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, currentTick);
             Move(inputBuffer[index], true);
 
             stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
@@ -327,7 +329,7 @@ namespace Mastic
                 Vector3 prev = eyes.position;
                 Move(inputBuffer[index], false);
 
-                interpolation.Interject(eyes.position, prev, rb.linearVelocity);
+                cameraInterpolation.Interject(eyes.position, prev, rb.linearVelocity);
                 stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
 
                 tickToProcess++;
@@ -346,7 +348,10 @@ namespace Mastic
             }
             else
             {
+                cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
+                cameraInterpolation.SetValue(input.lerpValue);
                 movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, currentTick));
+                prevEyePos = eyes.position;
             }
 
             // APPLY CHANGES.
@@ -357,7 +362,7 @@ namespace Mastic
             }
 
             if (assignToCamera)
-                interpolation.Assign(eyes.position, rb.linearVelocity);
+                cameraInterpolation.Assign(eyes.position, rb.linearVelocity);
         }
     }
 }

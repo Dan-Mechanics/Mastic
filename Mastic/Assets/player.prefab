@@ -303,6 +303,7 @@ GameObject:
   - component: {fileID: 8685740675525256336}
   - component: {fileID: -5984394209105652319}
   - component: {fileID: 97195063464409851}
+  - component: {fileID: 790473191979634726}
   m_Layer: 3
   m_Name: player
   m_TagString: Player
@@ -514,7 +515,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
+  primaryFire: {fileID: 0}
   mask:
     serializedVersion: 2
     m_Bits: 9
@@ -629,6 +630,34 @@ MonoBehaviour:
   maxPendingRequests: 8
   tickDuration: 100
   cooldownIndex: 1
+--- !u!114 &790473191979634726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e28c1e30ab79da244b444ef85fe70e05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  velocityChange: 12
+  teleportRange: 500
+  explosionRadius: 6
+  teleportMask:
+    serializedVersion: 2
+    m_Bits: 1
+  explosionMask:
+    serializedVersion: 2
+    m_Bits: 8
+  primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
+  maxPendingRequests: 8
+  tickDuration: 64
+  cooldownIndex: 2
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0
