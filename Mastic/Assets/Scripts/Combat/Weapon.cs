@@ -16,7 +16,7 @@ namespace Mastic
         [SerializeField] private float damage = default;
 
         private List<ShootMessage> pendingShootMessages;
-        private ICameraInterpolation interpolation;
+        private ICameraInterpolation cameraInterpolation;
         private LagCompensation lagCompensation;
         private ShootMessage shootMessage;
         private MouseLook mouseLook;
@@ -31,7 +31,7 @@ namespace Mastic
         {
             eyes = transform.Find("eyes");
             cam = GameObject.FindWithTag("MainCamera").transform;
-            interpolation = cam.GetComponent<ICameraInterpolation>();
+            cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
             lagCompensation = FindAnyObjectByType<LagCompensation>();
             pendingShootMessages = new List<ShootMessage>();
             mouseLook = GetComponent<MouseLook>();
@@ -45,18 +45,23 @@ namespace Mastic
             if (!primaryFire.WasPressed)
                 return;
 
-            shootMessage.SetValues(mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, movementTick, rollbackTick);
-            shootMessage.SetDebugValues(cam.position, Vector3.zero);
+            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, movementTick, rollbackTick);
+            shootMessage.debugEnemyPos = Vector3.zero;
             // CmdShoot(new ShootMessage(cameraInterpolation.lerpValue, movement.id - 1,
             //    playerLook.RotationY, playerLook.RotationY, movement.currentTick - 1));
 
             if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
             {
-                if (hit.transform.root.TryGetComponent(out IDamagable damagable))
+                Transform target = hit.transform.root;
+                if (target.TryGetComponent(out IDamagable damagable))
                 {
                     OnPredictDamage?.Invoke(damage);
-                    shootMessage.SetDebugValues(cam.position, hit.transform.root.position);
+                    shootMessage.debugEnemyPos = target.position;
                 }
+                
+                // REDUCE NO-REGS.
+                if (target.TryGetComponent(out PlayerEntity playerEntity))
+                    shootMessage.rollbackTick = playerEntity.RollbackTick;
             }
 
             CmdShoot(shootMessage);
@@ -71,40 +76,38 @@ namespace Mastic
         [Server]
         private void Shoot(ShootMessage shootMessage) 
         {
+            // RECREATE THE SHOT CONDITIONS.
             lagCompensation.SetAsTick(shootMessage.rollbackTick);
             
-            // WE DON'T HAVE TO MOVE THE PLAYER HERE
-            // BECAUSE RAYCASTS OF A 
             mouseLook.SetAsRotation(shootMessage.xRotation, shootMessage.yRotation);
-            cam.rotation = eyes.rotation;
-            interpolation.Interject(pos, prevPos, vel);
-            interpolation.SetValue(shootMessage.lerpValue);
+            cameraInterpolation.Interject(pos, prevPos, vel);
+            cameraInterpolation.SetValue(shootMessage.lerpValue);
 
-            // FOR DEBUG.
-            if (cam.position != shootMessage.debugEyesPos)
+            // DEBUG.
+            if (cam.position != shootMessage.origin)
             {
-                Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.debugEyesPos})");
-                Debug.LogWarning($"{(cam.position - shootMessage.debugEyesPos) / Time.fixedDeltaTime}");
+                Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin})");
+                Debug.LogWarning($"{(cam.position - shootMessage.origin) / Time.fixedDeltaTime}");
                 //cam.position = shootMessage.eyesPos;
 
                 // FUTURE: ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
             }
 
-            if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
-            {
-                if (hit.transform.root.TryGetComponent(out IDamagable damagable))
-                {
-                    damagable.Damage(damage);
-                    TargetDisplayHitPip(connectionToClient, damage);
-                    hit.transform.root.GetComponent<PlayerHealth>().Damage(damage);
+            if (!Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
+                return;
 
-                    // FOR DEBUG.
-                    if (shootMessage.debugEnemyPos != Vector3.zero && shootMessage.debugEnemyPos != hit.transform.root.position)
-                    {
-                        Debug.LogWarning($"Recreated enemy pos was not the same as on the client. correct: {shootMessage.debugEnemyPos}, recreated: {hit.transform.root.position}");
-                        Debug.LogWarning($"{(shootMessage.debugEnemyPos - hit.transform.root.position) / Time.fixedDeltaTime}");
-                    }
-                }
+            Transform target = hit.transform.root;
+            if (!target.TryGetComponent(out IDamagable damagable))
+                return;
+
+            damagable.Damage(damage);
+            TargetDisplayHitPip(connectionToClient, damage);
+
+            // DEBUG.
+            if (shootMessage.debugEnemyPos != Vector3.zero && shootMessage.debugEnemyPos != target.position)
+            {
+                Debug.LogWarning($"Recreated enemy pos was not the same as on the client. correct: {shootMessage.debugEnemyPos}, recreated: {hit.transform.root.position}");
+                Debug.LogWarning($"{(shootMessage.debugEnemyPos - hit.transform.root.position) / Time.fixedDeltaTime}");
             }
         }
 

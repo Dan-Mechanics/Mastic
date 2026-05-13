@@ -102,11 +102,12 @@ namespace Mastic
             Collider[] colliders = Physics.OverlapSphere(point, explosionRadius, explosionMask, QueryTriggerInteraction.Ignore);
             foreach (Collider coll in colliders)
             {
-                if (!coll.transform.root.TryGetComponent(out Rigidbody otherRb) || otherRb == rb)
+                Transform target = coll.transform.root;
+                if (!target.TryGetComponent(out Rigidbody targetRb) || targetRb == rb)
                     continue;
 
-                Vector3 dir = coll.transform.position - transform.position;
-                otherRb.AddForce(Utils.GetSafeNormal(dir) * explosionForce, ForceMode.VelocityChange);
+                Vector3 dir = target.position - transform.position;
+                targetRb.AddForce(Utils.GetSafeNormal(dir) * explosionForce, ForceMode.VelocityChange);
             }
         }
 

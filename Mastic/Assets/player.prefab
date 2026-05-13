@@ -607,7 +607,7 @@ MonoBehaviour:
   force: {x: 0, y: 15, z: 0}
   maxPendingRequests: 8
   expectedRigidbodies: 12
-  tickDuration: 640
+  tickDuration: 768
   standardTickrate: 64
   cooldownIndex: 1
 --- !u!114 &790473191979634726
