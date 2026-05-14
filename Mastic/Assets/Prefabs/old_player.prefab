@@ -297,13 +297,12 @@ GameObject:
   - component: {fileID: 6891286507384332386}
   - component: {fileID: 8815636318867098599}
   - component: {fileID: -1140434863641568140}
-  - component: {fileID: 1417728271743360921}
   - component: {fileID: 9211630360903548100}
   - component: {fileID: -5600370486124146712}
   - component: {fileID: 8685740675525256336}
   - component: {fileID: -5984394209105652319}
   - component: {fileID: 97195063464409851}
-  - component: {fileID: 790473191979634726}
+  - component: {fileID: 4560825470044163134}
   m_Layer: 3
   m_Name: old_player
   m_TagString: Player
@@ -447,7 +446,6 @@ MonoBehaviour:
   bufferSize: 64
   tolerance: 0.001
   maxPendingInputMessages: 8
-  standardMovementIndex: 0
 --- !u!114 &6891286507384332386
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -476,6 +474,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
+  standardTickrateVar: {fileID: 11400000, guid: 037f3c5719afb8b4ba554c92111d6bf1, type: 2}
   minTimeDilationTime: 0.5
   drainedTickrateOffset: 1
   fullTickrateOffset: -1
@@ -500,27 +499,6 @@ MonoBehaviour:
   tickrateChangeSound: {fileID: 8300000, guid: e574a31a4283dc1469d6674a922e3f0e, type: 3}
   authPrefab: {fileID: 4866268349233265365, guid: 51629528fa6e51d4fbb2eddc7a1da3d4, type: 3}
   authOffset: {x: 0, y: 2.5, z: 0}
---- !u!114 &1417728271743360921
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3751572637676758942}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69fe77c10f6ba0a48ab0baf773436b02, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  primaryFire: {fileID: 0}
-  mask:
-    serializedVersion: 2
-    m_Bits: 9
-  range: 1000
-  damage: 26
 --- !u!114 &9211630360903548100
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -629,7 +607,7 @@ MonoBehaviour:
   maxPendingRequests: 8
   tickDuration: 100
   cooldownIndex: 1
---- !u!114 &790473191979634726
+--- !u!114 &4560825470044163134
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -638,25 +616,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 3751572637676758942}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e28c1e30ab79da244b444ef85fe70e05, type: 3}
+  m_Script: {fileID: 11500000, guid: 69fe77c10f6ba0a48ab0baf773436b02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  teleportRange: 500
-  teleportMask:
-    serializedVersion: 2
-    m_Bits: 1
-  explosionForce: 0
-  explosionRadius: 6
-  explosionMask:
-    serializedVersion: 2
-    m_Bits: 8
   primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
-  maxPendingRequests: 8
-  tickDuration: 64
-  cooldownIndex: 2
+  mask:
+    serializedVersion: 2
+    m_Bits: 9
+  range: 500
+  damage: 100
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0

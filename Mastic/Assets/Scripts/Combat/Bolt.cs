@@ -5,27 +5,29 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class Weapon : NetworkBehaviour, IAttackAbility
+    public class Bolt : NetworkBehaviour, IAttackAbility
     {
         public event Action<float> OnAuthoritativeDamage;
         public event Action<float> OnPredictDamage;
 
-        [SerializeField] private EasyBinding primaryFire = default;
+        [SerializeField] private EasyBinding secondaryFire = default;
+        [SerializeField] private CooldownHandler cooldownHandler = default;
+        [SerializeField] private int cooldownIndex = default;
         [SerializeField] private LayerMask mask = default;
         [SerializeField] private float range = default;
         [SerializeField] private float damage = default;
 
-        private List<ShootMessage> pendingShootMessages;
+        private List<ReliableShootMessage> pendingShootMessages;
         private ICameraInterpolation cameraInterpolation;
         private LagCompensation lagCompensation;
-        private ShootMessage shootMessage;
+        private ReliableShootMessage shootMessage;
         private MouseLook mouseLook;
         private Rigidbody rb;
         private Transform eyes;
         private Transform cam;
-        private Vector3 pos;
-        private Vector3 prevPos;
-        private Vector3 vel;
+        private Vector3 origin;
+        private Vector3 prevOrigin;
+        private Vector3 velocity;
 
         private void Awake()
         {
@@ -33,19 +35,18 @@ namespace Mastic
             cam = GameObject.FindWithTag("MainCamera").transform;
             cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
             lagCompensation = FindAnyObjectByType<LagCompensation>();
-            pendingShootMessages = new List<ShootMessage>();
+            pendingShootMessages = new List<ReliableShootMessage>();
             mouseLook = GetComponent<MouseLook>();
             rb = GetComponent<Rigidbody>();
-            pos = transform.position;
-            prevPos = pos;
+            prevOrigin = eyes.position;
         }
 
-        public void DoLocalUpdate(int movementTick, int rollbackTick)
+        public void DoLocalUpdate(int inputTick, int rollbackTick)
         {
-            if (!primaryFire.WasPressed)
+            if (!secondaryFire.WasPressed)
                 return;
 
-            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, movementTick, rollbackTick);
+            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, inputTick, rollbackTick);
             shootMessage.debugEnemyPos = Vector3.zero;
             // CmdShoot(new ShootMessage(cameraInterpolation.lerpValue, movement.id - 1,
             //    playerLook.RotationY, playerLook.RotationY, movement.currentTick - 1));
@@ -71,23 +72,27 @@ namespace Mastic
         public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
 
         [Command]
-        private void CmdShoot(ShootMessage shootMessage) => pendingShootMessages.Add(shootMessage);
+        private void CmdShoot(ReliableShootMessage shootMessage) => pendingShootMessages.Add(shootMessage);
 
         [Server]
-        private void Shoot(ShootMessage shootMessage) 
+        private void Shoot(ReliableShootMessage shootMessage) 
         {
             // RECREATE THE SHOT CONDITIONS.
             lagCompensation.SetAsTick(shootMessage.rollbackTick);
             
             mouseLook.SetAsRotation(shootMessage.xRotation, shootMessage.yRotation);
-            cameraInterpolation.Interject(pos, prevPos, vel);
+            cameraInterpolation.Interject(origin, prevOrigin, velocity);
             cameraInterpolation.SetValue(shootMessage.lerpValue);
+
+            Debug.Log("shoot message recieved");
 
             // DEBUG.
             if (cam.position != shootMessage.origin)
             {
                 Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin})");
-                Debug.LogWarning($"{(cam.position - shootMessage.origin) / Time.fixedDeltaTime}");
+
+                Vector3 diff = (cam.position - shootMessage.origin) / Time.fixedDeltaTime;
+                Debug.LogWarning($"diff {diff.magnitude}");
                 //cam.position = shootMessage.eyesPos;
 
                 // FUTURE: ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
@@ -111,25 +116,22 @@ namespace Mastic
             }
         }
 
-        /// <summary>
-        /// You could also look in the server's buffer
-        /// for the client movement state but this leaves 
-        /// door open for cheats... See if this works first.
-        /// </summary>
         [Server]
-        public void DoServerTick(int movementTick)
+        public void DoServerTick(int inputTick)
         {
-            prevPos = pos;
-            pos = eyes.position;
-            vel = rb.linearVelocity;
-            for (int i = pendingShootMessages.Count - 1; i >= 0; i--)
+            origin = eyes.position;
+            velocity = rb.linearVelocity;
+            for (int i = 0; i < pendingShootMessages.Count; i++)
             {
-                if (movementTick >= pendingShootMessages[i].movementTick)
-                {
-                    Shoot(pendingShootMessages[i]);
-                    pendingShootMessages.RemoveAt(i);
-                }
+                if (inputTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownIndex))
+                    continue;
+
+                Shoot(pendingShootMessages[i]);
+                pendingShootMessages.RemoveAt(i);
+                break;
             }
+
+            prevOrigin = origin;
         }
     }
 }

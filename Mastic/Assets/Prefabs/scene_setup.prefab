@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60aa6d50d37fc584fa132a256ed44032, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  framerateLimit: 300
+  framerateLimit: 100
   tickrate: 64
   simulationMode: 2
+  initializeOnAwake: 0

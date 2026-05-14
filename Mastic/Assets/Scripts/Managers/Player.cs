@@ -15,22 +15,23 @@ namespace Mastic
         [SerializeField] private List<Object> serverRemove = default;
 
         private IAttackAbility[] attackAbilities;
-        private Jump jump;
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
         private DebugHandler debugHandler;
         private PlayerEntity entity;
         private CooldownHandler cooldownHandler;
-        private SimpleNetworkManager simpleNetworkManager;
+   //     private SimpleNetworkManager simpleNetworkManager;
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
         private LagCompensation lagCompensation;
         private ICameraInterpolation cameraInterpolation;
 
+        private SharedPlayerFields sharedPlayerFields;
+
         private void Awake()
         {
+            sharedPlayerFields = new SharedPlayerFields();
             attackAbilities = GetComponents<IAttackAbility>();
-            jump = GetComponent<Jump>();
             mouseLook = GetComponent<MouseLook>();
             cooldownHandler = GetComponent<CooldownHandler>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
@@ -39,7 +40,7 @@ namespace Mastic
             lagCompensation = FindAnyObjectByType<LagCompensation>();
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
-            simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();
+         //   simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
             Initialize();
         }
@@ -49,10 +50,9 @@ namespace Mastic
         /// </summary>
         private void Initialize()
         {
-            adaptiveTickrate.Initialize(simpleNetworkManager, standardTickrate);
             debugHandler.Initialize(standardTickrate);
             mouseLook.Initialize();
-            jump.Initialize();
+            adaptiveTickrate.Initialize(standardTickrate);
             entity.Initialize(lagCompensation);
             physicsMovement.Initialize();
             networkMovement.Initialize(standardTickrate, cameraInterpolation);

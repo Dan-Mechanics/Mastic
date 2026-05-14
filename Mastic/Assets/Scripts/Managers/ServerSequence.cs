@@ -28,15 +28,14 @@ namespace Mastic
             Clean();
             foreach (Player player in players)
             {
-                player.stateBufferIndex = player.networkMovement.DoServerTick();
+                player.networkMovement.DoServerTick();
                 player.cooldownHandler.Charge();
             }
 
             Physics.Simulate(Time.fixedDeltaTime);
             foreach (Player player in players)
             {
-                player.networkMovement.LimitSpeed();
-                player.networkMovement.SendStateMessageToClient(player.stateBufferIndex);
+                player.networkMovement.SendStateMessageToClient();
             }
 
             lagCompensation.Clean();
@@ -73,12 +72,11 @@ namespace Mastic
 
         private class Player 
         {
-            public NetworkMovement networkMovement;
-            public CooldownHandler cooldownHandler;
             public Transform transform;
             public IAttackAbility[] attackAbilities;
             public PlayerEntity entity;
-            public int stateBufferIndex;
+            public NetworkMovement networkMovement;
+            public CooldownHandler cooldownHandler;
 
             public Player(Transform transform)
             {

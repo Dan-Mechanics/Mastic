@@ -24,7 +24,6 @@ namespace Mastic
         [SerializeField, Min(1)] private int bufferSize = default;
         [SerializeField, Min(0f)] private float tolerance = default;
         [SerializeField, Min(1)] private int maxPendingInputMessages = default;
-        [SerializeField, Min(0)] private byte standardMovementIndex = default;
 
         private Rigidbody rb;
         private Transform eyes;
@@ -48,6 +47,7 @@ namespace Mastic
         private bool firstInputMessageReceived; 
         private bool hasInputMessages; 
         private int currentTick;
+        private int stateBufferIndex;
         private int receivedTick;
         private float standardInterval;
         private bool w, a, s, d;
@@ -65,7 +65,7 @@ namespace Mastic
             }
 
             movementAbilities = GetComponents<IMovementAbility>().ToList();
-            SetMovement(standardMovementIndex);
+            SetMovement(0);
             rb = GetComponent<Rigidbody>();
             mouseLook = GetComponent<MouseLook>();
             eyes = transform.Find("eyes");
@@ -111,7 +111,6 @@ namespace Mastic
                 OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier}");
                 for (int i = 0; i < clientPacketMultiplier; i++)
                 {
-                    movementAbilities.ForEach(x => x.DoLocalTick(currentTick, movement));
                     DoLocalTick();
                     ticks++;
                 }
@@ -123,15 +122,11 @@ namespace Mastic
             return ticks;
         }
 
-        public void SetMovement(byte index)
-        {
-            movement = movements[index];
-            movementIndex = index;
-        }
-
         [Client]
         private void DoLocalTick()
         {
+            movementAbilities.ForEach(x => x.DoLocalTick(currentTick, movement));
+
             // MAKE IT SO THAT IF YOU ALT+TAB YOU KEEP MOVING.
             if (Application.isFocused) 
             {
@@ -153,13 +148,13 @@ namespace Mastic
         }
 
         [Server]
-        public int DoServerTick()
+        public void DoServerTick()
         {
             adaptiveTickrate.ApplyTimeDilation(firstInputMessageReceived, pendingInputMessages.Count);
 
             InputMessage inputMessage = GetNextInputMessage();
             Move(inputMessage, false);
-            int stateBufferIndex = inputMessage.tick % bufferSize;
+            stateBufferIndex = inputMessage.tick % bufferSize;
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, movementIndex, inputMessage);
 
             movementAbilities.ForEach(x => x.CleanPendingRequests(inputMessage.tick));
@@ -171,9 +166,8 @@ namespace Mastic
                 Debug.LogWarning("This is acceptable for spawn because the buffer is very empty");
             }
 
-            currentTick++;
             previousInputMessage = inputMessage;
-            return stateBufferIndex;
+            currentTick++;
         }
 
         private InputMessage GetNextInputMessage()
@@ -209,15 +203,23 @@ namespace Mastic
             return inputMessage;
         }
 
+        public void SetMovement(byte index)
+        {
+            movement = movements[index];
+            movementIndex = index;
+        }
+
         /// <summary>
         /// This needs to be here because of the difference
         /// in ordering of Physics.Simulate between the server and client.
         /// </summary>
         [Server]
-        public void SendStateMessageToClient(int stateBufferIndex) 
+        public void SendStateMessageToClient() 
         {
+            LimitSpeed();
             stateBuffer[stateBufferIndex].position = transform.position;
             stateBuffer[stateBufferIndex].velocity = rb.linearVelocity;
+
             TargetSendStateMessageToClient(connectionToClient, stateBuffer[stateBufferIndex]);
         }
 

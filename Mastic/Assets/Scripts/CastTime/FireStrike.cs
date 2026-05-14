@@ -10,7 +10,7 @@ namespace Mastic
     {
         [SerializeField] private Transform eyes = null;
         [SerializeField] private CharacterController controller = null;
-        [SerializeField] private Weapon weapon = null;
+        [SerializeField] private Bolt weapon = null;
         [SerializeField] private GameObject fireStrikePrefab = null;
         [SerializeField] private CapsuleCollider hitbox = null;
         [SerializeField] private AudioSource source = null;

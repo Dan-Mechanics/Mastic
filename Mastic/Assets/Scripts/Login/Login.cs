@@ -36,7 +36,6 @@ namespace Mastic
         }
 
         private bool IsValid() => Utils.IsStringValid(email.text) && Utils.IsStringValid(password.text);
-
         private void FixedUpdate() => go.interactable = IsValid();
 
         public void Go()

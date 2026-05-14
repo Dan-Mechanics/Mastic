@@ -18,10 +18,10 @@ namespace Mastic
         private int currentTickrate;
         private bool hasTimeDilation;
 
-        public void Initialize(NetworkManager networkManager, int standardTickrate)
+        public void Initialize(int standardTickrate)
         {
+            networkManager = FindAnyObjectByType<NetworkManager>();
             this.standardTickrate = standardTickrate;
-            this.networkManager = networkManager;
             hasTimeDilation = true;
         }
 

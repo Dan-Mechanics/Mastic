@@ -9,10 +9,17 @@ namespace Mastic
         [SerializeField, Min(1)] private int framerateLimit = default;
         [SerializeField, Min(1)] private int tickrate = default;
         [SerializeField] private SimulationMode simulationMode = default;
+        [SerializeField] private bool initializeOnAwake = default;
+
+        private void Awake()
+        {
+            if (initializeOnAwake)
+                Initialize();
+        }
 
         public void SetTickrate(int tickrate) => this.tickrate = tickrate;
 
-        public void Setup()
+        public void Initialize()
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Application.targetFrameRate = framerateLimit;

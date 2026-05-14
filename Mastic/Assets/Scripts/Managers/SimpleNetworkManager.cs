@@ -14,7 +14,7 @@ namespace Mastic
         private List<NetworkConnectionToClient> connections;
         private Transform spawnpoint;
 
-        public void AssignValues(Transform spawnpoint, int standardTickrate)
+        public void Initialize(Transform spawnpoint, int standardTickrate)
         {
             this.spawnpoint = spawnpoint;
             connections = new List<NetworkConnectionToClient>();

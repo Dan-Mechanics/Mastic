@@ -15,7 +15,7 @@ namespace Mastic
         private int previousTick;
         private Rigidbody rb;
 
-        public void Initialize()
+        private void Awake()
         {
             rb = GetComponent<Rigidbody>();
             cooldownHandler = GetComponent<CooldownHandler>();

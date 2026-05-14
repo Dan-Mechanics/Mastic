@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace Mastic
 {
-    /// <summary>
-    /// The goal of this is to have a decoupling between 
-    /// network manager and the player manager.
-    /// </summary>
     public class GameManager : MonoBehaviour
     {
         [SerializeField] private EasyBinding closeGame = default;
@@ -29,9 +25,9 @@ namespace Mastic
         {
             // MAKE SURE THE SCENE SETUP IS DONE FIRST.
             sceneSetup.SetTickrate(standardTickrate);
-            sceneSetup.Setup();
+            sceneSetup.Initialize();
 
-            networkManager.AssignValues(spawnpoint, standardTickrate);
+            networkManager.Initialize(spawnpoint, standardTickrate);
             networkManager.OnRegisterPlayer += serverSequence.Register;
             networkManager.OnReload += serverSequence.Clear;
         }

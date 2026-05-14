@@ -17,7 +17,7 @@ namespace Mastic
             Destroy(gameObject, 2.5f);
         }
 
-        public void Setup(Weapon weapon, bool isServer) 
+        public void Setup(Bolt weapon, bool isServer) 
         {
           //  this.weapon = weapon;
             this.isServer = isServer;
