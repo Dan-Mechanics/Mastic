@@ -14,7 +14,7 @@ namespace Mastic
         [SerializeField] private List<Object> unlocalRemove = default;
         [SerializeField] private List<Object> serverRemove = default;
 
-        private IAttack[] attacks;
+        private IAttackAbility[] attackAbilities;
         private Jump jump;
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
@@ -29,7 +29,7 @@ namespace Mastic
 
         private void Awake()
         {
-            attacks = GetComponents<IAttack>();
+            attackAbilities = GetComponents<IAttackAbility>();
             jump = GetComponent<Jump>();
             mouseLook = GetComponent<MouseLook>();
             cooldownHandler = GetComponent<CooldownHandler>();
@@ -97,9 +97,9 @@ namespace Mastic
             if (!isLocalPlayer)
                 return;
 
-            for (int i = 0; i < attacks.Length; i++)
+            for (int i = 0; i < attackAbilities.Length; i++)
             {
-                attacks[i].DoLocalUpdate(networkMovement.MovementTick, entity.RollbackTick);
+                attackAbilities[i].DoLocalUpdate(networkMovement.MovementTick, entity.RollbackTick);
             }
 
             int ticks = networkMovement.DoLocalUpdate();

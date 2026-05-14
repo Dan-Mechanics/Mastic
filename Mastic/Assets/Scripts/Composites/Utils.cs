@@ -35,5 +35,11 @@ namespace Mastic
 
             return normal;
         }
+
+        public static Vector3 Flatten(Vector3 vec)
+        {
+            vec.y = 0f;
+            return vec;
+        }
     }
 }

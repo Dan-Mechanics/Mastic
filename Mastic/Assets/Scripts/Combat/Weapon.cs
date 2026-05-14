@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class Weapon : NetworkBehaviour, IAttack
+    public class Weapon : NetworkBehaviour, IAttackAbility
     {
-        public event Action<float> OnDealDamage;
+        public event Action<float> OnAuthoritativeDamage;
         public event Action<float> OnPredictDamage;
 
         [SerializeField] private EasyBinding primaryFire = default;
@@ -68,7 +68,7 @@ namespace Mastic
         }
 
         [TargetRpc]
-        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnDealDamage?.Invoke(damage);
+        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
 
         [Command]
         private void CmdShoot(ShootMessage shootMessage) => pendingShootMessages.Add(shootMessage);

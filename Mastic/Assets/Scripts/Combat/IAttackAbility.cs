@@ -2,11 +2,8 @@
 
 namespace Mastic
 {
-    public interface IAttack
+    public interface IAttackAbility : IDamageFeedback
     {
-        event Action<float> OnDealDamage;
-        event Action<float> OnPredictDamage;
-
         void DoLocalUpdate(int movementTick, int rollbackTick);
         void DoServerTick(int movementTick);
     }

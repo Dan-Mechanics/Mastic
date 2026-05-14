@@ -45,9 +45,9 @@ namespace Mastic
             {
                 // MAKE SURE THE PLAYER CAN'T SHOOT HIMSELF.
                 player.entity.EnableHitbox(false);
-                for (int i = 0; i < player.attacks.Length; i++)
+                for (int i = 0; i < player.attackAbilities.Length; i++)
                 {
-                    player.attacks[i].DoServerTick(player.networkMovement.MovementTick);
+                    player.attackAbilities[i].DoServerTick(player.networkMovement.MovementTick);
                 }
 
                 player.entity.EnableHitbox(true);
@@ -76,14 +76,14 @@ namespace Mastic
             public NetworkMovement networkMovement;
             public CooldownHandler cooldownHandler;
             public Transform transform;
-            public IAttack[] attacks;
+            public IAttackAbility[] attackAbilities;
             public PlayerEntity entity;
             public int stateBufferIndex;
 
             public Player(Transform transform)
             {
                 this.transform = transform;
-                attacks = transform.GetComponents<IAttack>();
+                attackAbilities = transform.GetComponents<IAttackAbility>();
                 entity = transform.GetComponent<PlayerEntity>();
                 networkMovement = transform.GetComponent<NetworkMovement>();
                 cooldownHandler = transform.GetComponent<CooldownHandler>();

@@ -344,7 +344,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 4106055646
+  _assetId: 4187886628
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
@@ -536,7 +536,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  mouseLook: {fileID: 3751572637676758940}
   playerLayerName: Player
   intangibleLayerName: Intangible
 --- !u!114 &-5600370486124146712
@@ -645,12 +644,12 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  velocityChange: 12
   teleportRange: 500
-  explosionRadius: 6
   teleportMask:
     serializedVersion: 2
     m_Bits: 1
+  explosionForce: 0
+  explosionRadius: 6
   explosionMask:
     serializedVersion: 2
     m_Bits: 8

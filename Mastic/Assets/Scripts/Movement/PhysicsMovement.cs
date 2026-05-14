@@ -40,23 +40,21 @@ namespace Mastic
             if (hasGravity)
                 rb.AddForce(Physics.gravity, ForceMode.Acceleration);
 
-            Vector3 velocity = rb.linearVelocity;
-            velocity.y = 0f;
-
-            float mag = velocity.magnitude;
+            Vector3 vel = Utils.Flatten(rb.linearVelocity);
+            float mag = vel.magnitude;
             if (mag < settings.speed)
             {
                 rb.AddForce(Vector3.ClampMagnitude(accel * interval * movement, settings.speed - mag), ForceMode.VelocityChange);
             }
             else if (isGrounded)
             {
-                rb.AddForce(Vector3.ClampMagnitude(accel * interval * -velocity.normalized, mag - settings.speed), ForceMode.VelocityChange);
+                rb.AddForce(Vector3.ClampMagnitude(accel * interval * -vel.normalized, mag - settings.speed), ForceMode.VelocityChange);
             }
 
-            Vector3 counterMovement = accel * interval * settings.multiplier * -(velocity.normalized - movement);
+            Vector3 counterMovement = accel * interval * settings.multiplier * -(vel.normalized - movement);
 
             if (mag != 0f && counterMovement.magnitude > mag)
-                counterMovement = -velocity;
+                counterMovement = -vel;
 
             rb.AddForce(counterMovement, ForceMode.VelocityChange);
         }

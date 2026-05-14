@@ -44,3 +44,7 @@ Thumbs.db
 /Mastic/.vs
 /Mastic/Logs
 /Mastic/UserSettings
+Mastic/Assets/session_id.asset
+Mastic/Assets/session_id.asset.meta
+Mastic/Assets/login_url.asset
+Mastic/Assets/login_url.asset.meta
