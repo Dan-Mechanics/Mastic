@@ -243,5 +243,5 @@ MonoBehaviour:
   text: {fileID: 6286990540881317288}
   image: {fileID: 6072007130832715731}
   defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  backdropVisibility: 0.75
-  defaultDuration: 2.5
+  backdropVisibility: 0.9
+  defaultDuration: 2

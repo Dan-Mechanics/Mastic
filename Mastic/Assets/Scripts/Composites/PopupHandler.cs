@@ -10,7 +10,7 @@ namespace Mastic
         [SerializeField] private TMP_Text text = default;
         [SerializeField] private Image image = default;
         [SerializeField] private Color defaultColor = default;
-        [SerializeField, Range(0.1f, 0.9f)] private float backdropVisibility = default;
+        [SerializeField, Range(0.1f, 1f)] private float backdropVisibility = default;
         [SerializeField, Min(0.1f)] private float defaultDuration = default;
         private float currentDuration;
 

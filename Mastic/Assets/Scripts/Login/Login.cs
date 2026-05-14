@@ -35,11 +35,18 @@ namespace Mastic
                 Debug.LogWarning($"'{nameof(sessionId)}' was already set in {nameof(Start)}(). This is not ideal.");
         }
 
+        private bool IsValid() => Utils.IsStringValid(email.text) && Utils.IsStringValid(password.text);
+
+        private void FixedUpdate() => go.interactable = IsValid();
+
         public void Go()
         {
+            if (!IsValid())
+                return;
+            
             sessionId.Set("nonsense here");
             string url = $"{loginUrl}?game_id={gameId}&email={email.text}&password={password.text}";
-            popupHandler.Send(url, Color.gray, 4.5f);
+            popupHandler.Send(url, Color.gray, 4f);
             
 
         }
