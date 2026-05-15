@@ -13,7 +13,7 @@ namespace Mastic
         private bool controllable;
         private bool hasGravity;
 
-        public void Initialize()
+        private void Awake()
         {
             rb = GetComponent<Rigidbody>();
             rb.sleepThreshold = 0f;

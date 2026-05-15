@@ -34,7 +34,7 @@ namespace Mastic
 
             for (int i = 0; i < attackAbilities.Length; i++)
             {
-                attackAbilities[i].DoLocalUpdate(shared.currentTick, shared.rollbackTick);
+                attackAbilities[i].DoLocalUpdate(shared.inputTick, shared.rollbackTick);
             }
 
             int clientPacketMultiplier = 1;
@@ -53,8 +53,8 @@ namespace Mastic
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.UpArrow)) { shared.currentTick += 10; Debug.LogWarning("+10"); }
-            if (Input.GetKeyDown(KeyCode.DownArrow)) { shared.currentTick -= 10; Debug.LogWarning("-10"); }
+            if (Input.GetKeyDown(KeyCode.UpArrow)) { shared.inputTick += 10; Debug.LogWarning("+10"); }
+            if (Input.GetKeyDown(KeyCode.DownArrow)) { shared.inputTick -= 10; Debug.LogWarning("-10"); }
         }
     }
 }

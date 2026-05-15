@@ -14,60 +14,52 @@ namespace Mastic
         [SerializeField] private List<Object> serverRemove = default;
 
         private ICameraInterpolation cameraInterpolation;
-        private SharedPlayerFields sharedPlayerFields;
         private IAttackAbility[] attackAbilities;
         private List<IMovementAbility> movementAbilities;
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
-        private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
         private LagCompensation lagCompensation;
         private ClientSequence clientSequence;
         private DebugHandler debugHandler;
         private PlayerEntity playerEntity;
-        private MouseLook mouseLook;
+        private SharedPlayerFields shared;
 
         private void Awake()
         {
-            SetShared(new SharedPlayerFields());
             attackAbilities = GetComponents<IAttackAbility>();
-            mouseLook = GetComponent<MouseLook>();
             cooldownHandler = GetComponent<CooldownHandler>();
             movementAbilities = GetComponents<IMovementAbility>().ToList();
             clientSequence = GetComponent<ClientSequence>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
-            physicsMovement = GetComponent<PhysicsMovement>();
             playerEntity = GetComponent<PlayerEntity>();
             lagCompensation = FindAnyObjectByType<LagCompensation>();
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
-            Initialize();
+            StartAll();
         }
 
-        public void SetShared(SharedPlayerFields sharedPlayerFields)
-        {
-            if (this.sharedPlayerFields == null)
-                this.sharedPlayerFields = sharedPlayerFields;
-        }
+        public void SetShared(SharedPlayerFields shared) => this.shared = shared;
 
         /// <summary>
         /// For server, local and unlocal client.
         /// </summary>
-        private void Initialize()
+        private void StartAll()
         {
+            if (shared == null)
+                SetShared(new SharedPlayerFields());
+
             debugHandler.Initialize(standardTickrate);
-            mouseLook.Initialize();
             adaptiveTickrate.Initialize(standardTickrate);
             playerEntity.Initialize(lagCompensation);
-            playerEntity.SetShared(sharedPlayerFields);
-            physicsMovement.Initialize();
+            playerEntity.SetShared(shared);
 
             networkMovement.Initialize(standardTickrate, cameraInterpolation,
-                sharedPlayerFields, movementAbilities);
+                shared, movementAbilities);
 
             clientSequence.Initialize(networkMovement, attackAbilities,
-                cooldownHandler, sharedPlayerFields);
+                cooldownHandler, shared);
         }
 
         public override void OnStartServer()
@@ -109,5 +101,7 @@ namespace Mastic
             if (isLocalPlayer)
                 clientSequence.DoLocalUpdate();
         }
+
+        private void FixedUpdate() => print(shared);
     }
 }

@@ -10,7 +10,7 @@ namespace Mastic
         private Vector3 prevPos;
         private float time;
 
-        private void Start()
+        private void Awake()
         {
             pos = transform.position;
             prevPos = pos;

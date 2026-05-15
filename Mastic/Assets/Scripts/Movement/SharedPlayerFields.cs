@@ -1,9 +1,13 @@
 ﻿namespace Mastic
 {
+    [System.Serializable]
     public class SharedPlayerFields 
     {
-        // TODO: make distinction between serverTick and inputTick here ...
-        public int currentTick;
+        public int inputTick;
+        public int serverTick;
         public int rollbackTick;
+        
+        public override string ToString() 
+            => $"inputTick: {inputTick}, serverTick: {serverTick}, rollbackTick: {rollbackTick}";
     }
 }

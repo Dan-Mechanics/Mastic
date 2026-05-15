@@ -15,7 +15,7 @@ namespace Mastic
         private Transform eyes;
         private Transform cam;
 
-        public void Initialize()
+        private void Awake()
         {
             cam = GameObject.FindWithTag("MainCamera").transform;
             eyes = transform.Find("eyes");

@@ -95,7 +95,7 @@ namespace Mastic
         [Client]
         public void DoLocalTick()
         {
-            movementAbilities.ForEach(x => x.DoLocalTick(shared.currentTick, movement));
+            movementAbilities.ForEach(x => x.DoLocalTick(shared.inputTick, movement));
 
             // MAKE IT SO THAT IF YOU ALT+TAB YOU KEEP MOVING.
             if (Application.isFocused) 
@@ -106,15 +106,15 @@ namespace Mastic
                 d = right.IsHeld;
             }
 
-            int index = shared.currentTick % bufferSize;
-            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, shared.currentTick);
+            int index = shared.inputTick % bufferSize;
+            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, shared.inputTick);
             Move(inputBuffer[index], true);
 
             stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
             CmdSendInputMessageToServer(inputBuffer[index]);
 
-            OnDisplayTick?.Invoke(shared.currentTick);
-            shared.currentTick++;
+            OnDisplayTick?.Invoke(shared.inputTick);
+            shared.inputTick++;
         }
 
         [Server]
@@ -137,7 +137,7 @@ namespace Mastic
             }
 
             previousInputMessage = inputMessage;
-            shared.currentTick++;
+            shared.serverTick++;
         }
 
         private InputMessage GetNextInputMessage()
@@ -246,7 +246,7 @@ namespace Mastic
         private void TargetSendStateMessageToClient(NetworkConnectionToClient conn, StateMessage stateMessage)
         {
             // MAKE SURE MESSAGES ARE NOT OUT OF ORDER.
-            if (stateMessage.tick > shared.currentTick - 1)
+            if (stateMessage.tick > shared.inputTick - 1)
             {
                 Debug.LogWarning("We have to return here since the positions are stored in a ringbuffer and otherwise would wrap around and completely break the reconsile.");
                 return;
@@ -294,7 +294,7 @@ namespace Mastic
             stateBuffer[stateBufferIndex] = serverStateMessage;
 
             int tickToProcess = serverStateMessage.tick + 1;
-            while (tickToProcess < shared.currentTick)
+            while (tickToProcess < shared.inputTick)
             {
                 int index = tickToProcess % bufferSize;
 
@@ -322,7 +322,7 @@ namespace Mastic
             {
                 cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
                 cameraInterpolation.SetValue(input.lerpValue);
-                movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, shared.currentTick));
+                movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, shared.serverTick));
                 prevEyePos = eyes.position;
             }
 
