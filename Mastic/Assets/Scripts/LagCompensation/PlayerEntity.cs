@@ -8,20 +8,16 @@ namespace Mastic
     /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
-        /// <summary>
-        /// I am here assuming that the tick on the local
-        /// player is the same as the tick that the player is shooting at.
-        /// </summary>
-        public int RollbackTick => tick;
-        
+        public SharedPlayerFields Shared => shared;
+
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
+        private SharedPlayerFields shared;
         private MouseLook mouseLook;
         private int intangibleLayer;
         private int playerLayer;
         private Frame[] recording;
         private Frame present;
-        private int tick;
 
         [Server]
         public void Initialize(LagCompensation lagCompensation)
@@ -33,6 +29,8 @@ namespace Mastic
             intangibleLayer = LayerMask.NameToLayer(intangibleLayerName);
             EnableHitbox(true);
         }
+
+        public void SetShared(SharedPlayerFields shared) => this.shared = shared;
 
         private void SetAsFrame(Frame frame)
         {
@@ -48,6 +46,8 @@ namespace Mastic
         {
             present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             recording[tick % recording.Length] = present;
+
+            shared.rollbackTick = tick;
             RpcSendAuthState(present, tick);
         }
 
@@ -57,7 +57,7 @@ namespace Mastic
         [ClientRpc(channel = Channels.Unreliable)]
         private void RpcSendAuthState(Frame frame, int tick)
         {
-            this.tick = tick;
+            shared.rollbackTick = tick;
             if (!isLocalPlayer)
                 SetAsFrame(frame);
         }
@@ -82,17 +82,7 @@ namespace Mastic
         public void ReturnToPresent() => SetAsFrame(present);
 
         [Server]
-        public void EnableHitbox(bool value)
-        {
-            if (value)
-            {
-                gameObject.layer = playerLayer;
-            }
-            else
-            {
-                gameObject.layer = intangibleLayer;
-            }
-        }
+        public void EnableHitbox(bool value) => gameObject.layer = value ? playerLayer : intangibleLayer;
 
         private struct Frame
         {

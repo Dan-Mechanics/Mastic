@@ -38,57 +38,57 @@ namespace Mastic
         }
 
         [Client]
-        public void DoLocalTick(int movementTick, IMovement movement)
+        public void DoLocalTick(int inputTick, IMovement movement)
         {
-            if (!ability2.IsHeld || !CanCast(movementTick))
+            if (!ability2.IsHeld || !CanCast(inputTick))
                 return;
 
             cooldownHandler.Cast(cooldownIndex);
-            pendingRequests.Add(movementTick);
-            CmdRequestBurningWings(movementTick);
+            pendingRequests.Add(inputTick);
+            CmdRequestBurningWings(inputTick);
         }
 
         public void Move(float vert, float hori, float interval) => rb.linearVelocity = eyes.forward * speed;
         private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
 
         [Command]
-        private void CmdRequestBurningWings(int tick)
+        private void CmdRequestBurningWings(int inputTick)
         {
-            if (pendingRequests.Count >= maxPendingRequests || tick <= previousTick)
+            if (pendingRequests.Count >= maxPendingRequests || inputTick <= previousTick)
                 return;
 
-            pendingRequests.Add(tick);
-            previousTick = tick;
-            Debug.LogWarning($"{gameObject.name}: requested burning wings {tick} ...");
+            pendingRequests.Add(inputTick);
+            previousTick = inputTick;
+            Debug.LogWarning($"{gameObject.name}: requested burning wings {inputTick} ...");
         }
 
         [Client]
-        public void CheckAgainstTickClient(int tick)
+        public void CheckAgainstTickClient(int inputTick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (tick == pendingRequests[i])
-                    Cast(tick);
+                if (inputTick == pendingRequests[i])
+                    Cast(inputTick);
             }
 
-            networkMovement.SetMovement(IsAbilityActive(tick) ? Index : physicsMovement.Index);
+            networkMovement.SetMovement(IsAbilityActive(inputTick) ? Index : physicsMovement.Index);
         }
 
         [Server]
-        public void CheckAgainstTickServer(int inputTick, IMovement movement, int movementTick)
+        public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (inputTick < pendingRequests[i] || !CanCast(movementTick))
+                if (inputTick < pendingRequests[i] || !CanCast(serverTick))
                     continue;
 
                 cooldownHandler.Cast(cooldownIndex);
-                Cast(movementTick);
+                Cast(serverTick);
                 pendingRequests.RemoveAt(i);
                 break;
             }
 
-            networkMovement.SetMovement(IsAbilityActive(movementTick) ? Index : physicsMovement.Index);
+            networkMovement.SetMovement(IsAbilityActive(serverTick) ? Index : physicsMovement.Index);
         }
 
         public void CleanPendingRequests(int upTo)

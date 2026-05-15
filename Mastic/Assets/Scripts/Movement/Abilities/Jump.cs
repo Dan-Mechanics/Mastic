@@ -23,25 +23,25 @@ namespace Mastic
         }
 
         [Client]
-        public void DoLocalTick(int movementTick, IMovement movement)
+        public void DoLocalTick(int inputTick, IMovement movement)
         {
             if (jump.IsHeld && CanJump(movement))
             {
                 cooldownHandler.Cast(cooldownHandler.Last);
-                pendingRequests.Add(movementTick);
-                CmdRequestJump(movementTick);
+                pendingRequests.Add(inputTick);
+                CmdRequestJump(inputTick);
             }
         }
 
         [Command]
-        private void CmdRequestJump(int tick)
+        private void CmdRequestJump(int inputTick)
         {
-            if (pendingRequests.Count >= maxPendingRequests || tick <= previousTick)
+            if (pendingRequests.Count >= maxPendingRequests || inputTick <= previousTick)
                 return;
 
-            pendingRequests.Add(tick);
-            previousTick = tick;
-            Debug.LogWarning($"{gameObject.name}: requested jump {tick} ...");
+            pendingRequests.Add(inputTick);
+            previousTick = inputTick;
+            Debug.LogWarning($"{gameObject.name}: requested jump {inputTick} ...");
         }
 
         [Client]
@@ -55,7 +55,7 @@ namespace Mastic
         }
 
         [Server]
-        public void CheckAgainstTickServer(int inputTick, IMovement movement, int movementTick)
+        public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {

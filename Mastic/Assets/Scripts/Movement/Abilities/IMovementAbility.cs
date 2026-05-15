@@ -2,9 +2,9 @@
 {
     public interface IMovementAbility
     {
-        void DoLocalTick(int movementTick, IMovement movement);
-        void CheckAgainstTickServer(int inputTick, IMovement movement, int movementTick);
-        void CheckAgainstTickClient(int tick);
+        void DoLocalTick(int inputTick, IMovement movement);
+        void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick);
+        void CheckAgainstTickClient(int inputTick);
         void CleanPendingRequests(int upTo);
     }
 }

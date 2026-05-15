@@ -304,6 +304,7 @@ GameObject:
   - component: {fileID: -3213554778907423252}
   - component: {fileID: 790473191979634726}
   - component: {fileID: -3850514727978609351}
+  - component: {fileID: -5172247997270406336}
   m_Layer: 3
   m_Name: player
   m_TagString: Player
@@ -409,8 +410,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  disconnect: {fileID: 11400000, guid: 76fa061607a567d45bc7219f92c14f6f, type: 2}
-  playerName: player
+  defaultName: player
   standardTickrate: 64
   localRemove:
   - {fileID: 8563719589400999970}
@@ -661,6 +661,22 @@ MonoBehaviour:
     m_Bits: 9
   range: 300
   damage: 50
+--- !u!114 &-5172247997270406336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ef166cd7c91df4419cad442064fce91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  disconnect: {fileID: 11400000, guid: 76fa061607a567d45bc7219f92c14f6f, type: 2}
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0

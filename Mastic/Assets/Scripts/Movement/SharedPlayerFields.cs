@@ -2,8 +2,8 @@
 {
     public class SharedPlayerFields 
     {
-        public int serverTick;
-        public int clientTick;
-
+        // TODO: make distinction between serverTick and inputTick here ...
+        public int currentTick;
+        public int rollbackTick;
     }
 }

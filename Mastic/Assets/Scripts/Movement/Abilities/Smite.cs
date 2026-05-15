@@ -39,40 +39,40 @@ namespace Mastic
         }
 
         [Client]
-        public void DoLocalTick(int movementTick, IMovement movement)
+        public void DoLocalTick(int inputTick, IMovement movement)
         {
-            if (!primaryFire.IsHeld || !CanCast(movementTick))
+            if (!primaryFire.IsHeld || !CanCast(inputTick))
                 return;
 
             cooldownHandler.Cast(cooldownIndex);
-            pendingRequests.Add(movementTick);
-            CmdRequestSmite(movementTick);
+            pendingRequests.Add(inputTick);
+            CmdRequestSmite(inputTick);
         }
 
         private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
 
         [Command]
-        private void CmdRequestSmite(int tick)
+        private void CmdRequestSmite(int inputTick)
         {
-            if (pendingRequests.Count >= maxPendingRequests || tick <= previousTick)
+            if (pendingRequests.Count >= maxPendingRequests || inputTick <= previousTick)
                 return;
 
-            pendingRequests.Add(tick);
-            previousTick = tick;
-            Debug.LogWarning($"{gameObject.name}: requested burning wings {tick} ...");
+            pendingRequests.Add(inputTick);
+            previousTick = inputTick;
+            Debug.LogWarning($"{gameObject.name}: requested burning wings {inputTick} ...");
         }
 
         [Client]
-        public void CheckAgainstTickClient(int tick)
+        public void CheckAgainstTickClient(int inputTick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (tick == pendingRequests[i])
-                    Cast(tick);
+                if (inputTick == pendingRequests[i])
+                    Cast(inputTick);
             }
 
-            physicsMovement.EnableGravity(!IsAbilityActive(tick));
-            if (tick == endingTick)
+            physicsMovement.EnableGravity(!IsAbilityActive(inputTick));
+            if (inputTick == endingTick)
             {
                 Vector3 point = Vector3.zero;
                 if (GetTeleportPoint(ref point))
@@ -112,22 +112,22 @@ namespace Mastic
         }
 
         [Server]
-        public void CheckAgainstTickServer(int inputTick, IMovement movement, int movementTick)
+        public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (inputTick < pendingRequests[i] || !CanCast(movementTick))
+                if (inputTick < pendingRequests[i] || !CanCast(serverTick))
                     continue;
 
                 cooldownHandler.Cast(cooldownIndex);
-                Cast(movementTick);
+                Cast(serverTick);
                 pendingRequests.RemoveAt(i);
                 break;
             }
 
 
-            physicsMovement.EnableGravity(!IsAbilityActive(movementTick));
-            if (endingTick == movementTick)
+            physicsMovement.EnableGravity(!IsAbilityActive(serverTick));
+            if (endingTick == serverTick)
             {
                 Vector3 point = Vector3.zero;
                 if (GetTeleportPoint(ref point))

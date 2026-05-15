@@ -7,42 +7,48 @@ namespace Mastic
 {
     public class Player : NetworkBehaviour
     {
-        [SerializeField] private EasyBinding disconnect = default;
-        [SerializeField] private string playerName = default;
+        [SerializeField] private string defaultName = default;
         [SerializeField, Min(1)] private int standardTickrate = default;
         [SerializeField] private List<Object> localRemove = default;
         [SerializeField] private List<Object> unlocalRemove = default;
         [SerializeField] private List<Object> serverRemove = default;
 
+        private ICameraInterpolation cameraInterpolation;
+        private SharedPlayerFields sharedPlayerFields;
         private IAttackAbility[] attackAbilities;
-        private MouseLook mouseLook;
+        private List<IMovementAbility> movementAbilities;
         private AdaptiveTickrate adaptiveTickrate;
-        private DebugHandler debugHandler;
-        private PlayerEntity entity;
         private CooldownHandler cooldownHandler;
-   //     private SimpleNetworkManager simpleNetworkManager;
         private PhysicsMovement physicsMovement;
         private NetworkMovement networkMovement;
         private LagCompensation lagCompensation;
-        private ICameraInterpolation cameraInterpolation;
-
-        private SharedPlayerFields sharedPlayerFields;
+        private ClientSequence clientSequence;
+        private DebugHandler debugHandler;
+        private PlayerEntity playerEntity;
+        private MouseLook mouseLook;
 
         private void Awake()
         {
-            sharedPlayerFields = new SharedPlayerFields();
+            SetShared(new SharedPlayerFields());
             attackAbilities = GetComponents<IAttackAbility>();
             mouseLook = GetComponent<MouseLook>();
             cooldownHandler = GetComponent<CooldownHandler>();
+            movementAbilities = GetComponents<IMovementAbility>().ToList();
+            clientSequence = GetComponent<ClientSequence>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             physicsMovement = GetComponent<PhysicsMovement>();
-            entity = GetComponent<PlayerEntity>();
+            playerEntity = GetComponent<PlayerEntity>();
             lagCompensation = FindAnyObjectByType<LagCompensation>();
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
-         //   simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
             Initialize();
+        }
+
+        public void SetShared(SharedPlayerFields sharedPlayerFields)
+        {
+            if (this.sharedPlayerFields == null)
+                this.sharedPlayerFields = sharedPlayerFields;
         }
 
         /// <summary>
@@ -53,15 +59,21 @@ namespace Mastic
             debugHandler.Initialize(standardTickrate);
             mouseLook.Initialize();
             adaptiveTickrate.Initialize(standardTickrate);
-            entity.Initialize(lagCompensation);
+            playerEntity.Initialize(lagCompensation);
+            playerEntity.SetShared(sharedPlayerFields);
             physicsMovement.Initialize();
-            networkMovement.Initialize(standardTickrate, cameraInterpolation);
+
+            networkMovement.Initialize(standardTickrate, cameraInterpolation,
+                sharedPlayerFields, movementAbilities);
+
+            clientSequence.Initialize(networkMovement, attackAbilities,
+                cooldownHandler, sharedPlayerFields);
         }
 
         public override void OnStartServer()
         {
             base.OnStartServer();
-            gameObject.name = $"{playerName} | server";
+            gameObject.name = $"{defaultName} | server";
             serverRemove.ForEach(x => Destroy(x));
             print($"{gameObject.name}: setup completed".ToUpperInvariant());
         }
@@ -72,20 +84,20 @@ namespace Mastic
             if (isLocalPlayer)
             {
                 Utils.LockMouse();
-                gameObject.name = $"{playerName} | local client";
+                gameObject.name = $"{defaultName} | local client";
                 localRemove.ForEach(x => Destroy(x));
 
                 adaptiveTickrate.OnDisplayTickrate += debugHandler.DisplayTickrate;
                 adaptiveTickrate.OnPlayTickrateChangedSound += debugHandler.PlayTickrateChangedSound;
                 networkMovement.OnDisplayServerState += debugHandler.DisplayServerState;
                 networkMovement.OnDisplayTick += debugHandler.DisplayTick;
-                networkMovement.OnDisplayCheats += debugHandler.DisplayCheats;
+                clientSequence.OnDisplayCheats += debugHandler.DisplayCheats;
                 networkMovement.OnDisplayReconsile += debugHandler.DisplayReconsile;
                 networkMovement.OnPlayReconsileSound += debugHandler.PlayReconsileSound;
             }
             else
             {
-                gameObject.name = $"{playerName} | unlocal client";
+                gameObject.name = $"{defaultName} | unlocal client";
                 unlocalRemove.ForEach(x => Destroy(x));
             }
 
@@ -94,22 +106,8 @@ namespace Mastic
 
         private void Update()
         {
-            if (!isLocalPlayer)
-                return;
-
-            for (int i = 0; i < attackAbilities.Length; i++)
-            {
-                attackAbilities[i].DoLocalUpdate(networkMovement.MovementTick, entity.RollbackTick);
-            }
-
-            int ticks = networkMovement.DoLocalUpdate();
-            for (int i = 0; i < ticks; i++)
-            {
-                cooldownHandler.Charge();
-            }
-
-            if (disconnect.WasPressed)
-                connectionToServer.Disconnect();
+            if (isLocalPlayer)
+                clientSequence.DoLocalUpdate();
         }
     }
 }

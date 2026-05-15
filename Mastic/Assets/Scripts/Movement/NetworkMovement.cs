@@ -8,11 +8,8 @@ namespace Mastic
 {
     public class NetworkMovement : NetworkBehaviour
     {
-        public int MovementTick => currentTick;
-
         public event Action OnPlayReconsileSound;
         public event Action<int> OnDisplayTick;
-        public event Action<string> OnDisplayCheats;
         public event Action<bool> OnDisplayReconsile;
         public event Action<StateMessage> OnDisplayServerState;
 
@@ -28,6 +25,7 @@ namespace Mastic
         private Rigidbody rb;
         private Transform eyes;
         private MouseLook mouseLook;
+        private SharedPlayerFields shared;
         private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation cameraInterpolation;
 
@@ -45,18 +43,18 @@ namespace Mastic
 
         private Vector3 prevEyePos;
         private bool firstInputMessageReceived; 
-        private bool hasInputMessages; 
-        private int currentTick;
+        private bool hasInputMessages;
         private int stateBufferIndex;
         private int receivedTick;
         private float standardInterval;
         private bool w, a, s, d;
-        private float timer;
 
-        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation)
+        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation, SharedPlayerFields shared, List<IMovementAbility> movementAbilities)
         {
-            standardInterval = 1f / standardTickrate;
+            this.shared = shared;
             this.cameraInterpolation = cameraInterpolation;
+            this.movementAbilities = movementAbilities;
+            standardInterval = 1f / standardTickrate;
 
             movements = GetComponents<IMovement>();
             for (int i = 0; i < movements.Length; i++)
@@ -64,8 +62,7 @@ namespace Mastic
                 movements[i].Index = (byte)i;
             }
 
-            movementAbilities = GetComponents<IMovementAbility>().ToList();
-            SetMovement(0);
+            SetMovement(default);
             rb = GetComponent<Rigidbody>();
             mouseLook = GetComponent<MouseLook>();
             eyes = transform.Find("eyes");
@@ -96,36 +93,9 @@ namespace Mastic
         }
 
         [Client]
-        public int DoLocalUpdate()
+        public void DoLocalTick()
         {
-            int ticks = 0;
-            int clientPacketMultiplier = 1;
-            if (Input.GetKey(KeyCode.Mouse4)) { clientPacketMultiplier = 2; }
-            else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
-
-            timer += Time.deltaTime;
-            while (timer >= Time.fixedDeltaTime)
-            {
-                timer -= Time.fixedDeltaTime;
-
-                OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier}");
-                for (int i = 0; i < clientPacketMultiplier; i++)
-                {
-                    DoLocalTick();
-                    ticks++;
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.UpArrow)) { currentTick += 10; Debug.LogWarning("+10"); }
-            if (Input.GetKeyDown(KeyCode.DownArrow)) { currentTick -= 10; Debug.LogWarning("-10"); }
-
-            return ticks;
-        }
-
-        [Client]
-        private void DoLocalTick()
-        {
-            movementAbilities.ForEach(x => x.DoLocalTick(currentTick, movement));
+            movementAbilities.ForEach(x => x.DoLocalTick(shared.currentTick, movement));
 
             // MAKE IT SO THAT IF YOU ALT+TAB YOU KEEP MOVING.
             if (Application.isFocused) 
@@ -136,15 +106,15 @@ namespace Mastic
                 d = right.IsHeld;
             }
 
-            int index = currentTick % bufferSize;
-            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, currentTick);
+            int index = shared.currentTick % bufferSize;
+            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, shared.currentTick);
             Move(inputBuffer[index], true);
 
             stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
             CmdSendInputMessageToServer(inputBuffer[index]);
 
-            OnDisplayTick?.Invoke(currentTick);
-            currentTick++;
+            OnDisplayTick?.Invoke(shared.currentTick);
+            shared.currentTick++;
         }
 
         [Server]
@@ -167,7 +137,7 @@ namespace Mastic
             }
 
             previousInputMessage = inputMessage;
-            currentTick++;
+            shared.currentTick++;
         }
 
         private InputMessage GetNextInputMessage()
@@ -276,7 +246,7 @@ namespace Mastic
         private void TargetSendStateMessageToClient(NetworkConnectionToClient conn, StateMessage stateMessage)
         {
             // MAKE SURE MESSAGES ARE NOT OUT OF ORDER.
-            if (stateMessage.tick > currentTick - 1)
+            if (stateMessage.tick > shared.currentTick - 1)
             {
                 Debug.LogWarning("We have to return here since the positions are stored in a ringbuffer and otherwise would wrap around and completely break the reconsile.");
                 return;
@@ -324,7 +294,7 @@ namespace Mastic
             stateBuffer[stateBufferIndex] = serverStateMessage;
 
             int tickToProcess = serverStateMessage.tick + 1;
-            while (tickToProcess < currentTick)
+            while (tickToProcess < shared.currentTick)
             {
                 int index = tickToProcess % bufferSize;
 
@@ -352,7 +322,7 @@ namespace Mastic
             {
                 cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
                 cameraInterpolation.SetValue(input.lerpValue);
-                movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, currentTick));
+                movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, shared.currentTick));
                 prevEyePos = eyes.position;
             }
 
