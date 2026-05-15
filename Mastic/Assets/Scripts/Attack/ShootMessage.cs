@@ -2,7 +2,7 @@
 
 namespace Mastic
 {
-    public struct ReliableShootMessage
+    public struct ShootMessage
     {
         public Vector3 origin;
         public float xRotation;

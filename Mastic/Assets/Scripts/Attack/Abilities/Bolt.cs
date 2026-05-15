@@ -17,9 +17,9 @@ namespace Mastic
         [SerializeField] private float range = default;
         [SerializeField] private float damage = default;
 
-        private List<ReliableShootMessage> pendingShootMessages;
+        private List<ShootMessage> pendingShootMessages;
         private ICameraInterpolation cameraInterpolation;
-        private ReliableShootMessage shootMessage;
+        private ShootMessage shootMessage;
         private LagCompensation lagCompensation;
         private MouseLook mouseLook;
         private Rigidbody rb;
@@ -35,7 +35,7 @@ namespace Mastic
             cam = GameObject.FindWithTag("MainCamera").transform;
             cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
             lagCompensation = FindAnyObjectByType<LagCompensation>();
-            pendingShootMessages = new List<ReliableShootMessage>();
+            pendingShootMessages = new List<ShootMessage>();
             mouseLook = GetComponent<MouseLook>();
             rb = GetComponent<Rigidbody>();
             prevOrigin = eyes.position;
@@ -72,10 +72,10 @@ namespace Mastic
         public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
 
         [Command]
-        private void CmdShoot(ReliableShootMessage shootMessage) => pendingShootMessages.Add(shootMessage);
+        private void CmdShoot(ShootMessage shootMessage) => pendingShootMessages.Add(shootMessage);
 
         [Server]
-        private void Shoot(ReliableShootMessage shootMessage) 
+        private void Shoot(ShootMessage shootMessage) 
         {
             // RECREATE THE SHOT CONDITIONS.
             lagCompensation.SetAsTick(shootMessage.rollbackTick);
@@ -117,13 +117,13 @@ namespace Mastic
         }
 
         [Server]
-        public void DoServerTick(int inputTick)
+        public void DoServerTick(int receivedInputTick)
         {
             origin = eyes.position;
             velocity = rb.linearVelocity;
             for (int i = 0; i < pendingShootMessages.Count; i++)
             {
-                if (inputTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownIndex))
+                if (receivedInputTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownIndex))
                     continue;
 
                 Shoot(pendingShootMessages[i]);

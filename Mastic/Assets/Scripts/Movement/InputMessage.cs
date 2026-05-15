@@ -6,7 +6,7 @@ namespace Mastic
     /// Represents a tick of player movement input,
     /// including looking direction.
     /// </summary>
-    public struct InputMessage : IComparable<InputMessage>
+    public struct InputMessage 
     {
         public bool w;
         public bool a;
@@ -28,8 +28,6 @@ namespace Mastic
             this.lerpValue = lerpValue;
             this.tick = tick;
         }
-
-        public int CompareTo(InputMessage other) => tick.CompareTo(other.tick);
 
         public float GetVerticalInput()
         {

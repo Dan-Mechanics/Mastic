@@ -7,6 +7,8 @@ namespace Mastic
 {
     public class Player : NetworkBehaviour
     {
+        public SharedPlayerFields Shared { get; set; }
+        
         [SerializeField] private string defaultName = default;
         [SerializeField, Min(1)] private int standardTickrate = default;
         [SerializeField] private List<Object> localRemove = default;
@@ -23,7 +25,6 @@ namespace Mastic
         private ClientSequence clientSequence;
         private DebugHandler debugHandler;
         private PlayerEntity playerEntity;
-        private SharedPlayerFields shared;
 
         private void Awake()
         {
@@ -37,29 +38,25 @@ namespace Mastic
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
+            Shared = new SharedPlayerFields();
             StartAll();
         }
-
-        public void SetShared(SharedPlayerFields shared) => this.shared = shared;
 
         /// <summary>
         /// For server, local and unlocal client.
         /// </summary>
         private void StartAll()
         {
-            if (shared == null)
-                SetShared(new SharedPlayerFields());
-
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
             playerEntity.Initialize(lagCompensation);
-            playerEntity.SetShared(shared);
+            playerEntity.SetShared(Shared);
 
             networkMovement.Initialize(standardTickrate, cameraInterpolation,
-                shared, movementAbilities);
+                Shared, movementAbilities);
 
             clientSequence.Initialize(networkMovement, attackAbilities,
-                cooldownHandler, shared);
+                cooldownHandler, Shared);
         }
 
         public override void OnStartServer()
@@ -102,6 +99,6 @@ namespace Mastic
                 clientSequence.DoLocalUpdate();
         }
 
-        private void FixedUpdate() => print(shared);
+        private void FixedUpdate() => print(Shared);
     }
 }

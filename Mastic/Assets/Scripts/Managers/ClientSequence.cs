@@ -34,7 +34,8 @@ namespace Mastic
 
             for (int i = 0; i < attackAbilities.Length; i++)
             {
-                attackAbilities[i].DoLocalUpdate(shared.inputTick, shared.rollbackTick);
+                // -1 HERE BECAUSE INPUTTICK IS THE ONE THAT WILL BE MADE IN THE NEW TICK.
+                attackAbilities[i].DoLocalUpdate(shared.inputTick - 1, shared.rollbackTick);
             }
 
             int clientPacketMultiplier = 1;

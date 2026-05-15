@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class SceneSetup : MonoBehaviour
+    public class SceneBoilerplate : MonoBehaviour
     {
         [SerializeField, Min(1)] private int framerateLimit = default;
         [SerializeField, Min(1)] private int tickrate = default;

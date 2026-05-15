@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3129894886814924651}
   - component: {fileID: 3129894886814924650}
   - component: {fileID: 443060642}
-  - component: {fileID: 4172893942627457508}
+  - component: {fileID: 3469503502427012751}
   m_Layer: 8
   m_Name: cam
   m_TagString: MainCamera
@@ -110,7 +110,7 @@ MonoBehaviour:
   padding: 175
   width: 150
   height: 25
---- !u!114 &4172893942627457508
+--- !u!114 &3469503502427012751
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -119,6 +119,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 3129894886814924649}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eabf609273b4f2741a986f2075120d1e, type: 3}
+  m_Script: {fileID: 11500000, guid: 30575d744a690e142b7bcd916b12427c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

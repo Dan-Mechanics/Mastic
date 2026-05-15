@@ -42,7 +42,10 @@ namespace Mastic
         {
             if (!IsValid())
                 return;
-            
+
+            if (!Utils.IsStringValid(loginUrl.text))
+                Debug.LogError("loginUrl has not been set.");
+
             sessionId.Set("nonsense here");
             string url = $"{loginUrl}?game_id={gameId}&email={email.text}&password={password.text}";
             popupHandler.Send(url, Color.gray, 4f);

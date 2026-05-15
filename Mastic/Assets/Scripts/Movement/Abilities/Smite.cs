@@ -93,7 +93,7 @@ namespace Mastic
 
         private void Teleport(Vector3 point)
         {
-            point += Vector3.up * 0.5f;
+            point += Vector3.up;
             transform.position = point;
             rb.linearVelocity = Vector3.zero;
             if (!isServer)

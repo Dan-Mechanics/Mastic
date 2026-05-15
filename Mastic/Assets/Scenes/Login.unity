@@ -854,7 +854,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5982554003716872714, guid: 26628af755ae7f54ea453edf188fed1c, type: 3}
       propertyPath: m_Name
-      value: login_scene_setup
+      value: scene_boilerplate
       objectReference: {fileID: 0}
     - target: {fileID: 7222330822865407113, guid: 26628af755ae7f54ea453edf188fed1c, type: 3}
       propertyPath: m_LocalPosition.x

@@ -26,6 +26,25 @@ namespace Mastic
         private void Tick() 
         {
             Clean();
+            lagCompensation.Clean();
+            lagCompensation.RecordFrame();
+            foreach (ServerPlayerWrapper player in players)
+            {
+                // MAKE SURE THE PLAYER CAN'T SHOOT HIMSELF.
+                player.entity.EnableHitbox(false);
+                for (int i = 0; i < player.attackAbilities.Length; i++)
+                {
+                    // HERE IS THE BUG !!
+                    player.attackAbilities[i].DoServerTick(player.Shared.receivedInputTick);
+                }
+
+                player.entity.EnableHitbox(true);
+            }
+
+            lagCompensation.ReturnToPresent();
+
+            // ===
+
             foreach (ServerPlayerWrapper player in players)
             {
                 player.networkMovement.DoServerTick();
@@ -37,23 +56,6 @@ namespace Mastic
             {
                 player.networkMovement.SendStateMessageToClient();
             }
-
-            lagCompensation.Clean();
-            lagCompensation.RecordFrame();
-            foreach (ServerPlayerWrapper player in players)
-            {
-                // MAKE SURE THE PLAYER CAN'T SHOOT HIMSELF.
-                player.entity.EnableHitbox(false);
-                for (int i = 0; i < player.attackAbilities.Length; i++)
-                {
-                    // HERE IS THE BUG !!
-                    player.attackAbilities[i].DoServerTick(player.shared.receivedInputTick);
-                }
-
-                player.entity.EnableHitbox(true);
-            }
-
-            lagCompensation.ReturnToPresent();
         }
 
         private void Clean()
@@ -73,18 +75,19 @@ namespace Mastic
 
         private class ServerPlayerWrapper 
         {
+            public SharedPlayerFields Shared => player.Shared;
+            private readonly Player player;
+
             public Transform transform;
             public IAttackAbility[] attackAbilities;
             public PlayerEntity entity;
             public NetworkMovement networkMovement;
             public CooldownHandler cooldownHandler;
-            public SharedPlayerFields shared;
 
             public ServerPlayerWrapper(Transform transform)
             {
                 this.transform = transform;
-                shared = new SharedPlayerFields();
-                transform.GetComponent<Player>().SetShared(shared);
+                player = transform.GetComponent<Player>();
                 attackAbilities = transform.GetComponents<IAttackAbility>();
                 entity = transform.GetComponent<PlayerEntity>();
                 networkMovement = transform.GetComponent<NetworkMovement>();

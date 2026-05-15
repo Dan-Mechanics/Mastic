@@ -4,6 +4,9 @@ namespace Mastic
 {
     public interface ICameraInterpolation
     {
+        /// <summary>
+        /// This value doesn't need to change, it's very placebo if you do.
+        /// </summary>
         public const float MAX_LERP_VALUE = 2f;
         
         float LerpValue { get; set; }
