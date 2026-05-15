@@ -10,6 +10,6 @@
         public int rollbackTick;
         
         public override string ToString() 
-            => $"inputTick: {inputTick}, serverTick: {serverTick}, serverProcessedTick: {receivedInputTick}, rollbackTick: {rollbackTick}.";
+            => $"inputTick: {inputTick}, serverTick: {serverTick}, receivedInputTick: {receivedInputTick}, rollbackTick: {rollbackTick}.";
     }
 }

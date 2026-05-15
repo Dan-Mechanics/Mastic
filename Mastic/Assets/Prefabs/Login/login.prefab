@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69de667046080264f93eecc249f7fdd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sessionId: {fileID: 11400000, guid: 5f0f06a834ade8f4c95dd876822eaeed, type: 2}
-  loginUrl: {fileID: 11400000, guid: cf31fb112c3025543b9a32268cf5c002, type: 2}
+  sessionId: {fileID: 11400000, guid: ee8875a092ebc5a4eafeb69354423359, type: 2}
+  loginUrl: {fileID: 11400000, guid: ade42f8dbdc02bf4f9c3f5ad690968ea, type: 2}
   gameId: 1
   nextSceneName: Scene
