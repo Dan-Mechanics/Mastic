@@ -19,6 +19,7 @@ namespace Mastic
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();   
             serverSequence = FindAnyObjectByType<ServerSequence>();
             spawnpoint = GameObject.FindWithTag(spawnpointTag).transform;
+            FindAnyObjectByType<EasySettings>().Log(Debug.Log);
         }
 
         private void Start()
