@@ -125,7 +125,6 @@ namespace Mastic
                 break;
             }
 
-
             physicsMovement.EnableGravity(!IsAbilityActive(serverTick));
             if (endingTick == serverTick)
             {

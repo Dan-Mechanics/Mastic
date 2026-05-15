@@ -19,8 +19,8 @@ namespace Mastic
 
         private List<ReliableShootMessage> pendingShootMessages;
         private ICameraInterpolation cameraInterpolation;
-        private LagCompensation lagCompensation;
         private ReliableShootMessage shootMessage;
+        private LagCompensation lagCompensation;
         private MouseLook mouseLook;
         private Rigidbody rb;
         private Transform eyes;
