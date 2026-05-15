@@ -136,6 +136,7 @@ namespace Mastic
                 Debug.LogWarning("This is acceptable for spawn because the buffer is very empty");
             }
 
+            shared.receivedInputTick = inputMessage.tick;
             previousInputMessage = inputMessage;
             shared.serverTick++;
         }

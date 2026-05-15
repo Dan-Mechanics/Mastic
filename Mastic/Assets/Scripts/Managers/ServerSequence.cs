@@ -47,7 +47,7 @@ namespace Mastic
                 for (int i = 0; i < player.attackAbilities.Length; i++)
                 {
                     // HERE IS THE BUG !!
-                    player.attackAbilities[i].DoServerTick(player.shared.inputTick);
+                    player.attackAbilities[i].DoServerTick(player.shared.receivedInputTick);
                 }
 
                 player.entity.EnableHitbox(true);
