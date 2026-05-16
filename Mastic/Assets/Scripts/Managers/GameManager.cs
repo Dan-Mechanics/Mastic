@@ -5,9 +5,9 @@ namespace Mastic
     public class GameManager : MonoBehaviour
     {
         [SerializeField] private EasyBinding closeGame = default;
-        [SerializeField, Min(1)] private int standardTickrate = default;
         [SerializeField] private string spawnpointTag = default;
 
+        private int standardTickrate;
         private SceneBoilerplate sceneBoilerplate;
         private SimpleNetworkManager networkManager;
         private ServerSequence serverSequence;
@@ -24,7 +24,9 @@ namespace Mastic
 
         private void Start()
         {
-            // MAKE SURE THE SCENE SETUP IS DONE FIRST.
+            EasySettings easySettings = FindAnyObjectByType<EasySettings>();
+            easySettings.Get(nameof(standardTickrate), ref standardTickrate);
+
             sceneBoilerplate.SetTickrate(standardTickrate);
             sceneBoilerplate.Initialize();
 

@@ -9,7 +9,7 @@ namespace Mastic
 {
     public class EasySettings : MonoBehaviour
     {
-        [SerializeField] private TextAsset text = default;
+        [SerializeField] private TextAsset[] texts = default;
         private Dictionary<string, string> dictionary;
 
         public bool Get<T>(string name, ref T value)
@@ -44,7 +44,16 @@ namespace Mastic
 
             dictionary = new Dictionary<string, string>();
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            using StringReader stringReader = new StringReader(text.text);
+            for (int i = 0; i < texts.Length; i++)
+            {
+                if (texts[i] != null)
+                    Parse(texts[i].text);
+            }
+        }
+
+        private void Parse(string text)
+        {
+            using StringReader stringReader = new StringReader(text);
 
             string line;
             while ((line = stringReader.ReadLine()) != null)

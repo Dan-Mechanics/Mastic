@@ -22,9 +22,13 @@ namespace Mastic
         [Server]
         public void Initialize(LagCompensation lagCompensation)
         {
-            mouseLook = GetComponent<MouseLook>();
             recording = new Frame[lagCompensation.MaxRecordingLength];
             lagCompensation.Register(this);
+        }
+
+        private void Awake()
+        {
+            mouseLook = GetComponent<MouseLook>();
             playerLayer = LayerMask.NameToLayer(playerLayerName);
             intangibleLayer = LayerMask.NameToLayer(intangibleLayerName);
             EnableHitbox(true);
@@ -81,7 +85,6 @@ namespace Mastic
         [Server]
         public void ReturnToPresent() => SetAsFrame(present);
 
-        [Server]
         public void EnableHitbox(bool value) => gameObject.layer = value ? playerLayer : intangibleLayer;
 
         private struct Frame

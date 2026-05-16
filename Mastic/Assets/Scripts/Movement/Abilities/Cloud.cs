@@ -6,21 +6,21 @@ namespace Mastic
 {
     public class Cloud : NetworkBehaviour, IMovementAbility
     {
+        public int magicOffset;
         [SerializeField] private EasyBinding ability2 = default;
         [SerializeField] private GameObject cloudPrefab = default;
         [SerializeField] private Vector3 force = default;
         [SerializeField] private int maxPendingRequests = default;
         [SerializeField, Min(1)] private int expectedRigidbodies = default;
-        [SerializeField] private int tickDuration = default;
-        [SerializeField] private int standardTickrate = default;
         [SerializeField] private int cooldownIndex = default;
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
         private GameObject cloudVisual;
-        private float endTime;
-        private float duration;
         private ForceZone forceZone;
+        private int tickDuration;
+        private int unlocalCurrentTick;
+        private int standardTickrate;
         private int previousTick;
         private int startingTick;
         private int endingTick;
@@ -30,13 +30,27 @@ namespace Mastic
             cooldownHandler = GetComponent<CooldownHandler>();
             cloudVisual = Instantiate(cloudPrefab, cloudPrefab.transform.position, cloudPrefab.transform.rotation);
             cloudVisual.SetActive(false);
+
+            EasySettings easySettings = FindAnyObjectByType<EasySettings>();
+            easySettings.Get(nameof(Cloud) + nameof(tickDuration), ref tickDuration);
+
             forceZone = cloudVisual.GetComponent<ForceZone>();
             forceZone.Initialize(expectedRigidbodies, force);
-            duration = (float)tickDuration / standardTickrate;
-            endTime = -1f;
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;
+        }
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            if (!isLocalPlayer)
+                EventManager<int>.AddListener(Occasion.DoUnlocalMovementAbilities, DoUnlocalTick);
+        }
+
+        private void OnDestroy()
+        {
+            EventManager<int>.RemoveListener(Occasion.DoUnlocalMovementAbilities, DoUnlocalTick);
         }
 
         [Client]
@@ -51,19 +65,6 @@ namespace Mastic
         }
 
         private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
-
-        private void FixedUpdate()
-        {
-            if (isLocalPlayer || isServer)
-                return;
-
-            // UNLOCAL CLIENT.
-            // THIS IS AN APPROXIMATION.
-            bool active = NetworkTime.time <= endTime;
-            cloudVisual.SetActive(active);
-            if (active)
-                forceZone.DoTick();
-        }
 
         [Command]
         private void CmdRequestCloud(int inputTick)
@@ -91,6 +92,16 @@ namespace Mastic
                 forceZone.DoTick();
         }
 
+        [Client]
+        private void DoUnlocalTick(int inputTick)
+        {
+            unlocalCurrentTick = inputTick;
+            bool active = IsAbilityActive(inputTick);
+            cloudVisual.SetActive(active);
+            if (active)
+                forceZone.DoTick();
+        }
+
         [Server]
         public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)
         {
@@ -101,7 +112,7 @@ namespace Mastic
 
                 cooldownHandler.Cast(cooldownIndex);
                 Cast(serverTick);
-                RpcCastCloud(transform.position, (float)NetworkTime.time + duration);
+                RpcCastCloud(transform.position, NetworkTime.time);
                 pendingRequests.RemoveAt(i);
                 break;
             }
@@ -113,13 +124,16 @@ namespace Mastic
         }
 
         [ClientRpc]
-        private void RpcCastCloud(Vector3 position, float endTime)
+        private void RpcCastCloud(Vector3 position, double sendTime)
         {
             if (isLocalPlayer)
                 return;
 
+            double diff = NetworkTime.time - sendTime;
+            int tickDiff = Mathf.FloorToInt((float)(diff / Time.fixedDeltaTime));
+
+            Cast(unlocalCurrentTick - tickDiff + magicOffset);
             cloudVisual.transform.position = position;
-            this.endTime = endTime;
         }
 
         public void CleanPendingRequests(int upTo)

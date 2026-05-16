@@ -411,7 +411,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   defaultName: player
-  standardTickrate: 64
   localRemove:
   - {fileID: 8563719589400999970}
   - {fileID: 8239588418118008676}
@@ -419,7 +418,6 @@ MonoBehaviour:
   - {fileID: 5846048930810008312}
   - {fileID: 3497393699691843500}
   - {fileID: 6891286507384332386}
-  - {fileID: 3751572637676758940}
   - {fileID: 3685579806953591295}
   serverRemove:
   - {fileID: 5846048930810008312}

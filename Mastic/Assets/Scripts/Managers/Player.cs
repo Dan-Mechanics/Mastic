@@ -10,11 +10,11 @@ namespace Mastic
         public SharedPlayerFields Shared { get; set; }
         
         [SerializeField] private string defaultName = default;
-        [SerializeField, Min(1)] private int standardTickrate = default;
         [SerializeField] private List<Object> localRemove = default;
         [SerializeField] private List<Object> unlocalRemove = default;
         [SerializeField] private List<Object> serverRemove = default;
 
+        private int standardTickrate;
         private ICameraInterpolation cameraInterpolation;
         private IAttackAbility[] attackAbilities;
         private List<IMovementAbility> movementAbilities;
@@ -39,17 +39,19 @@ namespace Mastic
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
             Shared = new SharedPlayerFields();
-            StartAll();
+            Initialize();
         }
 
         /// <summary>
         /// For server, local and unlocal client.
         /// </summary>
-        private void StartAll()
+        private void Initialize()
         {
+            EasySettings easySettings = FindAnyObjectByType<EasySettings>();
+            easySettings.Get(nameof(standardTickrate), ref standardTickrate);
+
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
-            playerEntity.Initialize(lagCompensation);
             playerEntity.SetShared(Shared);
 
             networkMovement.Initialize(standardTickrate, cameraInterpolation,
@@ -62,6 +64,7 @@ namespace Mastic
         public override void OnStartServer()
         {
             base.OnStartServer();
+            playerEntity.Initialize(lagCompensation);
             gameObject.name = $"{defaultName} | server";
             serverRemove.ForEach(x => Destroy(x));
             print($"{gameObject.name}: setup completed".ToUpperInvariant());
@@ -86,6 +89,7 @@ namespace Mastic
             }
             else
             {
+                gameObject.tag = "Untagged";
                 gameObject.name = $"{defaultName} | unlocal client";
                 unlocalRemove.ForEach(x => Destroy(x));
             }
@@ -98,7 +102,5 @@ namespace Mastic
             if (isLocalPlayer)
                 clientSequence.DoLocalUpdate();
         }
-
-        private void FixedUpdate() => print(Shared);
     }
 }

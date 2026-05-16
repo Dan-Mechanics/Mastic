@@ -274,8 +274,8 @@ namespace Mastic
             {
                 Debug.LogWarning($"We have to reconcile for {serverStateMessage.tick} | if ({serverStateMessage.position} != {stateBuffer[serverStateBufferIndex].position}).");
                 Debug.LogWarning($"Distance: {distance}, in actual: {distance / Time.fixedDeltaTime}.");
-                if (Application.isFocused)
-                    OnPlayReconsileSound?.Invoke();
+                //if (Application.isFocused)
+                OnPlayReconsileSound?.Invoke();
 
                 DoReconsile(serverStateBufferIndex);
             }
@@ -317,6 +317,7 @@ namespace Mastic
             if (isLocalPlayer)
             {
                 movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick));
+                EventManager<int>.RaiseEvent(Occasion.DoUnlocalMovementAbilities, input.tick);
             }
             else
             {

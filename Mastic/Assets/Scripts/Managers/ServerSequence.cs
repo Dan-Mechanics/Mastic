@@ -6,7 +6,7 @@ namespace Mastic
 {
     public class ServerSequence : MonoBehaviour
     {
-        private readonly List<ServerPlayerWrapper> players = new List<ServerPlayerWrapper>();
+        private readonly List<ServerPlayer> players = new List<ServerPlayer>();
         private LagCompensation lagCompensation;
         private float timer;
 
@@ -28,7 +28,7 @@ namespace Mastic
             Clean();
             lagCompensation.Clean();
             lagCompensation.RecordFrame();
-            foreach (ServerPlayerWrapper player in players)
+            foreach (ServerPlayer player in players)
             {
                 // MAKE SURE THE PLAYER CAN'T SHOOT HIMSELF.
                 player.entity.EnableHitbox(false);
@@ -45,14 +45,14 @@ namespace Mastic
 
             // ===
 
-            foreach (ServerPlayerWrapper player in players)
+            foreach (ServerPlayer player in players)
             {
                 player.networkMovement.DoServerTick();
                 player.cooldownHandler.Charge();
             }
 
             Physics.Simulate(Time.fixedDeltaTime);
-            foreach (ServerPlayerWrapper player in players)
+            foreach (ServerPlayer player in players)
             {
                 player.networkMovement.SendStateMessageToClient();
             }
@@ -68,12 +68,12 @@ namespace Mastic
         }
 
         [Server]
-        public void Register(Transform player) => players.Add(new ServerPlayerWrapper(player));
+        public void Register(Transform player) => players.Add(new ServerPlayer(player));
 
         [Server]
         public void Clear() => players.Clear();
 
-        private class ServerPlayerWrapper 
+        private class ServerPlayer 
         {
             public SharedPlayerFields Shared => player.Shared;
             private readonly Player player;
@@ -84,7 +84,7 @@ namespace Mastic
             public NetworkMovement networkMovement;
             public CooldownHandler cooldownHandler;
 
-            public ServerPlayerWrapper(Transform transform)
+            public ServerPlayer(Transform transform)
             {
                 this.transform = transform;
                 player = transform.GetComponent<Player>();

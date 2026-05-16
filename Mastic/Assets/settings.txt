@@ -1,13 +1,8 @@
+standardTickrate 64
 speed 6
 acceleration 60
 multiplier 0.33
 topSpeed 25
 slopeLimit 50
 
-// EasySettings supports comments!
-smiteRange 500
-smiteSpeed 12
-smiteDamage 80
-smiteRaidus 6
-smiteDuration 64
-smiteDuration 128
+cloudTickDuration 70
