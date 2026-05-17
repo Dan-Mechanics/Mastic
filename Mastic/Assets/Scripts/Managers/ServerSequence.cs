@@ -26,7 +26,7 @@ namespace Mastic
         private void Tick() 
         {
             Clean();
-            /*lagCompensation.Clean();
+            lagCompensation.Clean();
             lagCompensation.RecordFrame();
             foreach (ServerPlayer player in players)
             {
@@ -39,7 +39,7 @@ namespace Mastic
                 player.entity.EnableHitbox(true);
             }
 
-            lagCompensation.ReturnToPresent();*/
+            lagCompensation.ReturnToPresent();
 
             // ===
 

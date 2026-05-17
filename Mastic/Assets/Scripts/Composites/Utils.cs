@@ -48,8 +48,7 @@ namespace Mastic
         /// </summary>
         public static int GetCurrentServerTick(double networkTime, float standardInterval)
         {
-            return (int)Math.Floor(networkTime * 64);
-            //return Mathf.FloorToInt((float)networkTime / standardInterval);
+            return Mathf.FloorToInt((float)networkTime / standardInterval);
         }
     }
 }
