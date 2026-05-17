@@ -26,22 +26,20 @@ namespace Mastic
         private void Tick() 
         {
             Clean();
-            lagCompensation.Clean();
+            /*lagCompensation.Clean();
             lagCompensation.RecordFrame();
             foreach (ServerPlayer player in players)
             {
-                // MAKE SURE THE PLAYER CAN'T SHOOT HIMSELF.
                 player.entity.EnableHitbox(false);
                 for (int i = 0; i < player.attackAbilities.Length; i++)
                 {
-                    // HERE IS THE BUG !!
                     player.attackAbilities[i].DoServerTick(player.Shared.receivedInputTick);
                 }
 
                 player.entity.EnableHitbox(true);
             }
 
-            lagCompensation.ReturnToPresent();
+            lagCompensation.ReturnToPresent();*/
 
             // ===
 
