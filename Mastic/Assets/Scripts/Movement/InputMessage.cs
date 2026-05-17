@@ -16,9 +16,8 @@ namespace Mastic
         public float yRotation;
         public float lerpValue;
         public int tick;
-        public int syncedServerTick;
 
-        public void SetValues(bool w, bool a, bool s, bool d, float xRotation, float yRotation, float lerpValue, int tick, int syncedServerTick)
+        public void SetValues(bool w, bool a, bool s, bool d, float xRotation, float yRotation, float lerpValue, int tick)
         {
             this.w = w;
             this.a = a;
@@ -28,7 +27,6 @@ namespace Mastic
             this.yRotation = yRotation;
             this.lerpValue = lerpValue;
             this.tick = tick;
-            this.syncedServerTick = syncedServerTick;
         }
 
         public float GetVerticalInput()

@@ -41,15 +41,5 @@ namespace Mastic
             vec.y = 0f;
             return vec;
         }
-
-        /// <summary>
-        /// The idea here is that the standardInterval
-        /// always stays the same.
-        /// </summary>
-        public static int GetCurrentServerTick(double networkTime, float standardInterval)
-        {
-            return (int)Math.Floor(networkTime * 64);
-            //return Mathf.FloorToInt((float)networkTime / standardInterval);
-        }
     }
 }
