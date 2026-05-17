@@ -106,7 +106,8 @@ namespace Mastic
             }
 
             int index = shared.inputTick % bufferSize;
-            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, shared.inputTick);
+            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY,
+                cameraInterpolation.LerpValue, shared.inputTick, Utils.GetCurrentServerTick(NetworkTime.time, standardInterval));
             Move(inputBuffer[index], true);
 
             stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
@@ -317,7 +318,7 @@ namespace Mastic
             if (isLocalPlayer)
             {
                 movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick));
-                EventManager<int>.RaiseEvent(Occasion.DoUnlocalMovementAbilities, input.tick);
+                EventManager<int>.RaiseEvent(Occasion.DoUnlocalMovementAbilities, input.syncedServerTick);
             }
             else
             {
