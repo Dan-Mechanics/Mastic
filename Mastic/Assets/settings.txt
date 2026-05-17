@@ -1,4 +1,6 @@
 standardTickrate 64
+tolerance 0.001
+
 speed 6
 acceleration 60
 multiplier 0.33

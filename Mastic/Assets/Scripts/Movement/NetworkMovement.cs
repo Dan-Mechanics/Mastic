@@ -18,7 +18,6 @@ namespace Mastic
         [SerializeField] private EasyBinding right = default;
         [SerializeField] private MovementSettings settings = default;
         [SerializeField, Min(1)] private int bufferSize = default;
-        [SerializeField, Min(0f)] private float tolerance = default;
         [SerializeField, Min(1)] private int maxPendingInputMessages = default;
 
         private Rigidbody rb;
@@ -41,6 +40,7 @@ namespace Mastic
         private InputMessage previousInputMessage;
 
         private Vector3 prevEyePos;
+        private float tolerance;
         private bool firstInputMessageReceived; 
         private bool hasInputMessages;
         private int stateBufferIndex;
@@ -66,6 +66,9 @@ namespace Mastic
             mouseLook = GetComponent<MouseLook>();
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
+
+            EasySettings easySettings = FindAnyObjectByType<EasySettings>();
+            easySettings.Get(nameof(tolerance), ref tolerance);
 
             prevEyePos = eyes.position;
             receivedTick = -1;
@@ -171,6 +174,7 @@ namespace Mastic
         {
             InputMessage inputMessage = previousInputMessage;
             inputMessage.tick++;
+            inputMessage.syncedServerTick++;
             return inputMessage;
         }
 

@@ -71,6 +71,7 @@ namespace Mastic
         [TargetRpc]
         public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
 
+        // ADD MAX SIZE VALIDATION HERE !! and print message
         [Command]
         private void CmdShoot(ShootMessage shootMessage) => pendingShootMessages.Add(shootMessage);
 

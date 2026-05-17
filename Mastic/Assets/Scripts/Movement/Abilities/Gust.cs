@@ -44,7 +44,7 @@ namespace Mastic
 
             pendingRequests.Add(inputTick);
             previousTick = inputTick;
-            Debug.LogWarning($"{gameObject.name}: requested gust {inputTick} ...");
+            print($"{gameObject.name}: requested {GetType().Name} on {inputTick} ...");
         }
 
         [Client]
