@@ -443,7 +443,6 @@ MonoBehaviour:
   right: {fileID: 11400000, guid: b8e3ccdcc27814744b86665e6c2be37e, type: 2}
   settings: {fileID: 11400000, guid: 70b996bd5157383469db46c9f72ca15c, type: 2}
   bufferSize: 64
-  tolerance: 0.001
   maxPendingInputMessages: 8
 --- !u!114 &6891286507384332386
 MonoBehaviour:
@@ -600,13 +599,12 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  magicOffset: 0
   ability2: {fileID: 11400000, guid: c616e6e823b59d14b9712499bf992211, type: 2}
   cloudPrefab: {fileID: 106363770380491094, guid: e1ca7f8cf71c3a64d89a2e01e7898476, type: 3}
   force: {x: 0, y: 15, z: 0}
   maxPendingRequests: 8
   expectedRigidbodies: 12
-  tickDuration: 768
-  standardTickrate: 64
   cooldownIndex: 1
 --- !u!114 &790473191979634726
 MonoBehaviour:

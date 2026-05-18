@@ -9,32 +9,16 @@ namespace Mastic
 {
     public class EasySettings : MonoBehaviour
     {
-        [SerializeField] private TextAsset[] texts = default;
+        public static EasySettings Current => FindAnyObjectByType<EasySettings>();
+        
+        [SerializeField] private TextAsset text = default;
         private Dictionary<string, string> dictionary;
 
-        public bool Get<T>(string name, ref T value)
+        public T Get<T>(string name)
         {
             CheckInitialization();
             name = name.ToLowerInvariant();
-            try
-            {
-                value = (T)Convert.ChangeType(dictionary[name], typeof(T));
-                return true;
-            }
-            catch (Exception exception)
-            {
-                Debug.LogWarning($"{name} --> {exception.Message}");
-                return false;
-            }
-        }
-
-        public void Log(Action<string> onLog)
-        {
-            CheckInitialization();
-            foreach (KeyValuePair<string, string> pair in dictionary)
-            {
-                onLog?.Invoke($"|{pair.Key}|   |{pair.Value}|");
-            }
+            return (T)Convert.ChangeType(dictionary[name], typeof(T));
         }
 
         private void CheckInitialization()
@@ -44,16 +28,7 @@ namespace Mastic
 
             dictionary = new Dictionary<string, string>();
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            for (int i = 0; i < texts.Length; i++)
-            {
-                if (texts[i] != null)
-                    Parse(texts[i].text);
-            }
-        }
-
-        private void Parse(string text)
-        {
-            using StringReader stringReader = new StringReader(text);
+            using StringReader stringReader = new StringReader(text.text);
 
             string line;
             while ((line = stringReader.ReadLine()) != null)
@@ -72,6 +47,15 @@ namespace Mastic
                     continue;
 
                 dictionary[split[0].ToLowerInvariant()] = split[1];
+            }
+        }
+
+        public void Log(Action<string> onLog)
+        {
+            CheckInitialization();
+            foreach (KeyValuePair<string, string> pair in dictionary)
+            {
+                onLog?.Invoke($"|{pair.Key}|   |{pair.Value}|");
             }
         }
     }

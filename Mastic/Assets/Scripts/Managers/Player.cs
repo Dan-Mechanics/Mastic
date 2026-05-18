@@ -47,8 +47,7 @@ namespace Mastic
         /// </summary>
         private void Initialize()
         {
-            EasySettings easySettings = FindAnyObjectByType<EasySettings>();
-            easySettings.Get(nameof(standardTickrate), ref standardTickrate);
+            standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
 
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);

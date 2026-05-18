@@ -6,7 +6,6 @@ namespace Mastic
 {
     public class Cloud : NetworkBehaviour, IMovementAbility
     {
-        public int magicOffset;
         [SerializeField] private EasyBinding ability2 = default;
         [SerializeField] private GameObject cloudPrefab = default;
         [SerializeField] private Vector3 force = default;
@@ -18,7 +17,10 @@ namespace Mastic
         private CooldownHandler cooldownHandler;
         private GameObject cloudVisual;
         private ForceZone forceZone;
+        
         private float standardInterval;
+        private int standardTickrate;
+
         private int tickDuration;
         private int previousTick;
         private int startingTick;
@@ -31,11 +33,9 @@ namespace Mastic
             cloudVisual = Instantiate(cloudPrefab, cloudPrefab.transform.position, cloudPrefab.transform.rotation);
             cloudVisual.SetActive(false);
 
-            EasySettings easySettings = FindAnyObjectByType<EasySettings>();
-            easySettings.Get(nameof(Cloud) + nameof(tickDuration), ref tickDuration);
-
-            int standardTickrate = default;
-            easySettings.Get(nameof(standardTickrate), ref standardTickrate);
+            EasySettings easySettings = EasySettings.Current;
+            tickDuration = easySettings.Get<int>(GetType().Name + nameof(tickDuration));
+            standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
             standardInterval = 1f / standardTickrate;
 
             forceZone = cloudVisual.GetComponent<ForceZone>();
@@ -111,6 +111,10 @@ namespace Mastic
             serverTick = Utils.GetCurrentServerTick(NetworkTime.time, standardInterval);
             if (serverTick - prev != 1)
                 Debug.LogWarning($"if ({serverTick} - {prev} != 1)");
+            else
+            {
+                Debug.Log($"if ({serverTick} - {prev} == 1)");
+            }
 
             prev = serverTick;
             for (int i = 0; i < pendingRequests.Count; i++)

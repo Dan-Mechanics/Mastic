@@ -67,8 +67,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
 
-            EasySettings easySettings = FindAnyObjectByType<EasySettings>();
-            easySettings.Get(nameof(tolerance), ref tolerance);
+            tolerance = EasySettings.Current.Get<float>(nameof(tolerance));
 
             prevEyePos = eyes.position;
             receivedTick = -1;

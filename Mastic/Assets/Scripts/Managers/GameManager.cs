@@ -24,8 +24,7 @@ namespace Mastic
 
         private void Start()
         {
-            EasySettings easySettings = FindAnyObjectByType<EasySettings>();
-            easySettings.Get(nameof(standardTickrate), ref standardTickrate);
+            standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
 
             sceneBoilerplate.SetTickrate(standardTickrate);
             sceneBoilerplate.Initialize();

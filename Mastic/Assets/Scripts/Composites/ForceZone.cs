@@ -24,8 +24,7 @@ namespace Mastic
                 if (!colliders[i].transform.root.TryGetComponent(out Rigidbody rb))
                     continue;
 
-               //rb.AddForce(force, ForceMode.Acceleration);
-                rb.linearVelocity = force;
+                rb.AddForce(force, ForceMode.Acceleration);
             }
         }
     }
