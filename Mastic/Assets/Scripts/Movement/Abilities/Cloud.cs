@@ -97,9 +97,9 @@ namespace Mastic
         }
 
         [Client]
-        private void DoUnlocalTick(int inputTick)
+        private void DoUnlocalTick(int syncedServerTick)
         {
-            bool active = IsAbilityActive(inputTick);
+            bool active = IsAbilityActive(syncedServerTick);
             cloudVisual.SetActive(active);
             if (active)
                 forceZone.DoTick();
@@ -108,7 +108,7 @@ namespace Mastic
         [Server]
         public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)
         {
-            /*serverTick = Utils.GetCurrentServerTick(NetworkTime.time, standardInterval);
+            serverTick = Utils.GetCurrentServerTick(NetworkTime.time, standardInterval);
             if (serverTick - prev != 1)
                 Debug.LogWarning($"if ({serverTick} - {prev} != 1)");
             else
@@ -116,7 +116,7 @@ namespace Mastic
                 Debug.Log($"if ({serverTick} - {prev} == 1)");
             }
 
-            prev = serverTick;*/
+            prev = serverTick;
             for (int i = 0; i < pendingRequests.Count; i++)
             {
                 if (inputTick < pendingRequests[i] || !CanCast(serverTick))

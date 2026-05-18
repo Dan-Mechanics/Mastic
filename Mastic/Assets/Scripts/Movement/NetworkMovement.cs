@@ -40,7 +40,6 @@ namespace Mastic
         private InputMessage previousInputMessage;
 
         private Vector3 prevEyePos;
-        private int prevTick;
         private float tolerance;
         private bool firstInputMessageReceived; 
         private bool hasInputMessages;
@@ -48,7 +47,6 @@ namespace Mastic
         private int receivedTick;
         private float standardInterval;
         private bool w, a, s, d;
-        int some = 10;
 
         public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation, SharedPlayerFields shared, List<IMovementAbility> movementAbilities)
         {
@@ -74,7 +72,6 @@ namespace Mastic
             prevEyePos = eyes.position;
             receivedTick = -1;
             previousInputMessage.tick = -1;
-            prevTick = -1;
         }
 
         public override void OnStartLocalPlayer()
@@ -99,14 +96,6 @@ namespace Mastic
         [Client]
         public void DoLocalTick()
         {
-            shared.inputTick = Utils.GetCurrentServerTick(NetworkTime.time, standardInterval);
-            int diff = Mathf.Abs(shared.inputTick - prevTick);
-            if (shared.inputTick - prevTick != 1 && diff <= some && prevTick != -1)
-            {
-                shared.inputTick = prevTick + 1;
-            }
-            prevTick = shared.inputTick;
-            
             movementAbilities.ForEach(x => x.DoLocalTick(shared.inputTick, movement));
 
             // MAKE IT SO THAT IF YOU ALT+TAB YOU KEEP MOVING.
@@ -127,20 +116,12 @@ namespace Mastic
             CmdSendInputMessageToServer(inputBuffer[index]);
 
             OnDisplayTick?.Invoke(shared.inputTick);
-            //shared.inputTick++;
+            shared.inputTick++;
         }
 
         [Server]
         public void DoServerTick()
         {
-            shared.serverTick = Utils.GetCurrentServerTick(NetworkTime.time, standardInterval);
-            int diff = Mathf.Abs(shared.serverTick - prevTick);
-            if (shared.serverTick - prevTick != 1 && diff <= some && prevTick != -1)
-            {
-                shared.serverTick = prevTick + 1;
-            }
-            prevTick = shared.serverTick;
-
             adaptiveTickrate.ApplyTimeDilation(firstInputMessageReceived, pendingInputMessages.Count);
 
             InputMessage inputMessage = GetNextInputMessage();
@@ -159,8 +140,7 @@ namespace Mastic
 
             shared.receivedInputTick = inputMessage.tick;
             previousInputMessage = inputMessage;
-           // shared.serverTick = Utils.GetCurrentServerTick(NetworkTime.time, standardInterval);
-            //shared.serverTick++;
+            shared.serverTick++;
         }
 
         private InputMessage GetNextInputMessage()
@@ -341,7 +321,7 @@ namespace Mastic
             if (isLocalPlayer)
             {
                 movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick));
-                EventManager<int>.RaiseEvent(Occasion.DoUnlocalMovementAbilities, input.tick);
+                EventManager<int>.RaiseEvent(Occasion.DoUnlocalMovementAbilities, input.syncedServerTick);
             }
             else
             {
