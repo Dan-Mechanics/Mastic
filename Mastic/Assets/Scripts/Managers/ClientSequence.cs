@@ -52,6 +52,7 @@ namespace Mastic
                     networkMovement.DoLocalTick();
                     cooldownHandler.Charge();
                 }
+
             }
 
             if (Input.GetKeyDown(KeyCode.UpArrow)) { shared.inputTick += 10; Debug.LogWarning("+10"); }
