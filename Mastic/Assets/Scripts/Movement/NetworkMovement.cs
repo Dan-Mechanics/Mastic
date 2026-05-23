@@ -140,6 +140,7 @@ namespace Mastic
 
             shared.processedTick = inputMessage.tick;
             previousInputMessage = inputMessage;
+            shared.serverTick++;
         }
 
         private InputMessage GetNextInputMessage()
@@ -319,7 +320,6 @@ namespace Mastic
             prevEyePos = eyes.position;
 
             movementAbilities.ForEach(x => x.CleanPendingRequests(previousInputMessage.tick));
-            shared.serverTick++;
         }
 
         private void Move(InputMessage input, bool assignToCamera)
