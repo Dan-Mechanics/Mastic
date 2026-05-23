@@ -18,7 +18,11 @@ namespace Mastic
         {
             CheckInitialization();
             name = name.ToLowerInvariant();
-            return (T)Convert.ChangeType(dictionary[name], typeof(T));
+            string value = string.Empty;
+            if (dictionary.ContainsKey(name)) 
+                value = dictionary[name];
+
+            return (T)Convert.ChangeType(value, typeof(T));
         }
 
         private void CheckInitialization()
