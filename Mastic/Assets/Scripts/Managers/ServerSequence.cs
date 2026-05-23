@@ -46,6 +46,12 @@ namespace Mastic
             foreach (ServerPlayer player in players)
             {
                 player.networkMovement.DoServerTick();
+                //player.cooldownHandler.Charge();
+            }
+
+            foreach (ServerPlayer player in players)
+            {
+                player.networkMovement.DoServerMovementAbilities();
                 player.cooldownHandler.Charge();
             }
 
