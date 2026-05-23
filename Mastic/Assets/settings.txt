@@ -8,4 +8,6 @@ multiplier 0.33
 topSpeed 25
 slopeLimit 50
 
-cloudTickDuration 70
+// cooldown of cloud is 12 seconds and we want 50% uptime
+// that means the duration is 6 seconds * 64 ticks per second is:
+cloudTickDuration 384
