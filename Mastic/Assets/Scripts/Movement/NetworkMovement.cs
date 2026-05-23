@@ -129,7 +129,7 @@ namespace Mastic
             stateBufferIndex = inputMessage.tick % bufferSize;
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, movementIndex, inputMessage);
 
-            movementAbilities.ForEach(x => x.CleanPendingRequests(inputMessage.tick));
+           // movementAbilities.ForEach(x => x.CleanPendingRequests(inputMessage.tick));
 
             if (previousInputMessage.tick != inputMessage.tick - 1)
             {
@@ -140,7 +140,6 @@ namespace Mastic
 
             shared.processedTick = inputMessage.tick;
             previousInputMessage = inputMessage;
-            shared.serverTick++;
         }
 
         private InputMessage GetNextInputMessage()
@@ -311,6 +310,18 @@ namespace Mastic
             }
         }
 
+        [Server]
+        public void DoServerMovementAbilities()
+        {
+            cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
+            cameraInterpolation.SetValue(previousInputMessage.lerpValue);
+            movementAbilities.ForEach(x => x.CheckAgainstTickServer(previousInputMessage.tick, movement, shared.serverTick));
+            prevEyePos = eyes.position;
+
+            movementAbilities.ForEach(x => x.CleanPendingRequests(previousInputMessage.tick));
+            shared.serverTick++;
+        }
+
         private void Move(InputMessage input, bool assignToCamera)
         {
             // RECREATE THE MOVEMENT OF THE PLAYER IN THIS MOMENT.
@@ -329,13 +340,13 @@ namespace Mastic
                 movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick));
                 EventManager<int>.RaiseEvent(Occasion.DoUnlocalMovementAbilities, input.tick);
             }
-            else
+            /*else
             {
                 cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
                 cameraInterpolation.SetValue(input.lerpValue);
                 movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, shared.serverTick));
                 prevEyePos = eyes.position;
-            }
+            }*/
 
             // APPLY CHANGES.
             if (isLocalPlayer)

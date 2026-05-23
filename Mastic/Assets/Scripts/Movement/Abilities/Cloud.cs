@@ -115,14 +115,15 @@ namespace Mastic
                 Cast(transform.position, serverTick);
                 pendingRequests.RemoveAt(i);
 
-                int orderOffset = 0;
+              //  int orderOffset = 0;
                 var players = serverSequence.GetPlayerMovementConnections();
                 foreach (var player in players)
                 {
-                    if (player.connection == connectionToClient)
-                        orderOffset = 1;
+                  //  if (player.connection == connectionToClient)
+                     //   orderOffset = 1;
 
-                    TargetCast(player.connection, transform.position, player.processedTick + orderOffset);
+                    //TargetCast(player.connection, transform.position, player.processedTick + 1);
+                    TargetCast(player.connection, transform.position, player.processedTick);
                 }
 
                 break;
