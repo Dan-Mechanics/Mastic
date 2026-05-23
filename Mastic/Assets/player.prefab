@@ -305,7 +305,6 @@ GameObject:
   - component: {fileID: 790473191979634726}
   - component: {fileID: -3850514727978609351}
   - component: {fileID: -5172247997270406336}
-  - component: {fileID: -1520083828434283878}
   m_Layer: 3
   m_Name: player
   m_TagString: Player
@@ -531,20 +530,17 @@ MonoBehaviour:
   syncInterval: 0
   cooldowns:
   - value: 0
-    minRequired: 10
-    maxValue: 10
+    minRequired: 192
+    maxValue: 576
   - value: 0
-    minRequired: 64
-    maxValue: 64
+    minRequired: 768
+    maxValue: 768
   - value: 0
-    minRequired: 128
-    maxValue: 128
+    minRequired: 576
+    maxValue: 576
   - value: 0
-    minRequired: 128
-    maxValue: 128
-  - value: 0
-    minRequired: 64
-    maxValue: 64
+    minRequired: 384
+    maxValue: 768
   - value: 0
     minRequired: 10
     maxValue: 10
@@ -582,7 +578,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   speed: 8
-  ability1: {fileID: 11400000, guid: 5d90b30a166f93e4c994afab569f0415, type: 2}
+  ability1: {fileID: 11400000, guid: 00ce751e8eeaaf241bc6e06f96db00e0, type: 2}
   maxPendingRequests: 8
   cooldownIndex: 0
 --- !u!114 &-3213554778907423252
@@ -629,7 +625,7 @@ MonoBehaviour:
   explosionMask:
     serializedVersion: 2
     m_Bits: 8
-  primaryFire: {fileID: 11400000, guid: 5d90b30a166f93e4c994afab569f0415, type: 2}
+  primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
   maxPendingRequests: 8
   tickDuration: 64
   cooldownIndex: 2
@@ -672,26 +668,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   disconnect: {fileID: 11400000, guid: 76fa061607a567d45bc7219f92c14f6f, type: 2}
---- !u!114 &-1520083828434283878
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3751572637676758942}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f5be428ca6c91646b9162c2d609827b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  speed: 12
-  ability2: {fileID: 11400000, guid: 00ce751e8eeaaf241bc6e06f96db00e0, type: 2}
-  maxPendingRequests: 8
-  tickDuration: 128
-  cooldownIndex: 0
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0

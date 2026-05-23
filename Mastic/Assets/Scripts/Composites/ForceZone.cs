@@ -8,10 +8,12 @@ namespace Mastic
         private Collider[] colliders;
         private Vector3 halfExtents;
         private Vector3 force;
+        private float standardInterval;
 
-        public void Initialize(int expectedColliders, Vector3 force)
+        public void Initialize(int expectedColliders, float standardInterval, Vector3 force)
         {
             this.force = force;
+            this.standardInterval = standardInterval;
             colliders = new Collider[expectedColliders];
             halfExtents = transform.localScale / 2f;
         }
@@ -22,7 +24,7 @@ namespace Mastic
             for (int i = 0; i < count; i++)
             {
                 if (colliders[i].transform.root.TryGetComponent(out NetworkMovement networkMovement))
-                    networkMovement.AddForce(force * Time.fixedDeltaTime);
+                    networkMovement.AddForce(force * standardInterval);
             }
         }
     }

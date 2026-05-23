@@ -19,6 +19,7 @@ namespace Mastic
         private GameObject cloudVisual;
         private ForceZone forceZone;
 
+        private int standardTickrate;
         private int tickDuration;
         private int previousTick;
         private int startingTick;
@@ -34,9 +35,10 @@ namespace Mastic
             var easySettings = EasySettings.Current;
             tickDuration = easySettings.Get<int>(GetType().Name + nameof(tickDuration));
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
+            standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
 
             forceZone = cloudVisual.GetComponent<ForceZone>();
-            forceZone.Initialize(expectedColliders, force);
+            forceZone.Initialize(expectedColliders, 1f / standardTickrate, force);
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;

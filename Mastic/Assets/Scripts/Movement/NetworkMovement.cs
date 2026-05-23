@@ -88,7 +88,8 @@ namespace Mastic
         public override void OnStartServer()
         {
             base.OnStartServer();
-            inputBuffer = new InputMessage[bufferSize];
+            // inputBuffer = new InputMessage[bufferSize];
+            // YOU CAN REMOVE THIS FOR MORE SERVER RAM SPACE.
             stateBuffer = new StateMessage[bufferSize];
             pendingInputMessages = new List<InputMessage>();
         }

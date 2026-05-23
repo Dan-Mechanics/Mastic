@@ -66,8 +66,18 @@ namespace Mastic
             public int value;
             public int minRequired;
             public int maxValue;
+            //public string debugOutput;
 
             public void Clamp() => value = Mathf.Clamp(value, 0, maxValue);
         }
+
+        /*protected override void OnValidate()
+        {
+            base.OnValidate();
+            for (int i = 0; i < cooldowns.Length; i++)
+            {
+                cooldowns[i].debugOutput = $"{cooldowns[i].minRequired / 64f}s / {cooldowns[i].maxValue / 64f}s";
+            }
+        }*/
     }
 }

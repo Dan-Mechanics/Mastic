@@ -109,7 +109,7 @@ namespace Mastic
                 if (!target.TryGetComponent(out NetworkMovement networkMovement))
                     continue;
 
-                Vector3 dir = target.position - transform.position;
+                Vector3 dir = target.position - (point - Vector3.up);
                 networkMovement.AddForce(Utils.GetRealNormal(dir) * explosionForce);
             }
         }
