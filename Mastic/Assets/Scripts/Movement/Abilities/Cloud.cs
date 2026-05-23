@@ -9,7 +9,7 @@ namespace Mastic
         [SerializeField] private EasyBinding ability2 = default;
         [SerializeField] private GameObject cloudPrefab = default;
         [SerializeField] private Vector3 force = default;
-        [SerializeField, Min(1)] private int expectedRigidbodies = default;
+        [SerializeField, Min(1)] private int expectedColliders = default;
         [SerializeField] private int cooldownIndex = default;
 
         private readonly List<int> pendingRequests = new List<int>();
@@ -36,7 +36,7 @@ namespace Mastic
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
 
             forceZone = cloudVisual.GetComponent<ForceZone>();
-            forceZone.Initialize(expectedRigidbodies, force);
+            forceZone.Initialize(expectedColliders, force);
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;
@@ -80,7 +80,7 @@ namespace Mastic
         }
 
         [Client]
-        public void CheckAgainstTickClient(int inputTick)
+        public void CheckAgainstTickClient(int inputTick, IMovement movement)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
@@ -115,14 +115,10 @@ namespace Mastic
                 Cast(transform.position, serverTick);
                 pendingRequests.RemoveAt(i);
 
-              //  int orderOffset = 0;
+                // SEND BACK TO CLIENTS.
                 var players = serverSequence.GetPlayerMovementConnections();
                 foreach (var player in players)
                 {
-                  //  if (player.connection == connectionToClient)
-                     //   orderOffset = 1;
-
-                    //TargetCast(player.connection, transform.position, player.processedTick + 1);
                     TargetCast(player.connection, transform.position, player.processedTick);
                 }
 

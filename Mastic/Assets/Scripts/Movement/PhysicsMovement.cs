@@ -73,6 +73,12 @@ namespace Mastic
             return false;
         }
 
+        public void AddForce(Vector3 velocityChange)
+        {
+            if (rb != null)
+                rb.AddForce(velocityChange, ForceMode.VelocityChange);
+        }
+
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.green;

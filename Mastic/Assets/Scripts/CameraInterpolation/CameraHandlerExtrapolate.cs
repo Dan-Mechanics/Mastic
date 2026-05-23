@@ -18,7 +18,7 @@ namespace Mastic
             SetValue(LerpValue);
         }
 
-        public void Assign(Vector3 pos, Vector3 vel)
+        public void Apply(Vector3 pos, Vector3 vel)
         {
             time = Time.time;
             IsInterjected = false;

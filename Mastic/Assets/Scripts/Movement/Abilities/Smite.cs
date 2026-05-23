@@ -63,7 +63,7 @@ namespace Mastic
         }
 
         [Client]
-        public void CheckAgainstTickClient(int inputTick)
+        public void CheckAgainstTickClient(int inputTick, IMovement movement)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
@@ -103,11 +103,14 @@ namespace Mastic
             foreach (Collider coll in colliders)
             {
                 Transform target = coll.transform.root;
-                if (!target.TryGetComponent(out Rigidbody targetRb) || targetRb == rb)
+                if (target == transform)
+                    continue;
+
+                if (!target.TryGetComponent(out NetworkMovement networkMovement))
                     continue;
 
                 Vector3 dir = target.position - transform.position;
-                targetRb.AddForce(Utils.GetSafeNormal(dir) * explosionForce, ForceMode.VelocityChange);
+                networkMovement.AddForce(Utils.GetRealNormal(dir) * explosionForce);
             }
         }
 

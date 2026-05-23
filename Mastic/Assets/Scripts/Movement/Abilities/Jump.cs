@@ -45,12 +45,12 @@ namespace Mastic
         }
 
         [Client]
-        public void CheckAgainstTickClient(int tick)
+        public void CheckAgainstTickClient(int tick, IMovement movement)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
                 if (tick == pendingRequests[i])
-                    PerformJump();
+                    PerformJump(movement);
             }
         }
 
@@ -63,7 +63,7 @@ namespace Mastic
                     continue;
 
                 cooldownHandler.Cast(cooldownHandler.Last);
-                PerformJump();
+                PerformJump(movement);
                 pendingRequests.RemoveAt(i);
                 break;
             }
@@ -84,13 +84,13 @@ namespace Mastic
                 cooldownHandler.CanCast(cooldownHandler.Last);
         }
 
-        private void PerformJump()
+        private void PerformJump(IMovement movement)
         {
-            Vector3 force = Vector3.up * speed;
+            Vector3 velChange = Vector3.up * speed;
             if (rb.linearVelocity.y < 0f)
-                force.y -= rb.linearVelocity.y;
+                velChange.y -= rb.linearVelocity.y;
 
-            rb.AddForce(force, ForceMode.VelocityChange);
+            movement.AddForce(velChange);
         }
     }
 }

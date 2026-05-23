@@ -48,12 +48,12 @@ namespace Mastic
         }
 
         [Client]
-        public void CheckAgainstTickClient(int inputTick)
+        public void CheckAgainstTickClient(int inputTick, IMovement movement)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
                 if (inputTick == pendingRequests[i])
-                    PerformGust();
+                    PerformGust(movement);
             }
         }
 
@@ -66,7 +66,7 @@ namespace Mastic
                     continue;
 
                 cooldownHandler.Cast(cooldownIndex);
-                PerformGust();
+                PerformGust(movement);
                 pendingRequests.RemoveAt(i);
                 break;
             }
@@ -81,13 +81,13 @@ namespace Mastic
             }
         }
 
-        private void PerformGust()
+        private void PerformGust(IMovement movement)
         {
             Vector3 force = eyes.forward * speed;
             if (force.y >= 0f && rb.linearVelocity.y < 0f)
                 force.y -= rb.linearVelocity.y;
 
-            rb.AddForce(force, ForceMode.VelocityChange);
+            movement.AddForce(force);
         }
     }
 }

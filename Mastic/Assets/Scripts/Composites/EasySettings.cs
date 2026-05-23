@@ -59,7 +59,7 @@ namespace Mastic
             CheckInitialization();
             foreach (KeyValuePair<string, string> pair in dictionary)
             {
-                onLog?.Invoke($"|{pair.Key}|   |{pair.Value}|");
+                onLog?.Invoke($"'{pair.Key}' = '{pair.Value}'");
             }
         }
     }

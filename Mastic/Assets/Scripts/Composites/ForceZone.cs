@@ -4,15 +4,15 @@ namespace Mastic
 {
     public class ForceZone : MonoBehaviour
     {
-        [SerializeField] private Vector3 force = default;
         [SerializeField] private LayerMask mask = default;
         private Collider[] colliders;
         private Vector3 halfExtents;
+        private Vector3 force;
 
-        public void Initialize(int expectedRigidbodies, Vector3 force)
+        public void Initialize(int expectedColliders, Vector3 force)
         {
             this.force = force;
-            colliders = new Collider[expectedRigidbodies];
+            colliders = new Collider[expectedColliders];
             halfExtents = transform.localScale / 2f;
         }
 
@@ -21,10 +21,8 @@ namespace Mastic
             int count = Physics.OverlapBoxNonAlloc(transform.position, halfExtents, colliders, transform.rotation, mask, QueryTriggerInteraction.Ignore);
             for (int i = 0; i < count; i++)
             {
-                if (!colliders[i].transform.root.TryGetComponent(out Rigidbody rb))
-                    continue;
-
-                rb.AddForce(force, ForceMode.Acceleration);
+                if (colliders[i].transform.root.TryGetComponent(out NetworkMovement networkMovement))
+                    networkMovement.AddForce(force * Time.fixedDeltaTime);
             }
         }
     }

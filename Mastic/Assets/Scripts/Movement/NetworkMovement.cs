@@ -129,8 +129,6 @@ namespace Mastic
             stateBufferIndex = inputMessage.tick % bufferSize;
             stateBuffer[stateBufferIndex].SetValues(transform.position, rb.linearVelocity, movementIndex, inputMessage);
 
-           // movementAbilities.ForEach(x => x.CleanPendingRequests(inputMessage.tick));
-
             if (previousInputMessage.tick != inputMessage.tick - 1)
             {
                 Debug.LogWarning($"We have skipped a tick on the server ...");
@@ -140,7 +138,6 @@ namespace Mastic
 
             shared.processedTick = inputMessage.tick;
             previousInputMessage = inputMessage;
-            shared.serverTick++;
         }
 
         private InputMessage GetNextInputMessage()
@@ -272,18 +269,19 @@ namespace Mastic
         {
             int serverStateBufferIndex = serverStateMessage.tick % bufferSize;
             float distance = Vector3.Distance(serverStateMessage.position, stateBuffer[serverStateBufferIndex].position);
-            bool reconsile = distance > tolerance;
-            if (reconsile)
+            if (distance <= tolerance)
             {
-                Debug.LogWarning($"We have to reconcile for {serverStateMessage.tick} | if ({serverStateMessage.position} != {stateBuffer[serverStateBufferIndex].position}).");
-                Debug.LogWarning($"Distance: {distance}, in actual: {distance / Time.fixedDeltaTime}.");
-                //if (Application.isFocused)
-                OnPlayReconsileSound?.Invoke();
-
-                DoReconsile(serverStateBufferIndex);
+                OnDisplayReconsile?.Invoke(false);
+                return;
             }
 
-            OnDisplayReconsile?.Invoke(reconsile);
+            Debug.LogWarning($"We have to reconcile for {serverStateMessage.tick} | if ({serverStateMessage.position} != {stateBuffer[serverStateBufferIndex].position}).");
+            Debug.LogWarning($"Distance: {distance}, in actual: {distance / Time.fixedDeltaTime}.");
+            // if (Application.isFocused)
+            OnPlayReconsileSound?.Invoke();
+            OnDisplayReconsile?.Invoke(true);
+
+            DoReconsile(serverStateBufferIndex);
         }
 
         [Client]
@@ -314,49 +312,38 @@ namespace Mastic
         [Server]
         public void DoServerMovementAbilities()
         {
+            // RECREATE CAM POSITION IN THIS MOMENT.
+            mouseLook.SetRotation(previousInputMessage.xRotation, previousInputMessage.yRotation);
             cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
             cameraInterpolation.SetValue(previousInputMessage.lerpValue);
             movementAbilities.ForEach(x => x.CheckAgainstTickServer(previousInputMessage.tick, movement, shared.serverTick));
             prevEyePos = eyes.position;
 
             movementAbilities.ForEach(x => x.CleanPendingRequests(previousInputMessage.tick));
+            shared.serverTick++;
         }
 
-        private void Move(InputMessage input, bool assignToCamera)
+        public void AddForce(Vector3 velocityChange) => movement?.AddForce(velocityChange);
+
+        private void Move(InputMessage input, bool applyToInterpolation)
         {
             // RECREATE THE MOVEMENT OF THE PLAYER IN THIS MOMENT.
-            if (isLocalPlayer)
-            {
-                mouseLook.SetRotationTransient(input.xRotation, input.yRotation);
-            }
-            else
-            {
-                mouseLook.SetRotation(input.xRotation, input.yRotation);
-            }
-
+            mouseLook.SetRotationTransient(input.xRotation, input.yRotation);
             movement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval);
             if (isLocalPlayer)
             {
-                movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick));
+                movementAbilities.ForEach(x => x.CheckAgainstTickClient(input.tick, movement));
                 EventManager<int>.RaiseEvent(Occasion.DoUnlocalMovementAbilities, input.tick);
-            }
-            /*else
-            {
-                cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
-                cameraInterpolation.SetValue(input.lerpValue);
-                movementAbilities.ForEach(x => x.CheckAgainstTickServer(input.tick, movement, shared.serverTick));
-                prevEyePos = eyes.position;
-            }*/
 
-            // APPLY CHANGES.
-            if (isLocalPlayer)
-            {
+                // APPLY CHANGES.
                 Physics.Simulate(standardInterval);
                 LimitSpeed();
             }
+            // THE SERVER MOVEMENT ABILITIES ARE BATCHED FOR ALL PLAYERS.
+            // BECAUSE OTHERWISE YOU GET OUT-OF-ORDER BUGS.
 
-            if (assignToCamera)
-                cameraInterpolation.Assign(eyes.position, rb.linearVelocity);
+            if (applyToInterpolation)
+                cameraInterpolation.Apply(eyes.position, rb.linearVelocity);
         }
     }
 }

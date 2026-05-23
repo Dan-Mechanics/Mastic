@@ -63,7 +63,7 @@ namespace Mastic
         }
 
         [Client]
-        public void CheckAgainstTickClient(int inputTick)
+        public void CheckAgainstTickClient(int inputTick, IMovement movement)
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
@@ -105,6 +105,12 @@ namespace Mastic
             return !IsAbilityActive(tick) &&
                 cooldownHandler.CanCast(cooldownIndex);
         }
+
+        /// <summary>
+        /// Do nothing because while
+        /// in Burning Wings, the player is cc immune.
+        /// </summary>
+        public void AddForce(Vector3 velocityChange) { }
 
         private void Cast(int tick)
         {

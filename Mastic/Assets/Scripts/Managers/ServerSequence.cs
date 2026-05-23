@@ -43,13 +43,13 @@ namespace Mastic
 
             // ===
 
-
             foreach (ServerPlayer player in players)
             {
                 player.networkMovement.DoServerTick();
-                //player.cooldownHandler.Charge();
             }
 
+            // WE BATCH ALL THE MOVEMENT ABILITIES BECAUSE
+            // OTHERWISE WE HAVE TO MESS WITH ORDERING OF PLAYERS.
             foreach (ServerPlayer player in players)
             {
                 player.networkMovement.DoServerMovementAbilities();

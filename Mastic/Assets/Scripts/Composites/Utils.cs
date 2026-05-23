@@ -27,7 +27,7 @@ namespace Mastic
             Cursor.lockState = CursorLockMode.None;
         }
 
-        public static Vector3 GetSafeNormal(Vector3 normal)
+        public static Vector3 GetRealNormal(Vector3 normal)
         {
             normal.Normalize();
             if (normal == Vector3.zero)
