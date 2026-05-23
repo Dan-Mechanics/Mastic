@@ -71,29 +71,30 @@ namespace Mastic
         [Server]
         public void Clear() => players.Clear();
 
-        public class Temp
+        [Server]
+        public PlayerMovementConnection[] GetPlayerMovementConnections()
+        {
+            Clean();
+            PlayerMovementConnection[] result = new PlayerMovementConnection[players.Count];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new PlayerMovementConnection(players[i].connectionToClient, players[i].Shared.processedTick, i);
+            }
+
+            return result;
+        }
+
+        public struct PlayerMovementConnection
         {
             public NetworkConnectionToClient connection;
             public int processedTick;
             public int index;
-        }
 
-        [Server]
-        public void GetPlayerTemp(List<Temp> temps)
-        {
-            Clean();
-            temps.Clear();
-
-            int index = 0;
-            foreach (ServerPlayer player in players)
+            public PlayerMovementConnection(NetworkConnectionToClient connection, int processedTick, int index)
             {
-                temps.Add(new Temp()
-                {
-                    connection = player.connectionToClient,
-                    processedTick = player.Shared.processedTick,
-                    index = index
-                });
-                index++;
+                this.connection = connection;
+                this.processedTick = processedTick;
+                this.index = index;
             }
         }
 

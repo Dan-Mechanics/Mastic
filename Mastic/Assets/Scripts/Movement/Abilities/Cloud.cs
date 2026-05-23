@@ -51,6 +51,7 @@ namespace Mastic
 
         private void OnDestroy()
         {
+            Destroy(cloudVisual);
             EventManager<int>.RemoveListener(Occasion.DoUnlocalMovementAbilities, DoUnlocalTick);
         }
 
@@ -94,9 +95,9 @@ namespace Mastic
         }
 
         [Client]
-        private void DoUnlocalTick(int syncedServerTick)
+        private void DoUnlocalTick(int inputTick)
         {
-            bool active = IsAbilityActive(syncedServerTick);
+            bool active = IsAbilityActive(inputTick);
             cloudVisual.SetActive(active);
             if (active)
                 forceZone.DoTick();
@@ -114,24 +115,16 @@ namespace Mastic
                 Cast(transform.position, serverTick);
                 pendingRequests.RemoveAt(i);
 
-                // NOW SEND IT TO THE UNLOCAL CLIENTS.
-                List<ServerSequence.Temp> temps = new List<ServerSequence.Temp>();
-                serverSequence.GetPlayerTemp(temps);
-                foreach (var temp in temps)
+                int orderOffset = 0;
+                var players = serverSequence.GetPlayerMovementConnections();
+                foreach (var player in players)
                 {
-                    // dont send to self. is this smart?
-                    if (temp.connection == connectionToClient)
-                    {
-                        // THIS IS ALWAYS CORRECT.
-                        TargetCast(temp.connection, transform.position, temp.processedTick + 1);
-                        continue;
-                    }
+                    if (player.connection == connectionToClient)
+                        orderOffset = 1;
 
-                    int orderOffset = Mathf.Clamp(temp.index, 0, 1);
-                    TargetCast(temp.connection, transform.position, temp.processedTick + orderOffset);
+                    TargetCast(player.connection, transform.position, player.processedTick + orderOffset);
                 }
 
-               // RpcCast(transform.position, serverTick);
                 break;
             }
 
@@ -141,20 +134,8 @@ namespace Mastic
                 forceZone.DoTick();
         }
 
-        /*[ClientRpc]
-        private void RpcCast(Vector3 position, int syncedServerTick)
-        {
-            if (isLocalPlayer)
-                return;
-
-            Cast(position, syncedServerTick);
-        }*/
-
         [TargetRpc(channel = Channels.Unreliable)]
-        private void TargetCast(NetworkConnectionToClient conn, Vector3 position, int inputTick)
-        {
-            Cast(position, inputTick);
-        }
+        private void TargetCast(NetworkConnectionToClient conn, Vector3 pos, int inputTick) => Cast(pos, inputTick);
 
         public void CleanPendingRequests(int upTo)
         {
@@ -171,9 +152,9 @@ namespace Mastic
                 cooldownHandler.CanCast(cooldownIndex);
         }
 
-        private void Cast(Vector3 position, int startTick)
+        private void Cast(Vector3 pos, int startTick)
         {
-            cloudVisual.transform.position = position;
+            cloudVisual.transform.position = pos;
             startingTick = startTick;
             endingTick = startingTick + tickDuration;
         }
