@@ -227,7 +227,7 @@ GameObject:
   - component: {fileID: 1313093709}
   - component: {fileID: 1313093710}
   m_Layer: 0
-  m_Name: server_manager
+  m_Name: server_sequence
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -442,10 +442,6 @@ PrefabInstance:
     - target: {fileID: 3229349398631652837, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: maxConnections
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3229349398631652857, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_Name
@@ -792,10 +788,6 @@ PrefabInstance:
     - target: {fileID: 2857262702044904297, guid: e58735b1d2b7d734f89c67911ff0acb5, type: 3}
       propertyPath: m_Name
       value: scene_boilerplate
-      objectReference: {fileID: 0}
-    - target: {fileID: 6103662349769157085, guid: e58735b1d2b7d734f89c67911ff0acb5, type: 3}
-      propertyPath: framerateLimit
-      value: 300
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

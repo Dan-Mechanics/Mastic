@@ -33,7 +33,7 @@ namespace Mastic
                 player.entity.EnableHitbox(false);
                 for (int i = 0; i < player.attackAbilities.Length; i++)
                 {
-                    player.attackAbilities[i].DoServerTick(player.Shared.receivedInputTick);
+                    player.attackAbilities[i].DoServerTick(player.Shared.processedTick);
                 }
 
                 player.entity.EnableHitbox(true);
@@ -71,16 +71,43 @@ namespace Mastic
         [Server]
         public void Clear() => players.Clear();
 
+        public class Temp
+        {
+            public NetworkConnectionToClient connection;
+            public int processedTick;
+            public int index;
+        }
+
+        [Server]
+        public void GetPlayerTemp(List<Temp> temps)
+        {
+            Clean();
+            temps.Clear();
+
+            int index = 0;
+            foreach (ServerPlayer player in players)
+            {
+                temps.Add(new Temp()
+                {
+                    connection = player.connectionToClient,
+                    processedTick = player.Shared.processedTick,
+                    index = index
+                });
+                index++;
+            }
+        }
+
         private class ServerPlayer 
         {
             public SharedPlayerFields Shared => player.Shared;
             private readonly Player player;
 
-            public Transform transform;
+            public NetworkConnectionToClient connectionToClient;
             public IAttackAbility[] attackAbilities;
-            public PlayerEntity entity;
             public NetworkMovement networkMovement;
             public CooldownHandler cooldownHandler;
+            public Transform transform;
+            public PlayerEntity entity;
 
             public ServerPlayer(Transform transform)
             {
@@ -89,6 +116,7 @@ namespace Mastic
                 attackAbilities = transform.GetComponents<IAttackAbility>();
                 entity = transform.GetComponent<PlayerEntity>();
                 networkMovement = transform.GetComponent<NetworkMovement>();
+                connectionToClient = networkMovement.connectionToClient;
                 cooldownHandler = transform.GetComponent<CooldownHandler>();
             }
         }

@@ -5,13 +5,13 @@
     {
         // SERVER.
         public int serverTick;
-        public int receivedInputTick;
+        public int processedTick;
         
         // CLIENT.
         public int inputTick;
         public int rollbackTick;
         
         public override string ToString() 
-            => $"inputTick: {inputTick}, serverTick: {serverTick}, receivedInputTick: {receivedInputTick}, rollbackTick: {rollbackTick}.";
+            => $"inputTick: {inputTick}, serverTick: {serverTick}, receivedInputTick: {processedTick}, rollbackTick: {rollbackTick}.";
     }
 }

@@ -64,7 +64,7 @@ namespace Mastic
         {
             base.OnStartServer();
             playerEntity.Initialize(lagCompensation);
-            gameObject.name = $"{defaultName} | server";
+            // gameObject.name = $"{defaultName} | server";
             serverRemove.ForEach(x => Destroy(x));
             print($"{gameObject.name}: setup completed".ToUpperInvariant());
         }
