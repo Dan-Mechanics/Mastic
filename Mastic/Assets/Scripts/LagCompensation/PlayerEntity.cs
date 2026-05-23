@@ -39,7 +39,7 @@ namespace Mastic
         private void SetAsFrame(Frame frame)
         {
             transform.position = frame.position;
-            mouseLook.SetAsRotation(frame.xRotation, frame.yRotation);
+            mouseLook.SetRotation(frame.xRotation, frame.yRotation);
             
             // THIS IS WHERE LOOKBONE SHOULD GO.
             // INCLUDING HITBOX IF THAT IS NOT ATTACHED TO LOOKBONE.

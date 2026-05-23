@@ -14,7 +14,6 @@ namespace Mastic
         public float xRotation;
         public float yRotation;
         public int tick;
-        public int syncedServerTick;
 
         public void SetValues(Vector3 position, Vector3 velocity, byte movementIndex, InputMessage inputMessage)
         {
@@ -24,7 +23,6 @@ namespace Mastic
             xRotation = inputMessage.xRotation;
             yRotation = inputMessage.yRotation;
             tick = inputMessage.tick;
-            syncedServerTick = inputMessage.syncedServerTick;
         }
     }
 }

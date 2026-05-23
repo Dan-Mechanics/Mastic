@@ -41,10 +41,5 @@ namespace Mastic
             vec.y = 0f;
             return vec;
         }
-
-        public static int GetCurrentServerTick(double networkTime, float standardInterval)
-        {
-            return Mathf.FloorToInt((float)networkTime / standardInterval);
-        }
     }
 }

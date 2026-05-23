@@ -81,7 +81,7 @@ namespace Mastic
             // RECREATE THE SHOT CONDITIONS.
             lagCompensation.SetAsTick(shootMessage.rollbackTick);
             
-            mouseLook.SetAsRotation(shootMessage.xRotation, shootMessage.yRotation);
+            mouseLook.SetRotation(shootMessage.xRotation, shootMessage.yRotation);
             cameraInterpolation.Interject(origin, prevOrigin, velocity);
             cameraInterpolation.SetValue(shootMessage.lerpValue);
 

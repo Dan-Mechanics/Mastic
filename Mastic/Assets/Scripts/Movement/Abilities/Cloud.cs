@@ -25,7 +25,6 @@ namespace Mastic
         private int previousTick;
         private int startingTick;
         private int endingTick;
-        private int prev;
 
         private void Awake()
         {
@@ -108,15 +107,6 @@ namespace Mastic
         [Server]
         public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)
         {
-            serverTick = Utils.GetCurrentServerTick(NetworkTime.time, standardInterval);
-            if (serverTick - prev != 1)
-                Debug.LogWarning($"if ({serverTick} - {prev} != 1)");
-            else
-            {
-                Debug.Log($"if ({serverTick} - {prev} == 1)");
-            }
-
-            prev = serverTick;
             for (int i = 0; i < pendingRequests.Count; i++)
             {
                 if (inputTick < pendingRequests[i] || !CanCast(serverTick))
