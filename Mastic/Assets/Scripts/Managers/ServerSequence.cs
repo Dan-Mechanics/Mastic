@@ -6,6 +6,7 @@ namespace Mastic
 {
     public class ServerSequence : MonoBehaviour
     {
+        public int Count => players.Count;
         private readonly List<ServerPlayer> players = new List<ServerPlayer>();
         private LagCompensation lagCompensation;
         private float timer;
@@ -25,7 +26,7 @@ namespace Mastic
 
         private void Tick() 
         {
-            Clean();
+            RemoveNullPlayers();
             lagCompensation.Clean();
             lagCompensation.RecordFrame();
             foreach (ServerPlayer player in players)
@@ -63,7 +64,8 @@ namespace Mastic
             }
         }
 
-        private void Clean()
+        [Server]
+        public void RemoveNullPlayers()
         {
             for (int i = players.Count - 1; i >= 0; i--)
             {
@@ -78,31 +80,12 @@ namespace Mastic
         [Server]
         public void Clear() => players.Clear();
 
-        [Server]
-        public PlayerMovementConnection[] GetPlayerMovementConnections()
+        public (NetworkConnectionToClient, int) GetProcessedTick(int index)
         {
-            Clean();
-            PlayerMovementConnection[] result = new PlayerMovementConnection[players.Count];
-            for (int i = 0; i < result.Length; i++)
-            {
-                result[i] = new PlayerMovementConnection(players[i].connectionToClient, players[i].Shared.processedTick, i);
-            }
+            if (index < 0 || index >= players.Count)
+                return default;
 
-            return result;
-        }
-
-        public struct PlayerMovementConnection
-        {
-            public NetworkConnectionToClient connection;
-            public int processedTick;
-            public int index;
-
-            public PlayerMovementConnection(NetworkConnectionToClient connection, int processedTick, int index)
-            {
-                this.connection = connection;
-                this.processedTick = processedTick;
-                this.index = index;
-            }
+            return (players[index].networkMovement.connectionToClient, players[index].Shared.processedTick);
         }
 
         private class ServerPlayer 

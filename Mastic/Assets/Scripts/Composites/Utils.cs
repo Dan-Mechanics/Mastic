@@ -36,6 +36,16 @@ namespace Mastic
             return normal;
         }
 
+        public static int ConvertToTicks(float seconds, int standardTickrate)
+        {
+            return Mathf.RoundToInt(seconds * standardTickrate);
+        }
+
+        public static int GetCurrentServerTick(double networkTime, float standardInterval)
+        {
+            return Mathf.FloorToInt((float)networkTime / standardInterval);
+        }
+
         public static Vector3 Flatten(Vector3 vec)
         {
             vec.y = 0f;

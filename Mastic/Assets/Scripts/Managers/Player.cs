@@ -17,7 +17,6 @@ namespace Mastic
         private int standardTickrate;
         private ICameraInterpolation cameraInterpolation;
         private IAttackAbility[] attackAbilities;
-        private List<IMovementAbility> movementAbilities;
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
@@ -30,7 +29,6 @@ namespace Mastic
         {
             attackAbilities = GetComponents<IAttackAbility>();
             cooldownHandler = GetComponent<CooldownHandler>();
-            movementAbilities = GetComponents<IMovementAbility>().ToList();
             clientSequence = GetComponent<ClientSequence>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             playerEntity = GetComponent<PlayerEntity>();
@@ -53,8 +51,7 @@ namespace Mastic
             adaptiveTickrate.Initialize(standardTickrate);
             playerEntity.SetShared(Shared);
 
-            networkMovement.Initialize(standardTickrate, cameraInterpolation,
-                Shared, movementAbilities);
+            networkMovement.Initialize(standardTickrate, cameraInterpolation, Shared);
 
             clientSequence.Initialize(networkMovement, attackAbilities,
                 cooldownHandler, Shared);

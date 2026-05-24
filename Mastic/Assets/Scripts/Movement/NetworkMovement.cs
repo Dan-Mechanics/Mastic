@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Mastic
@@ -48,11 +49,11 @@ namespace Mastic
         private float standardInterval;
         private bool w, a, s, d;
 
-        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation, SharedPlayerFields shared, List<IMovementAbility> movementAbilities)
+        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation, SharedPlayerFields shared)
         {
             this.shared = shared;
             this.cameraInterpolation = cameraInterpolation;
-            this.movementAbilities = movementAbilities;
+            movementAbilities = GetComponents<IMovementAbility>().ToList();
             standardInterval = 1f / standardTickrate;
 
             movements = GetComponents<IMovement>();

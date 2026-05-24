@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace Mastic
@@ -14,6 +15,7 @@ namespace Mastic
         [SerializeField] private CooldownHandler cooldownHandler = default;
         [SerializeField] private int cooldownIndex = default;
         [SerializeField] private LayerMask mask = default;
+        [SerializeField] private LayerMask noregMask = default;
         [SerializeField] private float range = default;
         [SerializeField] private float damage = default;
 
@@ -28,6 +30,9 @@ namespace Mastic
         private Vector3 origin;
         private Vector3 prevOrigin;
         private Vector3 velocity;
+        private float tolerance;
+        private int previousTick;
+        private int maxPendingRequests;
 
         private void Awake()
         {
@@ -39,6 +44,11 @@ namespace Mastic
             mouseLook = GetComponent<MouseLook>();
             rb = GetComponent<Rigidbody>();
             prevOrigin = eyes.position;
+            previousTick = -1;
+
+            var easySettings = EasySettings.Current;
+            maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
+            tolerance = easySettings.Get<float>(nameof(tolerance));
         }
 
         public void DoLocalUpdate(int inputTick, int rollbackTick)
@@ -71,9 +81,15 @@ namespace Mastic
         [TargetRpc]
         public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
 
-        // ADD MAX SIZE VALIDATION HERE !! and print message
         [Command]
-        private void CmdShoot(ShootMessage shootMessage) => pendingShootMessages.Add(shootMessage);
+        private void CmdShoot(ShootMessage shootMessage) 
+        {
+            if (pendingShootMessages.Count >= maxPendingRequests || shootMessage.inputTick <= previousTick)
+                return;
+
+            pendingShootMessages.Add(shootMessage);
+            previousTick = shootMessage.inputTick;
+        }
 
         [Server]
         private void Shoot(ShootMessage shootMessage) 
@@ -86,17 +102,30 @@ namespace Mastic
             cameraInterpolation.SetValue(shootMessage.lerpValue);
 
             Debug.Log("shoot message recieved");
-
-            // DEBUG.
-            if (cam.position != shootMessage.origin)
+            float dist = Vector3.Distance(cam.position, shootMessage.origin);
+            if (dist > tolerance)
             {
+                Vector3 debugDiff = (cam.position - shootMessage.origin) / Time.fixedDeltaTime;
                 Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin})");
+                Debug.LogWarning($"diff {debugDiff.magnitude}");
 
-                Vector3 diff = (cam.position - shootMessage.origin) / Time.fixedDeltaTime;
-                Debug.LogWarning($"diff {diff.magnitude}");
-                //cam.position = shootMessage.eyesPos;
-
-                // FUTURE: ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
+                // ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
+                Vector3 dir = shootMessage.origin - cam.position;
+                dir.Normalize();
+                if (!Physics.Raycast(cam.position, dir, out RaycastHit noregHit, dist, noregMask, QueryTriggerInteraction.Ignore))
+                {
+                    cam.position = shootMessage.origin;
+                }
+                else
+                {
+                    Vector3 difference = cam.position - noregHit.point;
+                    dist = difference.magnitude - 0.1f;
+                    if (dist > tolerance)
+                    {
+                        difference = Vector3.ClampMagnitude(difference, dist);
+                        cam.position += difference;
+                    }
+                }
             }
 
             if (!Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))

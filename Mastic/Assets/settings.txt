@@ -8,4 +8,14 @@ multiplier 0.33
 topSpeed 25
 slopeLimit 50
 
+smiteCooldown 9
+smiteStack 1
+smiteDuration 1
+smiteDamage 80
+
+gustCooldown 3
+gustStack 3
+
 cloudTickDuration 384
+cloudCooldown 12
+cloudStack 1

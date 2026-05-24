@@ -650,6 +650,9 @@ MonoBehaviour:
   mask:
     serializedVersion: 2
     m_Bits: 9
+  noregMask:
+    serializedVersion: 2
+    m_Bits: 1
   range: 300
   damage: 50
 --- !u!114 &-5172247997270406336

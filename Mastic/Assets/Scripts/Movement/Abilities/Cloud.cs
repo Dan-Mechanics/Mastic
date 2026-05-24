@@ -117,11 +117,13 @@ namespace Mastic
                 Cast(transform.position, serverTick);
                 pendingRequests.RemoveAt(i);
 
-                // SEND BACK TO CLIENTS.
-                var players = serverSequence.GetPlayerMovementConnections();
-                foreach (var player in players)
+                // SEND BACK TO PLAYERS.
+                serverSequence.RemoveNullPlayers();
+                int playerCount = serverSequence.Count;
+                for (int j = 0; j < playerCount; j++)
                 {
-                    TargetCast(player.connection, transform.position, player.processedTick);
+                    (NetworkConnectionToClient conn, int processedTick) = serverSequence.GetProcessedTick(j);
+                    TargetCast(conn, transform.position, processedTick);
                 }
 
                 break;
