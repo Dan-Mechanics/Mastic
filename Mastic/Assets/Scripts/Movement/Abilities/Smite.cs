@@ -114,6 +114,9 @@ namespace Mastic
             }
         }
 
+        [TargetRpc]
+        private void TargetCast(NetworkConnectionToClient conn, int inputTick) => Cast(inputTick);
+
         [Server]
         public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)
         {
@@ -124,6 +127,7 @@ namespace Mastic
 
                 cooldownHandler.Cast(cooldownIndex);
                 Cast(serverTick);
+                TargetCast(connectionToClient, inputTick);
                 pendingRequests.RemoveAt(i);
                 break;
             }

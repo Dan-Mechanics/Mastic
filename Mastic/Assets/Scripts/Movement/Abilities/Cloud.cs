@@ -32,7 +32,7 @@ namespace Mastic
             cloudVisual = Instantiate(cloudPrefab, cloudPrefab.transform.position, cloudPrefab.transform.rotation);
             cloudVisual.SetActive(false);
 
-            var easySettings = EasySettings.Current;
+            EasySettings easySettings = EasySettings.Current;
             tickDuration = easySettings.Get<int>(GetType().Name + nameof(tickDuration));
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
             standardTickrate = easySettings.Get<int>(nameof(standardTickrate));

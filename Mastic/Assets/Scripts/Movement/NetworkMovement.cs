@@ -17,7 +17,6 @@ namespace Mastic
         [SerializeField] private EasyBinding left = default;
         [SerializeField] private EasyBinding backward = default;
         [SerializeField] private EasyBinding right = default;
-        [SerializeField] private MovementSettings settings = default;
         [SerializeField, Min(1)] private int bufferSize = default;
         [SerializeField, Min(1)] private int maxPendingInputMessages = default;
 
@@ -47,6 +46,7 @@ namespace Mastic
         private int stateBufferIndex;
         private int receivedTick;
         private float standardInterval;
+        private float topSpeed;
         private bool w, a, s, d;
 
         public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation, SharedPlayerFields shared)
@@ -68,7 +68,9 @@ namespace Mastic
             eyes = transform.Find("eyes");
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
 
-            tolerance = EasySettings.Current.Get<float>(nameof(tolerance));
+            EasySettings easySettings = EasySettings.Current;
+            tolerance = easySettings.Get<float>(nameof(tolerance));
+            topSpeed = easySettings.Get<float>(nameof(topSpeed));
 
             prevEyePos = eyes.position;
             receivedTick = -1;
@@ -199,7 +201,7 @@ namespace Mastic
         /// This is because afte the simulation step, the velocity is unstable. 
         /// We limit it to make sure it doesn't cause reconsiles.
         /// </summary>
-        public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, settings.topSpeed);
+        public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, topSpeed);
 
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)

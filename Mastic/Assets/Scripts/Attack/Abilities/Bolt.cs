@@ -46,7 +46,7 @@ namespace Mastic
             prevOrigin = eyes.position;
             previousTick = -1;
 
-            var easySettings = EasySettings.Current;
+            EasySettings easySettings = EasySettings.Current;
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
             tolerance = easySettings.Get<float>(nameof(tolerance));
         }

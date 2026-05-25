@@ -73,7 +73,7 @@ namespace Mastic
         /// get shot in the spawn room.
         /// </summary>
         [Server]
-        public void RefreshBuffer()
+        public void RefreshRecording()
         {
             present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             for (int i = 0; i < recording.Length; i++)

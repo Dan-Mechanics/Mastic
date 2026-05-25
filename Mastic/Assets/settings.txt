@@ -2,6 +2,8 @@ standardTickrate 64
 tolerance 0.001
 maxPendingRequests 8
 
+maxHealth 100
+
 speed 6
 acceleration 60
 multiplier 0.33
