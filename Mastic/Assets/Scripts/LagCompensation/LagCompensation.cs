@@ -26,6 +26,20 @@ namespace Mastic
             Physics.SyncTransforms();
         }
 
+        [Server]
+        public bool CheckRollbackProjectile(ref int rollbackTick, ref int tickCount)
+        {
+            if (rollbackTick >= currentTick)
+                return false;
+
+            if (rollbackTick < oldestTick)
+                rollbackTick = oldestTick;
+
+            // WILL BE AT LEAST 1, AND WILL NOT BE GREATER THAN MAXRECORDINGLENGTH.
+            tickCount = currentTick - rollbackTick;
+            return true;
+        }
+
         /// <summary>
         /// This should only be called after RecordFrame().
         /// </summary>
@@ -62,7 +76,7 @@ namespace Mastic
         /// This should be called first in the sequence.
         /// </summary>
         [Server]
-        public void Clean()
+        public void RemoveNullEntities()
         {
             for (int i = entities.Count - 1; i >= 0; i--)
             {

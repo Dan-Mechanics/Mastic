@@ -23,7 +23,7 @@ namespace Mastic
         private Rigidbody rb;
         private Transform eyes;
         private MouseLook mouseLook;
-        private SharedPlayerFields shared;
+        private PlayerTicks playerTicks;
         private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation cameraInterpolation;
 
@@ -49,9 +49,9 @@ namespace Mastic
         private float topSpeed;
         private bool w, a, s, d;
 
-        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation, SharedPlayerFields shared)
+        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation, PlayerTicks playerTicks)
         {
-            this.shared = shared;
+            this.playerTicks = playerTicks;
             this.cameraInterpolation = cameraInterpolation;
             movementAbilities = GetComponents<IMovementAbility>().ToList();
             standardInterval = 1f / standardTickrate;
@@ -100,7 +100,7 @@ namespace Mastic
         [Client]
         public void DoLocalTick()
         {
-            movementAbilities.ForEach(x => x.DoLocalTick(shared.inputTick, movement));
+            movementAbilities.ForEach(x => x.DoLocalTick(playerTicks.inputTick, movement));
 
             // MAKE IT SO THAT IF YOU ALT+TAB YOU KEEP MOVING.
             if (Application.isFocused) 
@@ -111,16 +111,16 @@ namespace Mastic
                 d = right.IsHeld;
             }
 
-            int index = shared.inputTick % bufferSize;
+            int index = playerTicks.inputTick % bufferSize;
             inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY,
-                cameraInterpolation.LerpValue, shared.inputTick);
+                cameraInterpolation.LerpValue, playerTicks.inputTick);
             Move(inputBuffer[index], true);
 
             stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
             CmdSendInputMessageToServer(inputBuffer[index]);
 
-            OnDisplayTick?.Invoke(shared.inputTick);
-            shared.inputTick++;
+            OnDisplayTick?.Invoke(playerTicks.inputTick);
+            playerTicks.inputTick++;
         }
 
         [Server]
@@ -140,7 +140,7 @@ namespace Mastic
                 Debug.LogWarning("This is acceptable for spawn because the buffer is very empty");
             }
 
-            shared.processedTick = inputMessage.tick;
+            playerTicks.processedTick = inputMessage.tick;
             previousInputMessage = inputMessage;
         }
 
@@ -250,7 +250,7 @@ namespace Mastic
         private void TargetSendStateMessageToClient(NetworkConnectionToClient conn, StateMessage stateMessage)
         {
             // MAKE SURE MESSAGES ARE NOT OUT OF ORDER.
-            if (stateMessage.tick > shared.inputTick - 1)
+            if (stateMessage.tick > playerTicks.inputTick - 1)
             {
                 Debug.LogWarning("We have to return here since the positions are stored in a ringbuffer and otherwise would wrap around and completely break the reconsile.");
                 return;
@@ -299,7 +299,7 @@ namespace Mastic
             stateBuffer[stateBufferIndex] = serverStateMessage;
 
             int tickToProcess = serverStateMessage.tick + 1;
-            while (tickToProcess < shared.inputTick)
+            while (tickToProcess < playerTicks.inputTick)
             {
                 int index = tickToProcess % bufferSize;
 
@@ -320,11 +320,11 @@ namespace Mastic
             mouseLook.SetRotation(previousInputMessage.xRotation, previousInputMessage.yRotation);
             cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
             cameraInterpolation.SetValue(previousInputMessage.lerpValue);
-            movementAbilities.ForEach(x => x.CheckAgainstTickServer(previousInputMessage.tick, movement, shared.serverTick));
+            movementAbilities.ForEach(x => x.CheckAgainstTickServer(previousInputMessage.tick, movement, playerTicks.serverTick));
             prevEyePos = eyes.position;
 
             movementAbilities.ForEach(x => x.CleanPendingRequests(previousInputMessage.tick));
-            shared.serverTick++;
+            playerTicks.serverTick++;
         }
 
         public void AddForce(Vector3 velocityChange) => movement?.AddForce(velocityChange);

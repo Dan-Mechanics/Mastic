@@ -1,7 +1,7 @@
 ﻿namespace Mastic
 {
     [System.Serializable]
-    public class SharedPlayerFields 
+    public class PlayerTicks 
     {
         // SERVER.
         public int serverTick;

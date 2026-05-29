@@ -8,11 +8,10 @@ namespace Mastic
     /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
-        public SharedPlayerFields Shared => shared;
+        public PlayerTicks PlayerTicks { get; set; }
 
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
-        private SharedPlayerFields shared;
         private MouseLook mouseLook;
         private int intangibleLayer;
         private int playerLayer;
@@ -34,8 +33,6 @@ namespace Mastic
             EnableHitbox(true);
         }
 
-        public void SetShared(SharedPlayerFields shared) => this.shared = shared;
-
         private void SetAsFrame(Frame frame)
         {
             transform.position = frame.position;
@@ -51,7 +48,7 @@ namespace Mastic
             present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             recording[tick % recording.Length] = present;
 
-            shared.rollbackTick = tick;
+            PlayerTicks.rollbackTick = tick;
             RpcSendAuthState(present, tick);
         }
 
@@ -61,7 +58,7 @@ namespace Mastic
         [ClientRpc(channel = Channels.Unreliable)]
         private void RpcSendAuthState(Frame frame, int tick)
         {
-            shared.rollbackTick = tick;
+            PlayerTicks.rollbackTick = tick;
             if (!isLocalPlayer)
                 SetAsFrame(frame);
         }

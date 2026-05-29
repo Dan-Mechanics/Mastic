@@ -1,11 +1,15 @@
 using Mirror;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mastic
 {
-    public class Smite : NetworkBehaviour, IMovementAbility
+    public class Smite : NetworkBehaviour, IMovementAbility, IDamageFeedback
     {
+        public event Action<float> OnAuthoritativeDamage;
+        public event Action<float> OnPredictDamage;
+
         [SerializeField] private float teleportRange = default;
         [SerializeField] private LayerMask teleportMask = default;
         [SerializeField] private float explosionForce = default;
@@ -15,6 +19,7 @@ namespace Mastic
         [SerializeField] private int maxPendingRequests = default;
         [SerializeField] private int tickDuration = default;
         [SerializeField] private int cooldownIndex = default;
+        [SerializeField] private float damage = default;
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
@@ -99,23 +104,36 @@ namespace Mastic
             if (!isServer)
                 return;
 
+            float totalDamage = 0f;
             Collider[] colliders = Physics.OverlapSphere(point, explosionRadius, explosionMask, QueryTriggerInteraction.Ignore);
-            foreach (Collider coll in colliders)
+            for (int i = 0; i < colliders.Length; i++)
             {
-                Transform target = coll.transform.root;
+                Transform target = colliders[i].transform.root;
                 if (target == transform)
                     continue;
 
-                if (!target.TryGetComponent(out NetworkMovement networkMovement))
-                    continue;
+                if (target.TryGetComponent(out NetworkMovement networkMovement))
+                {
+                    Vector3 dir = target.position - (point - Vector3.up);
+                    networkMovement.AddForce(Utils.Normalize(dir) * explosionForce);
+                }
 
-                Vector3 dir = target.position - (point - Vector3.up);
-                networkMovement.AddForce(Utils.GetRealNormal(dir) * explosionForce);
+                if (target.TryGetComponent(out IDamagable damagable))
+                {
+                    damagable.Damage(damage);
+                    totalDamage += damage;
+                }
             }
+
+            if (totalDamage > 0f)
+                TargetDisplayHitPip(connectionToClient, totalDamage);
         }
 
         [TargetRpc]
         private void TargetCast(NetworkConnectionToClient conn, int inputTick) => Cast(inputTick);
+
+        [TargetRpc]
+        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
 
         [Server]
         public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)

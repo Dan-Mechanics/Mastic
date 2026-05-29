@@ -119,7 +119,7 @@ namespace Mastic
 
                 // SEND BACK TO PLAYERS.
                 serverSequence.RemoveNullPlayers();
-                int playerCount = serverSequence.Count;
+                int playerCount = serverSequence.PlayerCount;
                 for (int j = 0; j < playerCount; j++)
                 {
                     (NetworkConnectionToClient conn, int processedTick) = serverSequence.GetProcessedTick(j);

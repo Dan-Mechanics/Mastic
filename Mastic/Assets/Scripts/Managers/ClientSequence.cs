@@ -12,15 +12,15 @@ namespace Mastic
         private IAttackAbility[] attackAbilities;
         private NetworkMovement networkMovement;
         private CooldownHandler cooldownHandler;
-        private SharedPlayerFields shared;
+        private PlayerTicks playerTicks;
         private float timer;
 
-        public void Initialize(NetworkMovement networkMovement, IAttackAbility[] attackAbilities, CooldownHandler cooldownHandler, SharedPlayerFields shared)
+        public void Initialize(NetworkMovement networkMovement, IAttackAbility[] attackAbilities, CooldownHandler cooldownHandler, PlayerTicks playerTicks)
         {
             this.networkMovement = networkMovement;
             this.attackAbilities = attackAbilities;
             this.cooldownHandler = cooldownHandler;
-            this.shared = shared;
+            this.playerTicks = playerTicks;
         }
 
         [Client]
@@ -35,7 +35,7 @@ namespace Mastic
             for (int i = 0; i < attackAbilities.Length; i++)
             {
                 // -1 HERE BECAUSE INPUTTICK IS THE ONE THAT WILL BE MADE IN THE NEW TICK.
-                attackAbilities[i].DoLocalUpdate(shared.inputTick - 1, shared.rollbackTick);
+                attackAbilities[i].DoLocalUpdate(playerTicks.inputTick - 1, playerTicks.rollbackTick);
             }
 
             int clientPacketMultiplier = 1;
@@ -54,8 +54,8 @@ namespace Mastic
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.UpArrow)) { shared.inputTick += 10; Debug.LogWarning("+10"); }
-            if (Input.GetKeyDown(KeyCode.DownArrow)) { shared.inputTick -= 10; Debug.LogWarning("-10"); }
+            if (Input.GetKeyDown(KeyCode.UpArrow)) { playerTicks.inputTick += 10; Debug.LogWarning("+10"); }
+            if (Input.GetKeyDown(KeyCode.DownArrow)) { playerTicks.inputTick -= 10; Debug.LogWarning("-10"); }
         }
     }
 }

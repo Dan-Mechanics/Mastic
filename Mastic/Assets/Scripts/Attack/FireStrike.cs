@@ -50,7 +50,7 @@ namespace Mastic
             proj.GetComponent<Rigidbody>().linearVelocity = eyes.forward * projectileSpeed;
             Physics.IgnoreCollision(proj.GetComponent<SphereCollider>(), controller);
 
-            proj.GetComponent<FireStrikeBehaviour>().Setup(weapon, true);
+         //   proj.GetComponent<Projectile>().Setup(weapon, true);
 
             RpcCast(eyes.position, eyes.forward);
         }
@@ -65,7 +65,7 @@ namespace Mastic
             if (controller != null) { Physics.IgnoreCollision(proj.GetComponent<SphereCollider>(), controller); }
             else { Physics.IgnoreCollision(proj.GetComponent<SphereCollider>(), hitbox); }
 
-            proj.GetComponent<FireStrikeBehaviour>().Setup(null, false);
+           // proj.GetComponent<Projectile>().Setup(null, false);
         }
     }
 }

@@ -1,13 +1,12 @@
 using Mirror;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Mastic
 {
     public class Player : NetworkBehaviour
     {
-        public SharedPlayerFields Shared { get; set; }
+        public PlayerTicks PlayerTicks { get; set; }
         
         [SerializeField] private string defaultName = default;
         [SerializeField] private List<Object> localRemove = default;
@@ -36,7 +35,7 @@ namespace Mastic
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
-            Shared = new SharedPlayerFields();
+            PlayerTicks = new PlayerTicks();
             Initialize();
         }
 
@@ -49,12 +48,12 @@ namespace Mastic
 
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
-            playerEntity.SetShared(Shared);
+            playerEntity.PlayerTicks = PlayerTicks;
 
-            networkMovement.Initialize(standardTickrate, cameraInterpolation, Shared);
+            networkMovement.Initialize(standardTickrate, cameraInterpolation, PlayerTicks);
 
             clientSequence.Initialize(networkMovement, attackAbilities,
-                cooldownHandler, Shared);
+                cooldownHandler, PlayerTicks);
         }
 
         public override void OnStartServer()

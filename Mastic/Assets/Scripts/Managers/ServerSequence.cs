@@ -6,7 +6,7 @@ namespace Mastic
 {
     public class ServerSequence : MonoBehaviour
     {
-        public int Count => players.Count;
+        public int PlayerCount => players.Count;
         private readonly List<ServerPlayer> players = new List<ServerPlayer>();
         private LagCompensation lagCompensation;
         private float timer;
@@ -27,14 +27,14 @@ namespace Mastic
         private void Tick() 
         {
             RemoveNullPlayers();
-            lagCompensation.Clean();
+            lagCompensation.RemoveNullEntities();
             lagCompensation.RecordFrame();
             foreach (ServerPlayer player in players)
             {
                 player.entity.EnableHitbox(false);
                 for (int i = 0; i < player.attackAbilities.Length; i++)
                 {
-                    player.attackAbilities[i].DoServerTick(player.Shared.processedTick);
+                    player.attackAbilities[i].DoServerTick(player.PlayerTicks.processedTick);
                 }
 
                 player.entity.EnableHitbox(true);
@@ -85,12 +85,12 @@ namespace Mastic
             if (index < 0 || index >= players.Count)
                 return default;
 
-            return (players[index].networkMovement.connectionToClient, players[index].Shared.processedTick);
+            return (players[index].networkMovement.connectionToClient, players[index].PlayerTicks.processedTick);
         }
 
         private class ServerPlayer 
         {
-            public SharedPlayerFields Shared => player.Shared;
+            public PlayerTicks PlayerTicks => player.PlayerTicks;
             private readonly Player player;
 
             public NetworkConnectionToClient connectionToClient;

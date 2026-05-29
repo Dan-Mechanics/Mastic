@@ -5,7 +5,10 @@ namespace Mastic
 {
     public interface IDamagable
     {
-        void Damage(float amount);
+        /// <summary>
+        /// Future: you could make this return a bool for if killed.
+        /// </summary>
+        bool Damage(float amount);
         void Die();
     }
 
@@ -26,14 +29,17 @@ namespace Mastic
         }
 
         [Server]
-        public void Damage(float amount)
+        public bool Damage(float amount)
         {
             if (amount <= 0f)
-                return;
+                return false;
 
             health -= amount;
-            if (health <= 0f)
-                Die();
+            if (health > 0f)
+                return false;
+
+            Die();
+            return true;
         }
 
         [Client]

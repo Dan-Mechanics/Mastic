@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class Bolt : NetworkBehaviour, IAttackAbility
+    public class PiercingIcicle : NetworkBehaviour, IAttackAbility
     {
         public event Action<float> OnAuthoritativeDamage;
         public event Action<float> OnPredictDamage;
@@ -69,7 +69,7 @@ namespace Mastic
                     OnPredictDamage?.Invoke(damage);
                     shootMessage.debugEnemyPos = target.position;
                 }
-                
+
                 // REDUCE NO-REGS.
                 if (target.TryGetComponent(out PlayerEntity playerEntity))
                     shootMessage.rollbackTick = playerEntity.PlayerTicks.rollbackTick;
@@ -82,7 +82,7 @@ namespace Mastic
         public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
 
         [Command]
-        private void CmdShoot(ShootMessage shootMessage) 
+        private void CmdShoot(ShootMessage shootMessage)
         {
             if (pendingShootMessages.Count >= maxPendingRequests || shootMessage.inputTick <= previousTick)
                 return;
@@ -92,15 +92,16 @@ namespace Mastic
         }
 
         [Server]
-        private void Shoot(ShootMessage shootMessage) 
+        private void Shoot(ShootMessage shootMessage)
         {
             // RECREATE THE SHOT CONDITIONS.
             lagCompensation.SetAsTick(shootMessage.rollbackTick);
-            
+
             mouseLook.SetRotation(shootMessage.xRotation, shootMessage.yRotation);
             cameraInterpolation.Interject(origin, prevOrigin, velocity);
             cameraInterpolation.SetValue(shootMessage.lerpValue);
 
+            // MAKE METHOD FOR THIS.
             Debug.Log("shoot message recieved");
             float dist = Vector3.Distance(cam.position, shootMessage.origin);
             if (dist > tolerance)
