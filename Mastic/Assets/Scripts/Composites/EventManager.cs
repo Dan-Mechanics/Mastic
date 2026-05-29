@@ -3,7 +3,11 @@ using System.Collections.Generic;
 
 namespace Mastic
 {
-    public enum Occasion { DoUnlocalMovementAbilities }
+    public enum Occasion 
+    { 
+        None = 0,
+        DoUnlocalMovementAbilities = 1
+    }
     
     public static class EventManager
     {
