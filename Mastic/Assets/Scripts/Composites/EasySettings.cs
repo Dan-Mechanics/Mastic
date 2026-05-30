@@ -28,7 +28,7 @@ namespace Mastic
             }
             catch (Exception exception)
             {
-                Debug.LogWarning($"'{name}' --> {exception.Message} |\n" +
+                Debug.LogError($"'{name}' --> {exception.Message} |\n" +
                     $"'{name}' --> {(dictionary.ContainsKey(name) ? "found" : "NOT FOUND")}.");
                 return default;
             }

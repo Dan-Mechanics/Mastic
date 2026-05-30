@@ -53,18 +53,18 @@ namespace Mastic
             coll = GetComponentInChildren<Collider>();
             prevOrigin = eyes.position;
             previousTick = -1;
-            cooldownName = nameof(PiercingIcicle);
 
             EasySettings easySettings = EasySettings.Current;
             int standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
             standardInterval = 1f / standardTickrate;
+            cooldownName = nameof(PiercingIcicle);
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
             tolerance = easySettings.Get<float>(nameof(tolerance));
-            damage = easySettings.Get<float>(nameof(PiercingIcicle) + nameof(damage));
-            lifetime = easySettings.Get<float>(nameof(PiercingIcicle) + nameof(lifetime));
-            speed = easySettings.Get<float>(nameof(PiercingIcicle) + nameof(speed));
-            radius = easySettings.Get<float>(nameof(PiercingIcicle) + nameof(radius));
-            hasGravity = easySettings.Get<bool>(nameof(PiercingIcicle) + nameof(hasGravity));
+            damage = easySettings.Get<float>(cooldownName + nameof(damage));
+            lifetime = easySettings.Get<float>(cooldownName + nameof(lifetime));
+            speed = easySettings.Get<float>(cooldownName + nameof(speed));
+            radius = easySettings.Get<float>(cooldownName + nameof(radius));
+            hasGravity = easySettings.Get<bool>(cooldownName + nameof(hasGravity));
         }
 
         public void DoLocalUpdate(int inputTick, int rollbackTick)

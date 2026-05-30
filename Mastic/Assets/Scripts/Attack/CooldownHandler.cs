@@ -1,5 +1,6 @@
 using Mirror;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Mastic
@@ -7,36 +8,36 @@ namespace Mastic
     public class CooldownHandler : NetworkBehaviour
     {
         [SerializeField] private string[] cooldownNames = default;
-        private Dictionary<string, Cooldown> nameToCooldown;
-        private Cooldown[] cooldowns;
+        private Dictionary<string, Cooldown> cooldowns;
 
         public void Initialize()
         {
             EasySettings easySettings = EasySettings.Current;
             int standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
-            nameToCooldown = new Dictionary<string, Cooldown>();
-            cooldowns = new Cooldown[cooldownNames.Length];
-            for (int i = 0; i < cooldowns.Length; i++)
+            cooldowns = new Dictionary<string, Cooldown>();
+            for (int i = 0; i < cooldownNames.Length; i++)
             {
-                string cooldownName = cooldownNames[i];
+                string cooldownName = cooldownNames[i].ToLowerInvariant();
                 int stack = easySettings.Get<int>(cooldownName + nameof(stack));
-                float cooldown = easySettings.Get<int>(cooldownName + nameof(cooldown));
+                float cooldown = easySettings.Get<float>(cooldownName + nameof(cooldown));
 
                 int minTicks = Mathf.CeilToInt(cooldown * standardTickrate);
                 int maxTicks = minTicks * stack;
-                Cooldown newCooldown = new Cooldown(minTicks, maxTicks);
-                cooldowns[i] = newCooldown;
-                nameToCooldown.Add(cooldownName, newCooldown);
+                cooldowns.Add(cooldownName, new Cooldown(minTicks, maxTicks));
             }
         }
 
         public bool CanCast(string cooldownName)
         {
-            if (!nameToCooldown.ContainsKey(cooldownName))
+            cooldownName = cooldownName.ToLowerInvariant();
+            if (cooldowns.ContainsKey(cooldownName))
+            {
+                return cooldowns[cooldownName].CanCast();
+            }
+            else
+            {
                 return false;
-
-            Cooldown cooldown = nameToCooldown[cooldownName];
-            return cooldown.ticks >= cooldown.minTicksRequired;
+            }
         }
         
         /// <summary>
@@ -44,12 +45,9 @@ namespace Mastic
         /// </summary>
         public void Cast(string cooldownName)
         {
-            if (!nameToCooldown.ContainsKey(cooldownName))
-                return;
-
-            Cooldown cooldown = nameToCooldown[cooldownName];
-            cooldown.ticks -= cooldown.minTicksRequired;
-            cooldown.Clamp();
+            cooldownName = cooldownName.ToLowerInvariant();
+            if (cooldowns.ContainsKey(cooldownName))
+                cooldowns[cooldownName].Cast();
         }
 
         /// <summary>
@@ -58,37 +56,26 @@ namespace Mastic
         [Server]
         public void RechargeAll()
         {
-            for (int i = 0; i < cooldowns.Length; i++)
-            {
-                cooldowns[i].ticks = cooldowns[i].maxTicksAllowed;
-            }
-
+            cooldowns.Values.ToList().ForEach(x => x.Recharge());
             TargetRechargeAll(connectionToClient);
         }
 
         public void Charge()
         {
-            for (int i = 0; i < cooldowns.Length; i++)
-            {
-                cooldowns[i].ticks++;
-                cooldowns[i].Clamp();
-            }
+            cooldowns.Values.ToList().ForEach(x => x.Charge());
         }
 
         [TargetRpc]
         private void TargetRechargeAll(NetworkConnectionToClient conn)
         {
-            for (int i = 0; i < cooldowns.Length; i++)
-            {
-                cooldowns[i].ticks = cooldowns[i].maxTicksAllowed;
-            }
+            cooldowns.Values.ToList().ForEach(x => x.Recharge());
         }
 
         private class Cooldown
         {
-            public int ticks;
-            public int minTicksRequired;
-            public int maxTicksAllowed;
+            private int ticks;
+            private readonly int minTicksRequired;
+            private readonly int maxTicksAllowed;
 
             public Cooldown(int minTicksRequired, int maxTicksAllowed)
             {
@@ -96,7 +83,21 @@ namespace Mastic
                 this.maxTicksAllowed = maxTicksAllowed;
             }
 
-            public void Clamp() => ticks = Mathf.Clamp(ticks, 0, maxTicksAllowed);
+            public void Charge()
+            {
+                ticks++;
+                Clamp();
+            }
+
+            public void Cast()
+            {
+                ticks -= minTicksRequired;
+                Clamp();
+            }
+
+            public bool CanCast() => ticks >= minTicksRequired;
+            public void Recharge() => ticks = maxTicksAllowed;
+            private void Clamp() => ticks = Mathf.Clamp(ticks, 0, maxTicksAllowed);
         }
     }
 }

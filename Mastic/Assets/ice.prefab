@@ -527,22 +527,12 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  cooldowns:
-  - value: 0
-    minRequired: 192
-    maxValue: 576
-  - value: 0
-    minRequired: 768
-    maxValue: 768
-  - value: 0
-    minRequired: 25
-    maxValue: 25
-  - value: 0
-    minRequired: 384
-    maxValue: 768
-  - value: 0
-    minRequired: 10
-    maxValue: 10
+  cooldownNames:
+  - jump
+  - gust
+  - cloud
+  - bolt
+  - piercingicicle
 --- !u!114 &8685740675525256336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -579,7 +569,6 @@ MonoBehaviour:
   speed: 8
   ability1: {fileID: 11400000, guid: 00ce751e8eeaaf241bc6e06f96db00e0, type: 2}
   maxPendingRequests: 8
-  cooldownIndex: 0
 --- !u!114 &-3213554778907423252
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,7 +588,6 @@ MonoBehaviour:
   cloudPrefab: {fileID: 106363770380491094, guid: e1ca7f8cf71c3a64d89a2e01e7898476, type: 3}
   force: {x: 0, y: 15, z: 0}
   expectedColliders: 12
-  cooldownIndex: 1
 --- !u!114 &-3850514727978609351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -617,7 +605,6 @@ MonoBehaviour:
   syncInterval: 0
   secondaryFire: {fileID: 11400000, guid: d21a50d1d68a6cd4ab1e76f523708be3, type: 2}
   cooldownHandler: {fileID: -5600370486124146712}
-  cooldownIndex: 3
   mask:
     serializedVersion: 2
     m_Bits: 9
@@ -659,7 +646,6 @@ MonoBehaviour:
   syncInterval: 0
   primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
   cooldownHandler: {fileID: -5600370486124146712}
-  cooldownIndex: 2
   projectile: {fileID: 4199077544637763028, guid: ed4601bdc7f8511408e381ae3964e9ee, type: 3}
   mask:
     serializedVersion: 2
