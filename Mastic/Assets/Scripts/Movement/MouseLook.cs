@@ -31,20 +31,20 @@ namespace Mastic
             float x = -Input.GetAxisRaw("Mouse Y");
             float y = Input.GetAxisRaw("Mouse X");
             rotation += new Vector2(x, y) * sensitivity;
-            SetRotation(rotation.x, rotation.y);
+            SetRotationDirectly(rotation.x, rotation.y);
         }
 
-        public void SetRotation(float xRotation, float yRotation)
+        public void SetRotationDirectly(float xRotation, float yRotation)
         {
             xRotation = Mathf.Clamp(xRotation, minCamAngle, maxCamAngle);
             rotation.x = xRotation;
             rotation.y = yRotation;
 
-            SetRotationTransient(xRotation, yRotation);
+            SetRotationTemporarily(xRotation, yRotation);
             cam.rotation = eyes.rotation;
         }
 
-        public void SetRotationTransient(float xRotation, float yRotation)
+        public void SetRotationTemporarily(float xRotation, float yRotation)
         {
             eyes.localRotation = Quaternion.AngleAxis(xRotation, Vector3.right);
             transform.rotation = Quaternion.AngleAxis(yRotation, Vector3.up);

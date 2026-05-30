@@ -317,7 +317,7 @@ namespace Mastic
         public void DoServerMovementAbilities()
         {
             // RECREATE CAM POSITION IN THIS MOMENT.
-            mouseLook.SetRotation(previousInputMessage.xRotation, previousInputMessage.yRotation);
+            mouseLook.SetRotationDirectly(previousInputMessage.xRotation, previousInputMessage.yRotation);
             cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
             cameraInterpolation.SetValue(previousInputMessage.lerpValue);
             movementAbilities.ForEach(x => x.CheckAgainstTickServer(previousInputMessage.tick, movement, playerTicks.serverTick));
@@ -332,7 +332,7 @@ namespace Mastic
         private void Move(InputMessage input, bool applyToInterpolation)
         {
             // RECREATE THE MOVEMENT OF THE PLAYER IN THIS MOMENT.
-            mouseLook.SetRotationTransient(input.xRotation, input.yRotation);
+            mouseLook.SetRotationTemporarily(input.xRotation, input.yRotation);
             movement.Move(input.GetVerticalInput(), input.GetHorizontalInput(), standardInterval);
             if (isLocalPlayer)
             {

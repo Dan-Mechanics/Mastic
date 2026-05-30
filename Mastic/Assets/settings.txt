@@ -1,15 +1,17 @@
+// NETCODE
 standardTickrate 64
 tolerance 0.001
 maxPendingRequests 8
 
+// GENERAL
 maxHealth 100
-
 speed 6
 acceleration 60
 multiplier 0.33
 topSpeed 25
 slopeLimit 50
 
+// LIGHTNING
 smiteCooldown 9
 smiteStack 1
 smiteDuration 1
@@ -21,3 +23,10 @@ gustStack 3
 cloudTickDuration 384
 cloudCooldown 12
 cloudStack 1
+
+// ICE
+piercingIcicleDamage 40
+piercingIcicleLifetime 3.5
+piercingIcicleSpeed 40
+piercingIcicleRadius 0.25
+piercingIcicleHasGravity false

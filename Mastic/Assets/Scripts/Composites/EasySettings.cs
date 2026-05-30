@@ -17,12 +17,21 @@ namespace Mastic
         public T Get<T>(string name)
         {
             CheckInitialization();
-            name = name.ToLowerInvariant();
-            string value = string.Empty;
-            if (dictionary.ContainsKey(name)) 
-                value = dictionary[name];
+            try
+            {
+                name = name.ToLowerInvariant();
+                string value = string.Empty;
+                if (dictionary.ContainsKey(name))
+                    value = dictionary[name];
 
-            return (T)Convert.ChangeType(value, typeof(T));
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"'{name}' --> {exception.Message} |\n" +
+                    $"'{name}' --> {(dictionary.ContainsKey(name) ? "found" : "NOT FOUND")}.");
+                return default;
+            }
         }
 
         private void CheckInitialization()

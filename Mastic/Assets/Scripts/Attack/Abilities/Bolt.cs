@@ -92,41 +92,14 @@ namespace Mastic
         }
 
         [Server]
-        private void Shoot(ShootMessage shootMessage) 
+        private void Shoot(ShootMessage shootMessage)
         {
             // RECREATE THE SHOT CONDITIONS.
             lagCompensation.SetAsTick(shootMessage.rollbackTick);
-            
-            mouseLook.SetRotation(shootMessage.xRotation, shootMessage.yRotation);
+            mouseLook.SetRotationDirectly(shootMessage.xRotation, shootMessage.yRotation);
             cameraInterpolation.Interject(origin, prevOrigin, velocity);
             cameraInterpolation.SetValue(shootMessage.lerpValue);
-
-            Debug.Log("shoot message recieved");
-            float dist = Vector3.Distance(cam.position, shootMessage.origin);
-            if (dist > tolerance)
-            {
-                Vector3 debugDiff = (cam.position - shootMessage.origin) / Time.fixedDeltaTime;
-                Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin})");
-                Debug.LogWarning($"diff {debugDiff.magnitude}");
-
-                // ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
-                Vector3 dir = shootMessage.origin - cam.position;
-                dir.Normalize();
-                if (!Physics.Raycast(cam.position, dir, out RaycastHit noregHit, dist, noregMask, QueryTriggerInteraction.Ignore))
-                {
-                    cam.position = shootMessage.origin;
-                }
-                else
-                {
-                    Vector3 difference = cam.position - noregHit.point;
-                    dist = difference.magnitude - 0.1f;
-                    if (dist > tolerance)
-                    {
-                        difference = Vector3.ClampMagnitude(difference, dist);
-                        cam.position += difference;
-                    }
-                }
-            }
+            AllowNoregLenience(shootMessage);
 
             if (!Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
                 return;
@@ -143,6 +116,36 @@ namespace Mastic
             {
                 Debug.LogWarning($"Recreated enemy pos was not the same as on the client. correct: {shootMessage.debugEnemyPos}, recreated: {hit.transform.root.position}");
                 Debug.LogWarning($"{(shootMessage.debugEnemyPos - hit.transform.root.position) / Time.fixedDeltaTime}");
+            }
+        }
+
+        private void AllowNoregLenience(ShootMessage shootMessage)
+        {
+            float dist = Vector3.Distance(cam.position, shootMessage.origin);
+            if (dist <= tolerance)
+                return;
+
+            // DEBUG.
+            Vector3 debugDiff = (cam.position - shootMessage.origin) / Time.fixedDeltaTime;
+            Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin})");
+            Debug.LogWarning($"diff {debugDiff.magnitude}");
+
+            // ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
+            Vector3 dir = shootMessage.origin - cam.position;
+            dir.Normalize();
+            if (!Physics.Raycast(cam.position, dir, out RaycastHit hit, dist, noregMask, QueryTriggerInteraction.Ignore))
+            {
+                cam.position = shootMessage.origin;
+            }
+            else
+            {
+                Vector3 difference = cam.position - hit.point;
+                dist = difference.magnitude - 0.1f;
+                if (dist > tolerance)
+                {
+                    difference = Vector3.ClampMagnitude(difference, dist);
+                    cam.position += difference;
+                }
             }
         }
 

@@ -27,17 +27,16 @@ namespace Mastic
         }
 
         [Server]
-        public bool CheckRollbackProjectile(ref int rollbackTick, ref int tickCount)
+        public int GetProjectileRollbackTickCount(ref int rollbackTick)
         {
-            if (rollbackTick >= currentTick)
-                return false;
-
             if (rollbackTick < oldestTick)
                 rollbackTick = oldestTick;
 
-            // WILL BE AT LEAST 1, AND WILL NOT BE GREATER THAN MAXRECORDINGLENGTH.
-            tickCount = currentTick - rollbackTick;
-            return true;
+            if (rollbackTick >= currentTick)
+                return 0;
+
+            // WILL BE AT LEAST 1, AND WILL NEVER BE GREATER THAN MAXRECORDINGLENGTH.
+            return currentTick - rollbackTick;
         }
 
         /// <summary>
