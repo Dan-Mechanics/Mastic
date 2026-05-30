@@ -4,20 +4,21 @@ namespace Mastic
 {
     public class Projectile : MonoBehaviour
     {
+        [SerializeField] private Rigidbody rb = default;
+        [SerializeField] private Collider coll = default;
         private float damage;
-        private float lifetime;
         private bool isServer;
-
-        public void Initialize(string name, bool isServer)
+        
+        public void Initialize(Vector3 velocityChange, string name, Collider sender, bool isServer, float damage, float lifetime)
         {
+            this.damage = damage;
             this.isServer = isServer;
+            Physics.IgnoreCollision(sender, coll);
             gameObject.name = name;
-            EasySettings easySettings = EasySettings.Current;
-            damage = easySettings.Get<float>(name + nameof(damage));
-            lifetime = easySettings.Get<float>(name + nameof(lifetime));
+            transform.forward = velocityChange.normalized;
+            rb.AddForce(velocityChange, ForceMode.VelocityChange);
+            Destroy(gameObject, lifetime);
         }
-
-        private void Start() => Destroy(gameObject, lifetime);
 
         private void OnCollisionEnter(Collision collision)
         {
