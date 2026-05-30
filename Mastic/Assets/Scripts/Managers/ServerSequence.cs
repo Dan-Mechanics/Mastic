@@ -96,9 +96,6 @@ namespace Mastic
 
         private class ServerPlayer 
         {
-            public PlayerTicks PlayerTicks => player.PlayerTicks;
-            private readonly Player player;
-
             public NetworkConnectionToClient connectionToClient;
             public IReliableAttackAbility[] reliableAttackAbilities;
             public IUnreliableAttackAbility[] unreliableAttackAbilities;
@@ -110,7 +107,6 @@ namespace Mastic
             public ServerPlayer(Transform transform)
             {
                 this.transform = transform;
-                player = transform.GetComponent<Player>();
                 reliableAttackAbilities = transform.GetComponents<IReliableAttackAbility>();
                 unreliableAttackAbilities = transform.GetComponents<IUnreliableAttackAbility>();
                 entity = transform.GetComponent<PlayerEntity>();

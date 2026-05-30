@@ -9,10 +9,10 @@ namespace Mastic
         [SerializeField] private float speed = default;
         [SerializeField] private EasyBinding ability1 = default;
         [SerializeField] private int maxPendingRequests = default;
-        [SerializeField] private int cooldownIndex = default;
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
+        private string cooldownName;
         private int previousTick;
         private Transform eyes;
         private Rigidbody rb;
@@ -20,6 +20,7 @@ namespace Mastic
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
+            cooldownName = nameof(Gust);
             cooldownHandler = GetComponent<CooldownHandler>();
             eyes = transform.Find("eyes");
             previousTick = -1;
@@ -28,9 +29,9 @@ namespace Mastic
         [Client]
         public void DoLocalTick(int inputTick, IMovement movement)
         {
-            if (ability1.IsHeld && cooldownHandler.CanCast(cooldownIndex))
+            if (ability1.IsHeld && cooldownHandler.CanCast(cooldownName))
             {
-                cooldownHandler.Cast(cooldownIndex);
+                cooldownHandler.Cast(cooldownName);
                 pendingRequests.Add(inputTick);
                 CmdRequestGust(inputTick);
             }
@@ -62,10 +63,10 @@ namespace Mastic
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (inputTick < pendingRequests[i] || !cooldownHandler.CanCast(cooldownIndex))
+                if (inputTick < pendingRequests[i] || !cooldownHandler.CanCast(cooldownName))
                     continue;
 
-                cooldownHandler.Cast(cooldownIndex);
+                cooldownHandler.Cast(cooldownName);
                 PerformGust(movement);
                 pendingRequests.RemoveAt(i);
                 break;

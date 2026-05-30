@@ -13,12 +13,12 @@ namespace Mastic
         [SerializeField] private EasyBinding ability2 = default;
         [SerializeField] private int maxPendingRequests = default;
         [SerializeField] private int tickDuration = default;
-        [SerializeField] private int cooldownIndex = default;
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
         private PhysicsMovement physicsMovement;
+        private string cooldownName;
         private int previousTick;
         private int startingTick;
         private int endingTick;
@@ -32,6 +32,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             physicsMovement = GetComponent<PhysicsMovement>();
             cooldownHandler = GetComponent<CooldownHandler>();
+            cooldownName = nameof(BurningWings);
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;
@@ -43,7 +44,7 @@ namespace Mastic
             if (!ability2.IsHeld || !CanCast(inputTick))
                 return;
 
-            cooldownHandler.Cast(cooldownIndex);
+            cooldownHandler.Cast(cooldownName);
             pendingRequests.Add(inputTick);
             CmdRequestBurningWings(inputTick);
         }
@@ -82,7 +83,7 @@ namespace Mastic
                 if (inputTick < pendingRequests[i] || !CanCast(serverTick))
                     continue;
 
-                cooldownHandler.Cast(cooldownIndex);
+                cooldownHandler.Cast(cooldownName);
                 Cast(serverTick);
                 pendingRequests.RemoveAt(i);
                 break;
@@ -103,7 +104,7 @@ namespace Mastic
         private bool CanCast(int tick)
         {
             return !IsAbilityActive(tick) &&
-                cooldownHandler.CanCast(cooldownIndex);
+                cooldownHandler.CanCast(cooldownName);
         }
 
         /// <summary>

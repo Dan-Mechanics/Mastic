@@ -38,7 +38,6 @@ namespace Mastic
         private Rigidbody rb;
         private Transform eyes;
         private MouseLook mouseLook;
-        private PlayerTicks playerTicks;
         private AdaptiveTickrate adaptiveTickrate;
         private ICameraInterpolation cameraInterpolation;
 
@@ -63,9 +62,8 @@ namespace Mastic
         private float topSpeed;
         private bool w, a, s, d;
 
-        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation, PlayerTicks playerTicks)
+        public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation)
         {
-            this.playerTicks = playerTicks;
             this.cameraInterpolation = cameraInterpolation;
             movementAbilities = GetComponents<IMovementAbility>().ToList();
             standardInterval = 1f / standardTickrate;

@@ -10,7 +10,6 @@ namespace Mastic
         [SerializeField] private GameObject cloudPrefab = default;
         [SerializeField] private Vector3 force = default;
         [SerializeField, Min(1)] private int expectedColliders = default;
-        [SerializeField] private int cooldownIndex = default;
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
@@ -18,6 +17,7 @@ namespace Mastic
         private int maxPendingRequests;
         private GameObject cloudVisual;
         private ForceZone forceZone;
+        private string cooldownName;
 
         private int standardTickrate;
         private int tickDuration;
@@ -31,6 +31,7 @@ namespace Mastic
             serverSequence = FindAnyObjectByType<ServerSequence>();
             cloudVisual = Instantiate(cloudPrefab, cloudPrefab.transform.position, cloudPrefab.transform.rotation);
             cloudVisual.SetActive(false);
+            cooldownName = nameof(Cloud);
 
             EasySettings easySettings = EasySettings.Current;
             tickDuration = easySettings.Get<int>(GetType().Name + nameof(tickDuration));
@@ -60,10 +61,11 @@ namespace Mastic
         [Client]
         public void DoLocalTick(int inputTick, IMovement movement)
         {
+            // IDEA: ADD CHAMBERING SO YOU CAN'T SPAM THIS ACCIDENTALLY.
             if (!ability2.IsHeld || !CanCast(inputTick))
                 return;
 
-            cooldownHandler.Cast(cooldownIndex);
+            cooldownHandler.Cast(cooldownName);
             pendingRequests.Add(inputTick);
             CmdRequestCast(inputTick);
         }
@@ -113,7 +115,7 @@ namespace Mastic
                 if (inputTick < pendingRequests[i] || !CanCast(serverTick))
                     continue;
 
-                cooldownHandler.Cast(cooldownIndex);
+                cooldownHandler.Cast(cooldownName);
                 Cast(transform.position, serverTick);
                 pendingRequests.RemoveAt(i);
 
@@ -150,7 +152,7 @@ namespace Mastic
         private bool CanCast(int tick)
         {
             return !IsAbilityActive(tick) &&
-                cooldownHandler.CanCast(cooldownIndex);
+                cooldownHandler.CanCast(cooldownName);
         }
 
         private void Cast(Vector3 pos, int startTick)

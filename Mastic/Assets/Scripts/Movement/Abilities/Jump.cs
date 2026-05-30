@@ -12,6 +12,7 @@ namespace Mastic
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
+        private string cooldownName;
         private int previousTick;
         private Rigidbody rb;
 
@@ -19,6 +20,7 @@ namespace Mastic
         {
             rb = GetComponent<Rigidbody>();
             cooldownHandler = GetComponent<CooldownHandler>();
+            cooldownName = nameof(Jump);
             previousTick = -1;
         }
 
@@ -27,7 +29,7 @@ namespace Mastic
         {
             if (jump.IsHeld && CanJump(movement))
             {
-                cooldownHandler.Cast(cooldownHandler.Last);
+                cooldownHandler.Cast(cooldownName);
                 pendingRequests.Add(inputTick);
                 CmdRequestJump(inputTick);
             }
@@ -62,7 +64,7 @@ namespace Mastic
                 if (inputTick < pendingRequests[i] || !CanJump(movement))
                     continue;
 
-                cooldownHandler.Cast(cooldownHandler.Last);
+                cooldownHandler.Cast(cooldownName);
                 PerformJump(movement);
                 pendingRequests.RemoveAt(i);
                 break;
@@ -81,7 +83,7 @@ namespace Mastic
         private bool CanJump(IMovement movement)
         {
             return movement.IsGrounded &&
-                cooldownHandler.CanCast(cooldownHandler.Last);
+                cooldownHandler.CanCast(cooldownName);
         }
 
         private void PerformJump(IMovement movement)

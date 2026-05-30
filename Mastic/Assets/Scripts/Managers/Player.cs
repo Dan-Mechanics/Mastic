@@ -6,8 +6,6 @@ namespace Mastic
 {
     public class Player : NetworkBehaviour
     {
-        public PlayerTicks PlayerTicks { get; set; }
-        
         [SerializeField] private string defaultName = default;
         [SerializeField] private List<Object> localRemove = default;
         [SerializeField] private List<Object> unlocalRemove = default;
@@ -36,19 +34,16 @@ namespace Mastic
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
-            PlayerTicks = new PlayerTicks();
-            Initialize();
+            InitializeAll();
         }
 
-        /// <summary>
-        /// For server, local and unlocal client.
-        /// </summary>
-        private void Initialize()
+        private void InitializeAll()
         {
             int standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
+            cooldownHandler.Initialize();
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
-            networkMovement.Initialize(standardTickrate, cameraInterpolation, PlayerTicks);
+            networkMovement.Initialize(standardTickrate, cameraInterpolation);
             clientSequence.Initialize(networkMovement, reliableAttackAbilities, unreliableAttackAbilities,
                 cooldownHandler, playerEntity);
         }
