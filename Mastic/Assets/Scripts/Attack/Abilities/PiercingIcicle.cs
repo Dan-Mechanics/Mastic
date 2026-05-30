@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class PiercingIcicle : NetworkBehaviour, IAttackAbility
+    public class PiercingIcicle : NetworkBehaviour, IReliableAttackAbility
     {
         public event Action<float> OnAuthoritativeDamage;
         public event Action<float> OnPredictDamage;
@@ -106,7 +106,8 @@ namespace Mastic
             mouseLook.SetRotationDirectly(shootMessage.xRotation, shootMessage.yRotation);
             cameraInterpolation.Interject(origin, prevOrigin, vel);
             cameraInterpolation.SetValue(shootMessage.lerpValue);
-            AllowNoregLenience(shootMessage);
+            //AllowNoregLenience(shootMessage);
+            IReliableAttackAbility.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
 
             // ACCOUNT FOR TRAVEL TIME OF PACKET.
             Vector3 projectileOrigin = cam.position;
@@ -136,44 +137,14 @@ namespace Mastic
             SpawnProjectile(projectileOrigin, projectileVelocity);
         }
 
-        private void AllowNoregLenience(ShootMessage shootMessage)
-        {
-            float dist = Vector3.Distance(cam.position, shootMessage.origin);
-            if (dist <= tolerance)
-                return;
-
-            // DEBUG.
-            Vector3 debugDiff = (cam.position - shootMessage.origin) / Time.fixedDeltaTime;
-            Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin})");
-            Debug.LogWarning($"diff {debugDiff.magnitude}");
-
-            // ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
-            Vector3 dir = shootMessage.origin - cam.position;
-            dir.Normalize();
-            if (!Physics.Raycast(cam.position, dir, out RaycastHit hit, dist, noregMask, QueryTriggerInteraction.Ignore))
-            {
-                cam.position = shootMessage.origin;
-            }
-            else
-            {
-                Vector3 difference = cam.position - hit.point;
-                dist = difference.magnitude - 0.1f;
-                if (dist > tolerance)
-                {
-                    difference = Vector3.ClampMagnitude(difference, dist);
-                    cam.position += difference;
-                }
-            }
-        }
-
         [Server]
-        public void DoServerTick(int receivedInputTick)
+        public void DoServerTick(int processedTick)
         {
             origin = eyes.position;
             vel = rb.linearVelocity;
             for (int i = 0; i < pendingShootMessages.Count; i++)
             {
-                if (receivedInputTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownIndex))
+                if (processedTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownIndex))
                     continue;
 
                 cooldownHandler.Cast(cooldownIndex);

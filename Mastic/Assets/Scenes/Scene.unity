@@ -446,11 +446,7 @@ PrefabInstance:
     - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: playerPrefab
       value: 
-      objectReference: {fileID: 3751572637676758942, guid: 96b436d5d67864e4b8c5654f2b7dd3c7, type: 3}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: maxConnections
-      value: 1
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     - target: {fileID: 3229349398631652857, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_Name
       value: simple_network_manager

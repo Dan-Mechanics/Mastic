@@ -9,18 +9,20 @@ namespace Mastic
         public event Action<string> OnDisplayCheats;
 
         [SerializeField] private EasyBinding disconnect = default;
-        private IAttackAbility[] attackAbilities;
+        private IReliableAttackAbility[] reliableAttackAbilities;
+        private IUnreliableAttackAbility[] unreliableAttackAbilities;
         private NetworkMovement networkMovement;
+        private PlayerEntity playerEntity;
         private CooldownHandler cooldownHandler;
-        private PlayerTicks playerTicks;
         private float timer;
 
-        public void Initialize(NetworkMovement networkMovement, IAttackAbility[] attackAbilities, CooldownHandler cooldownHandler, PlayerTicks playerTicks)
+        public void Initialize(NetworkMovement networkMovement, IReliableAttackAbility[] reliableAttackAbilities, IUnreliableAttackAbility[] unreliableAttackAbilities, CooldownHandler cooldownHandler, PlayerEntity playerEntity)
         {
             this.networkMovement = networkMovement;
-            this.attackAbilities = attackAbilities;
+            this.reliableAttackAbilities = reliableAttackAbilities;
+            this.unreliableAttackAbilities = unreliableAttackAbilities;
             this.cooldownHandler = cooldownHandler;
-            this.playerTicks = playerTicks;
+            this.playerEntity = playerEntity;
         }
 
         [Client]
@@ -32,12 +34,17 @@ namespace Mastic
                 return;
             }
 
-            for (int i = 0; i < attackAbilities.Length; i++)
+            foreach (IReliableAttackAbility reliable in reliableAttackAbilities)
             {
-                // -1 HERE BECAUSE INPUTTICK IS THE ONE THAT WILL BE MADE IN THE NEW TICK.
-                attackAbilities[i].DoLocalUpdate(playerTicks.inputTick - 1, playerTicks.rollbackTick);
+                reliable.DoLocalUpdate(networkMovement.InputTick - 1, playerEntity.RollbackTick);
             }
 
+            foreach (IUnreliableAttackAbility unreliable in unreliableAttackAbilities)
+            {
+                unreliable.DoLocalUpdate(networkMovement.InputTick - 1);
+            }
+
+            // DEBUG.
             int clientPacketMultiplier = 1;
             if (Input.GetKey(KeyCode.Mouse4)) { clientPacketMultiplier = 2; }
             else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
@@ -49,13 +56,17 @@ namespace Mastic
                 OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier}");
                 for (int i = 0; i < clientPacketMultiplier; i++)
                 {
-                    networkMovement.DoLocalTick();
+                    networkMovement.DoLocalTick(playerEntity.RollbackTick);
                     cooldownHandler.Charge();
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.UpArrow)) { playerTicks.inputTick += 10; Debug.LogWarning("+10"); }
-            if (Input.GetKeyDown(KeyCode.DownArrow)) { playerTicks.inputTick -= 10; Debug.LogWarning("-10"); }
+            // DEBUG.
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+                networkMovement.DebugAlterInputTick(10);
+
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+                networkMovement.DebugAlterInputTick(-10);
         }
     }
 }

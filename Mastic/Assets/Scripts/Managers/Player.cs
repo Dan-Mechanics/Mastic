@@ -13,9 +13,9 @@ namespace Mastic
         [SerializeField] private List<Object> unlocalRemove = default;
         [SerializeField] private List<Object> serverRemove = default;
 
-        private int standardTickrate;
         private ICameraInterpolation cameraInterpolation;
-        private IAttackAbility[] attackAbilities;
+        private IReliableAttackAbility[] reliableAttackAbilities;
+        private IUnreliableAttackAbility[] unreliableAttackAbilities;
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
@@ -26,7 +26,8 @@ namespace Mastic
 
         private void Awake()
         {
-            attackAbilities = GetComponents<IAttackAbility>();
+            reliableAttackAbilities = GetComponents<IReliableAttackAbility>();
+            unreliableAttackAbilities = GetComponents<IUnreliableAttackAbility>();
             cooldownHandler = GetComponent<CooldownHandler>();
             clientSequence = GetComponent<ClientSequence>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
@@ -44,23 +45,18 @@ namespace Mastic
         /// </summary>
         private void Initialize()
         {
-            standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
-
+            int standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
-            playerEntity.PlayerTicks = PlayerTicks;
-
             networkMovement.Initialize(standardTickrate, cameraInterpolation, PlayerTicks);
-
-            clientSequence.Initialize(networkMovement, attackAbilities,
-                cooldownHandler, PlayerTicks);
+            clientSequence.Initialize(networkMovement, reliableAttackAbilities, unreliableAttackAbilities,
+                cooldownHandler, playerEntity);
         }
 
         public override void OnStartServer()
         {
             base.OnStartServer();
             playerEntity.Initialize(lagCompensation);
-            // gameObject.name = $"{defaultName} | server";
             serverRemove.ForEach(x => Destroy(x));
             print($"{gameObject.name}: setup completed".ToUpperInvariant());
         }

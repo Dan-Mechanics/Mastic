@@ -8,7 +8,7 @@ namespace Mastic
     /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
-        public PlayerTicks PlayerTicks { get; set; }
+        public int RollbackTick { get; private set; }
 
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
@@ -47,8 +47,7 @@ namespace Mastic
         {
             present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             recording[tick % recording.Length] = present;
-
-            PlayerTicks.rollbackTick = tick;
+            RollbackTick = tick;
             RpcSendAuthState(present, tick);
         }
 
@@ -58,7 +57,7 @@ namespace Mastic
         [ClientRpc(channel = Channels.Unreliable)]
         private void RpcSendAuthState(Frame frame, int tick)
         {
-            PlayerTicks.rollbackTick = tick;
+            RollbackTick = tick;
             if (!isLocalPlayer)
                 SetAsFrame(frame);
         }

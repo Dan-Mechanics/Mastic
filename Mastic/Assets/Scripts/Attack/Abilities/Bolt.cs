@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class Bolt : NetworkBehaviour, IAttackAbility
+    public class Bolt : NetworkBehaviour, IReliableAttackAbility
     {
         public event Action<float> OnAuthoritativeDamage;
         public event Action<float> OnPredictDamage;
@@ -56,11 +56,8 @@ namespace Mastic
                 return;
 
             cooldownHandler.Cast(cooldownIndex);
-            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, inputTick, rollbackTick);
             shootMessage.debugEnemyPos = Vector3.zero;
-            // CmdShoot(new ShootMessage(cameraInterpolation.lerpValue, movement.id - 1,
-            //    playerLook.RotationY, playerLook.RotationY, movement.currentTick - 1));
-
+            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, inputTick, rollbackTick);
             if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
             {
                 Transform target = hit.transform.root;
@@ -72,7 +69,7 @@ namespace Mastic
                 
                 // REDUCE NO-REGS.
                 if (target.TryGetComponent(out PlayerEntity playerEntity))
-                    shootMessage.rollbackTick = playerEntity.PlayerTicks.rollbackTick;
+                    shootMessage.rollbackTick = playerEntity.RollbackTick;
             }
 
             CmdShoot(shootMessage);
@@ -99,7 +96,8 @@ namespace Mastic
             mouseLook.SetRotationDirectly(shootMessage.xRotation, shootMessage.yRotation);
             cameraInterpolation.Interject(origin, prevOrigin, velocity);
             cameraInterpolation.SetValue(shootMessage.lerpValue);
-            AllowNoregLenience(shootMessage);
+            IReliableAttackAbility.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
+            //AllowNoregLenience(shootMessage);
 
             if (!Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
                 return;
@@ -119,44 +117,14 @@ namespace Mastic
             }
         }
 
-        private void AllowNoregLenience(ShootMessage shootMessage)
-        {
-            float dist = Vector3.Distance(cam.position, shootMessage.origin);
-            if (dist <= tolerance)
-                return;
-
-            // DEBUG.
-            Vector3 debugDiff = (cam.position - shootMessage.origin) / Time.fixedDeltaTime;
-            Debug.LogWarning($"if (cam.position != shootMessage.origin) | if ({cam.position} != {shootMessage.origin})");
-            Debug.LogWarning($"diff {debugDiff.magnitude}");
-
-            // ALLOW LENIENCY IF WAS RECENTLY BOOPED AND ALSO RAYCAST LOS.
-            Vector3 dir = shootMessage.origin - cam.position;
-            dir.Normalize();
-            if (!Physics.Raycast(cam.position, dir, out RaycastHit hit, dist, noregMask, QueryTriggerInteraction.Ignore))
-            {
-                cam.position = shootMessage.origin;
-            }
-            else
-            {
-                Vector3 difference = cam.position - hit.point;
-                dist = difference.magnitude - 0.1f;
-                if (dist > tolerance)
-                {
-                    difference = Vector3.ClampMagnitude(difference, dist);
-                    cam.position += difference;
-                }
-            }
-        }
-
         [Server]
-        public void DoServerTick(int receivedInputTick)
+        public void DoServerTick(int processedTick)
         {
             origin = eyes.position;
             velocity = rb.linearVelocity;
             for (int i = 0; i < pendingShootMessages.Count; i++)
             {
-                if (receivedInputTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownIndex))
+                if (processedTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownIndex))
                     continue;
 
                 cooldownHandler.Cast(cooldownIndex);

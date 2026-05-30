@@ -32,9 +32,15 @@ namespace Mastic
             foreach (ServerPlayer player in players)
             {
                 player.entity.EnableHitbox(false);
-                for (int i = 0; i < player.attackAbilities.Length; i++)
+                foreach (IReliableAttackAbility reliable in player.reliableAttackAbilities)
                 {
-                    player.attackAbilities[i].DoServerTick(player.PlayerTicks.processedTick);
+                    reliable.DoServerTick(player.networkMovement.ProcessedTick);
+                }
+
+                foreach (IUnreliableAttackAbility unreliable in player.unreliableAttackAbilities)
+                {
+                    unreliable.DoServerTick(player.networkMovement.ProcessedTick,
+                        player.networkMovement.ServerTick, player.networkMovement.GetPreviousInputMessage());
                 }
 
                 player.entity.EnableHitbox(true);
@@ -85,7 +91,7 @@ namespace Mastic
             if (index < 0 || index >= players.Count)
                 return default;
 
-            return (players[index].networkMovement.connectionToClient, players[index].PlayerTicks.processedTick);
+            return (players[index].networkMovement.connectionToClient, players[index].networkMovement.ProcessedTick);
         }
 
         private class ServerPlayer 
@@ -94,7 +100,8 @@ namespace Mastic
             private readonly Player player;
 
             public NetworkConnectionToClient connectionToClient;
-            public IAttackAbility[] attackAbilities;
+            public IReliableAttackAbility[] reliableAttackAbilities;
+            public IUnreliableAttackAbility[] unreliableAttackAbilities;
             public NetworkMovement networkMovement;
             public CooldownHandler cooldownHandler;
             public Transform transform;
@@ -104,7 +111,8 @@ namespace Mastic
             {
                 this.transform = transform;
                 player = transform.GetComponent<Player>();
-                attackAbilities = transform.GetComponents<IAttackAbility>();
+                reliableAttackAbilities = transform.GetComponents<IReliableAttackAbility>();
+                unreliableAttackAbilities = transform.GetComponents<IUnreliableAttackAbility>();
                 entity = transform.GetComponent<PlayerEntity>();
                 networkMovement = transform.GetComponent<NetworkMovement>();
                 connectionToClient = networkMovement.connectionToClient;
