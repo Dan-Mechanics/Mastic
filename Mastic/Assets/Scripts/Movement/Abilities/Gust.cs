@@ -12,6 +12,7 @@ namespace Mastic
 
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
+        private bool isInputChambered;
         private string cooldownName;
         private int previousTick;
         private Transform eyes;
@@ -26,15 +27,23 @@ namespace Mastic
             previousTick = -1;
         }
 
+        private void Update()
+        {
+            if (isLocalPlayer && ability1.WasPressed)
+                isInputChambered = true;
+        }
+
         [Client]
         public void DoLocalTick(int inputTick, IMovement movement)
         {
-            if (ability1.IsHeld && cooldownHandler.CanCast(cooldownName))
+            if (isInputChambered && cooldownHandler.CanCast(cooldownName))
             {
                 cooldownHandler.Cast(cooldownName);
                 pendingRequests.Add(inputTick);
                 CmdRequestGust(inputTick);
             }
+
+            isInputChambered = false;
         }
 
         [Command]
