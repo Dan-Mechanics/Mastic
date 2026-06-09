@@ -43,10 +43,10 @@ namespace Mastic
             if (!nameToCooldown.ContainsKey(name))
                 return (0, 0f);
 
-            CooldownValue value = nameToCooldown[name];
-            int currentStack = Mathf.FloorToInt((float)value.ticks / value.minTicksRequired);
-            float remainderPercentage = (float)(value.ticks - currentStack * value.minTicksRequired) / value.minTicksRequired;
-            if (value.ticks >= value.maxTicksAllowed)
+            CooldownValue cooldown = nameToCooldown[name];
+            int currentStack = Mathf.FloorToInt((float)cooldown.ticks / cooldown.minTicksRequired);
+            float remainderPercentage = (float)(cooldown.ticks - currentStack * cooldown.minTicksRequired) / cooldown.minTicksRequired;
+            if (cooldown.ticks >= cooldown.maxTicksAllowed)
                 remainderPercentage = 1f;
 
             return (currentStack, remainderPercentage);
