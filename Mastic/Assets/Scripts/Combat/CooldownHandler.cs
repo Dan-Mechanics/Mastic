@@ -92,9 +92,6 @@ namespace Mastic
                 if (maxTicksAllowed <= 0)
                     maxTicksAllowed = 1;
 
-                if (minTicksRequired > maxTicksAllowed)
-                    (minTicksRequired, maxTicksAllowed) = (maxTicksAllowed, minTicksRequired);
-
                 this.minTicksRequired = minTicksRequired;
                 this.maxTicksAllowed = maxTicksAllowed;
             }
