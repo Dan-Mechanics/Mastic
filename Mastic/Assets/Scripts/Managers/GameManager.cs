@@ -5,6 +5,7 @@ namespace Mastic
     public class GameManager : MonoBehaviour
     {
         [SerializeField] private EasyBinding closeGame = default;
+        [SerializeField] private bool logSettings = default;
 
         private int standardTickrate;
         private SceneBoilerplate sceneBoilerplate;
@@ -17,8 +18,9 @@ namespace Mastic
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();   
             serverSequence = FindAnyObjectByType<ServerSequence>();
 
-            var easySettings = EasySettings.Current;
-            easySettings.Log(Debug.Log);
+            EasySettings easySettings = EasySettings.Current;
+            if (logSettings)
+                easySettings.Log(Debug.Log);
 
             var interpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
             interpolation.MaxLerpValue = easySettings.Get<float>(nameof(interpolation.MaxLerpValue));

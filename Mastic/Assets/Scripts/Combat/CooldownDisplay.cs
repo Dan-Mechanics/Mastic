@@ -11,11 +11,13 @@ namespace Mastic
         private CooldownHandler cooldownHandler;
         private CooldownVisual[] visuals;
         private Cooldown[] cooldowns;
+        private float fadeSpeed;
 
         public void AssignCooldowns(Cooldown[] cooldowns, CooldownHandler cooldownHandler)
         {
             this.cooldowns = cooldowns;
             this.cooldownHandler = cooldownHandler;
+            fadeSpeed = EasySettings.Current.Get<float>(nameof(fadeSpeed));
             visuals = new CooldownVisual[cooldowns.Length];
             for (int i = 0; i < cooldownHolder.childCount; i++)
             {
@@ -37,6 +39,17 @@ namespace Mastic
                 visuals[i].stack.text = Utils.GetRoman(currentStack);
                 visuals[i].icon.fillAmount = remainderPercentage;
                 visuals[i].icon.color = currentStack > 0 ? Color.white : Color.gray;
+                visuals[i].flash.alpha -= Time.fixedDeltaTime * fadeSpeed;
+            }
+        }
+
+        [Client]
+        public void FlashCooldown(string name) 
+        {
+            for (int i = 0; i < cooldowns.Length; i++)
+            {
+                if (cooldowns[i].name == name)
+                    visuals[i].flash.alpha = 1f;
             }
         }
 
@@ -44,11 +57,13 @@ namespace Mastic
         {
             public TMP_Text stack;
             public Image icon;
+            public CanvasGroup flash;
 
             public CooldownVisual(Transform transform)
             {
                 stack = transform.Find(nameof(stack)).GetComponent<TMP_Text>();
                 icon = transform.Find(nameof(icon)).GetComponent<Image>();
+                flash = transform.Find(nameof(flash)).GetComponent<CanvasGroup>();
             }
         }
     }

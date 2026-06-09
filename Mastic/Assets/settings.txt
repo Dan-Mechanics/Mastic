@@ -1,14 +1,15 @@
-// NETCODE ===============================
+// GENERAL ===============================
 standardTickrate 64
 tolerance 0.001
 maxPendingRequests 8
-maxLerpValue 1.5
+maxLerpValue 2
 maxConsecutiveTicks 2
 
-// GENERAL ===============================
+// PLAYER ===============================
 maxHealth 100
 healingPerSecond 8
 syncInterval 0.1
+fadeSpeed 3
 
 speed 6
 acceleration 60

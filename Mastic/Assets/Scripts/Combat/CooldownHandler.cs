@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,6 +8,7 @@ namespace Mastic
 {
     public class CooldownHandler : NetworkBehaviour
     {
+        public event Action<string> OnCast;
         [SerializeField] private Cooldown[] registeredCooldowns = default;
         private Dictionary<string, CooldownValue> nameToCooldown;
 
@@ -58,8 +60,11 @@ namespace Mastic
         /// </summary>
         public void Cast(string name)
         {
-            if (nameToCooldown.ContainsKey(name))
-                nameToCooldown[name].Cast();
+            if (!nameToCooldown.ContainsKey(name))
+                return;
+
+            nameToCooldown[name].Cast();
+            OnCast?.Invoke(name);
         }
 
         /// <summary>

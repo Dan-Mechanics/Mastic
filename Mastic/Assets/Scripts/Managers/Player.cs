@@ -18,6 +18,7 @@ namespace Mastic
         private NetworkMovement networkMovement;
         private LagCompensation lagCompensation;
         private ClientSequence clientSequence;
+        private CooldownDisplay cooldownDisplay;
         private DebugHandler debugHandler;
         private PlayerEntity playerEntity;
         private PlayerHealth playerHealth;
@@ -25,6 +26,7 @@ namespace Mastic
         private void Awake()
         {
             cooldownHandler = GetComponent<CooldownHandler>();
+            cooldownDisplay = GetComponent<CooldownDisplay>();
             playerHealthDisplay = GetComponent<PlayerHealthDisplay>();
             playerHealth = GetComponent<PlayerHealth>();
             clientSequence = GetComponent<ClientSequence>();
@@ -68,6 +70,7 @@ namespace Mastic
                 gameObject.name = $"{defaultName} | local client";
                 localRemove.ForEach(x => Destroy(x));
 
+                cooldownHandler.OnCast += cooldownDisplay.FlashCooldown;
                 playerHealthDisplay.Initialize("local_health");
                 adaptiveTickrate.OnDisplayTickrate += debugHandler.DisplayTickrate;
                 adaptiveTickrate.OnPlayTickrateChangedSound += debugHandler.PlayTickrateChangedSound;
