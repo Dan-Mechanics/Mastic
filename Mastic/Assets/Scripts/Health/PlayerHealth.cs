@@ -19,13 +19,13 @@ namespace Mastic
             respawn = GameObject.FindWithTag("Respawn").transform;
             EasySettings easySettings = EasySettings.Current;
             maxHealth = easySettings.Get<float>(nameof(maxHealth));
-            syncInterval = easySettings.Get<float>(nameof(syncInterval));
+            // syncInterval = easySettings.Get<float>(nameof(syncInterval));
         }
 
         public override void OnStartServer()
         {
             base.OnStartServer();
-            Respawn();
+            //Respawn();
         }
 
         [Server]
@@ -73,7 +73,7 @@ namespace Mastic
         public void Respawn()
         {
             health = maxHealth;
-            transform.position = respawn.GetChild((int)netId % 2).position;
+            //transform.position = respawn.GetChild((int)netId % 2).position;
             transform.position = respawn.position;
             OnRespawn?.Invoke();
             RpcRespawn();

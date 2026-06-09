@@ -14,7 +14,7 @@ namespace Mastic
         private ICameraInterpolation cameraInterpolation;
         private IReliableAttackAbility[] reliableAttackAbilities;
         private IUnreliableAttackAbility[] unreliableAttackAbilities;
-        private PlayerHealthDisplay playerHealthDisplay;
+     //   private PlayerHealthDisplay playerHealthDisplay;
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
@@ -22,15 +22,15 @@ namespace Mastic
         private ClientSequence clientSequence;
         private DebugHandler debugHandler;
         private PlayerEntity playerEntity;
-        private PlayerHealth playerHealth;
+  //      private PlayerHealth playerHealth;
 
         private void Awake()
         {
             reliableAttackAbilities = GetComponents<IReliableAttackAbility>();
             unreliableAttackAbilities = GetComponents<IUnreliableAttackAbility>();
             cooldownHandler = GetComponent<CooldownHandler>();
-            playerHealthDisplay = GetComponent<PlayerHealthDisplay>();
-            playerHealth = GetComponent<PlayerHealth>();
+        //    playerHealthDisplay = GetComponent<PlayerHealthDisplay>();
+          //  playerHealth = GetComponent<PlayerHealth>();
             clientSequence = GetComponent<ClientSequence>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             playerEntity = GetComponent<PlayerEntity>();
@@ -51,9 +51,9 @@ namespace Mastic
             clientSequence.Initialize(networkMovement, reliableAttackAbilities, unreliableAttackAbilities,
                 cooldownHandler, playerEntity);
 
-            playerHealth.OnRespawn += playerEntity.Reload;
-            playerHealth.OnRespawn += cooldownHandler.RechargeAll;
-            playerHealth.OnHealthChanged += playerHealthDisplay.DisplayHealth;
+          //  playerHealth.OnRespawn += playerEntity.ReloadRollbackBuffer;
+          //  playerHealth.OnRespawn += cooldownHandler.RechargeAll;
+          //  playerHealth.OnHealthChanged += playerHealthDisplay.DisplayHealth;
         }
 
         public override void OnStartServer()
@@ -73,7 +73,7 @@ namespace Mastic
                 gameObject.name = $"{defaultName} | local client";
                 localRemove.ForEach(x => Destroy(x));
 
-                playerHealthDisplay.Initialize("local_health");
+            //    playerHealthDisplay.Initialize("local_health");
                 adaptiveTickrate.OnDisplayTickrate += debugHandler.DisplayTickrate;
                 adaptiveTickrate.OnPlayTickrateChangedSound += debugHandler.PlayTickrateChangedSound;
                 networkMovement.OnDisplayServerState += debugHandler.DisplayServerState;

@@ -66,7 +66,7 @@ namespace Mastic
         /// This is called when player respawns.
         /// </summary>
         [Server]
-        public void Reload()
+        public void ReloadRollbackBuffer()
         {
             present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             for (int i = 0; i < recording.Length; i++)

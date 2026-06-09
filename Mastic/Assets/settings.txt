@@ -1,13 +1,13 @@
-// NETCODE ===============================
+// NETCODE ==========
 standardTickrate 64
 tolerance 0.001
 maxPendingRequests 8
-maxLerpValue 1.5
+maxLerpValue 2
 
-// GENERAL ===============================
+// GENERAL ==========
 maxHealth 100
 healingPerSecond 8
-syncInterval 0.1
+//XXXXXXXXXX syncInterval 0.1
 
 speed 6
 acceleration 60
@@ -18,7 +18,7 @@ slopeLimit 50
 jumpCooldown 0.3
 jumpStack 1
 
-// LIGHTNING ===============================
+// LIGHTNING ==========
 smiteCooldown 9
 smiteStack 1
 smiteDuration 1
@@ -34,7 +34,7 @@ cloudStack 1
 boltCooldown 6
 boltStack 2
 
-// ICE ===============================
+// ICE ==========
 piercingIcicleDamage 40
 piercingIcicleLifetime 3.5
 piercingIcicleSpeed 40
@@ -44,6 +44,6 @@ piercingIcicleHasGravity false
 piercingIcicleCooldown 3
 piercingIcicleStack 2
 
-// FIRE ===============================
+// FIRE ==========
 burningWingsCooldown 6
 burningWingsStack 1
