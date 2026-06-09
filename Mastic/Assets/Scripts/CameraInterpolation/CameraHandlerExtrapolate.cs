@@ -5,6 +5,7 @@ namespace Mastic
     public class CameraHandlerExtrapolate : MonoBehaviour, ICameraInterpolation
     {
         public float LerpValue { get; set; }
+        public float MaxLerpValue { get; set; }
         public bool IsInterjected { get; set; }
         private Vector3 pos;
         private Vector3 vel;
@@ -35,7 +36,7 @@ namespace Mastic
 
         public void SetValue(float value)
         {
-            value = Mathf.Clamp(value, 0f, Time.fixedDeltaTime * ICameraInterpolation.MAX_LERP_VALUE);
+            value = Mathf.Clamp(value, 0f, Time.fixedDeltaTime * MaxLerpValue);
             transform.position = pos + (vel * value);
         }
     }

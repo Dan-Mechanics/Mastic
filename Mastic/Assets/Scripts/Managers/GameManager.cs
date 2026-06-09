@@ -19,7 +19,12 @@ namespace Mastic
             networkManager = FindAnyObjectByType<SimpleNetworkManager>();   
             serverSequence = FindAnyObjectByType<ServerSequence>();
             spawnpoint = GameObject.FindWithTag(spawnpointTag).transform;
-            FindAnyObjectByType<EasySettings>().Log(Debug.Log);
+
+            var easySettings = EasySettings.Current;
+            easySettings.Log(Debug.Log);
+
+            var interpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
+            interpolation.MaxLerpValue = easySettings.Get<float>(nameof(interpolation.MaxLerpValue));
         }
 
         private void Start()

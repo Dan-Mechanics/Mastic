@@ -2,6 +2,7 @@
 standardTickrate 64
 tolerance 0.001
 maxPendingRequests 8
+maxLerpValue 1.5
 
 // GENERAL ===============================
 maxHealth 100

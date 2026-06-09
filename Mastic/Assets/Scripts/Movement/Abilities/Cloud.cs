@@ -137,7 +137,11 @@ namespace Mastic
                 forceZone.DoTick();
         }
 
-        [TargetRpc(channel = Channels.Unreliable)]
+        /// <summary>
+        /// Make this reliable because otherwise
+        /// you get even more reconsiled.
+        /// </summary>
+        [TargetRpc]
         private void TargetCast(NetworkConnectionToClient conn, Vector3 pos, int inputTick) => Cast(pos, inputTick);
 
         public void CleanPendingRequests(int upTo)
