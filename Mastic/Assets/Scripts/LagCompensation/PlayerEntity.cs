@@ -63,13 +63,10 @@ namespace Mastic
         }
 
         /// <summary>
-        /// Invoke when (re)spawned.
-        /// This is important because otherwise we can rollback
-        /// the player to a time before he was dead and then he will
-        /// get shot in the spawn room.
+        /// This is called when player respawns.
         /// </summary>
         [Server]
-        public void RefreshRecording()
+        public void Reload()
         {
             present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             for (int i = 0; i < recording.Length; i++)

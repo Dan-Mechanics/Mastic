@@ -6,6 +6,8 @@ maxLerpValue 1.5
 
 // GENERAL ===============================
 maxHealth 100
+healingPerSecond 10
+syncInterval 0.1
 
 speed 6
 acceleration 60
@@ -38,5 +40,10 @@ piercingIcicleLifetime 3.5
 piercingIcicleSpeed 40
 piercingIcicleRadius 0.25
 piercingIcicleHasGravity false
+
 piercingIcicleCooldown 3
 piercingIcicleStack 2
+
+// FIRE ===============================
+burningWingsCooldown 6
+burningWingsStack 1

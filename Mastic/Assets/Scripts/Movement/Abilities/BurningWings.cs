@@ -49,8 +49,11 @@ namespace Mastic
             CmdRequestBurningWings(inputTick);
         }
 
-        public void Move(float vert, float hori, float interval) => rb.linearVelocity = eyes.forward * speed;
-        private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
+        public void Move(float vert, float hori, float interval) 
+            => rb.linearVelocity = eyes.forward * speed;
+
+        private bool IsAbilityActive(int tick) 
+            => tick >= startingTick && tick <= endingTick;
 
         [Command]
         private void CmdRequestBurningWings(int inputTick)

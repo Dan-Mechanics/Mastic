@@ -85,7 +85,7 @@ namespace Mastic
         private void SpawnProjectile(Vector3 origin, Vector3 velocity)
         {
             GameObject proj = Instantiate(projectile, origin, Quaternion.identity);
-            proj.GetComponent<Projectile>().Initialize(velocity, radius, hasGravity, coll, isServer, damage, lifetime);
+            proj.GetComponent<Projectile>().Initialize(velocity, radius, hasGravity, coll, damage, lifetime);
         }
 
         [TargetRpc]

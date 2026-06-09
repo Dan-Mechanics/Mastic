@@ -214,10 +214,10 @@ namespace Mastic
         }
 
         [Client]
-        public void DebugAlterInputTick(int offset)
+        public void IncrementInputTick(int offset)
         {
             InputTick += offset;
-            Debug.LogWarning($"{nameof(InputTick)} changed by {offset}.");
+            Debug.LogWarning($"CHEATS: {nameof(InputTick)} changed by {offset}.");
         }
 
         /// <summary>

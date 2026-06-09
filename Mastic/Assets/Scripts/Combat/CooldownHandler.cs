@@ -51,7 +51,7 @@ namespace Mastic
         }
 
         /// <summary>
-        /// TODO: hook this to respawn Action.
+        /// This is called when player respawns.
         /// </summary>
         [Server]
         public void RechargeAll()

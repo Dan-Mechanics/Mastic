@@ -12,11 +12,11 @@ namespace Mastic
         public event Action OnReload;
 
         private List<NetworkConnectionToClient> connections;
-        private Transform spawnpoint;
+        private Transform respawn;
 
-        public void Initialize(Transform spawnpoint, int standardTickrate)
+        public void Initialize(int standardTickrate)
         {
-            this.spawnpoint = spawnpoint;
+            respawn = GameObject.FindWithTag("Respawn").transform;
             connections = new List<NetworkConnectionToClient>();
             sendRate = standardTickrate;
         }
@@ -63,7 +63,7 @@ namespace Mastic
         [Server]
         private void AddPlayer(NetworkConnectionToClient conn)
         {
-            GameObject player = Instantiate(playerPrefab, spawnpoint.position, Quaternion.identity);
+            GameObject player = Instantiate(playerPrefab, respawn.position, Quaternion.identity);
             player.name = $"uninitialized_{playerPrefab.name}_[{conn.connectionId}]";
 
             NetworkServer.AddPlayerForConnection(conn, player);

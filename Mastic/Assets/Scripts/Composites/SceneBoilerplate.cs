@@ -17,7 +17,7 @@ namespace Mastic
                 Initialize();
         }
 
-        public void SetTickrate(int tickrate) => this.tickrate = tickrate;
+        public void AssignTickrate(int tickrate) => this.tickrate = tickrate;
 
         public void Initialize()
         {

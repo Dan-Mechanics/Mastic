@@ -16,7 +16,8 @@ namespace Mastic
         private CooldownHandler cooldownHandler;
         private float timer;
 
-        public void Initialize(NetworkMovement networkMovement, IReliableAttackAbility[] reliableAttackAbilities, IUnreliableAttackAbility[] unreliableAttackAbilities, CooldownHandler cooldownHandler, PlayerEntity playerEntity)
+        public void Initialize(NetworkMovement networkMovement, IReliableAttackAbility[] reliableAttackAbilities,
+            IUnreliableAttackAbility[] unreliableAttackAbilities, CooldownHandler cooldownHandler, PlayerEntity playerEntity)
         {
             this.networkMovement = networkMovement;
             this.reliableAttackAbilities = reliableAttackAbilities;
@@ -63,10 +64,10 @@ namespace Mastic
 
             // DEBUG.
             if (Input.GetKeyDown(KeyCode.UpArrow))
-                networkMovement.DebugAlterInputTick(10);
+                networkMovement.IncrementInputTick(10);
 
             if (Input.GetKeyDown(KeyCode.DownArrow))
-                networkMovement.DebugAlterInputTick(-10);
+                networkMovement.IncrementInputTick(-10);
         }
     }
 }
