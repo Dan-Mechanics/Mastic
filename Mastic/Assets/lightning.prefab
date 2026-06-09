@@ -413,6 +413,7 @@ GameObject:
   - component: {fileID: 2725046757556269923}
   - component: {fileID: -945388235591399086}
   - component: {fileID: 2101675562693342329}
+  - component: {fileID: 1629047567316114364}
   m_Layer: 3
   m_Name: lightning
   m_TagString: Player
@@ -804,6 +805,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32822e69c1c281144abd52b00a56d584, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1629047567316114364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba72d4dea9f60f849b3af36896859bb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  cooldownHolder: {fileID: 6065797567882671535}
 --- !u!1 &3970219889359651778
 GameObject:
   m_ObjectHideFlags: 0

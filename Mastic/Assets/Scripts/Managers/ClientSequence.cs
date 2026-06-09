@@ -14,16 +14,17 @@ namespace Mastic
         private NetworkMovement networkMovement;
         private PlayerEntity playerEntity;
         private CooldownHandler cooldownHandler;
+        private float maxConsecutiveTicks;
         private float timer;
 
-        public void Initialize(NetworkMovement networkMovement, IReliableAttackAbility[] reliableAttackAbilities,
-            IUnreliableAttackAbility[] unreliableAttackAbilities, CooldownHandler cooldownHandler, PlayerEntity playerEntity)
+        public void Initialize(NetworkMovement networkMovement, CooldownHandler cooldownHandler, PlayerEntity playerEntity) 
         {
             this.networkMovement = networkMovement;
-            this.reliableAttackAbilities = reliableAttackAbilities;
-            this.unreliableAttackAbilities = unreliableAttackAbilities;
             this.cooldownHandler = cooldownHandler;
             this.playerEntity = playerEntity;
+            reliableAttackAbilities = GetComponents<IReliableAttackAbility>();
+            unreliableAttackAbilities = GetComponents<IUnreliableAttackAbility>();
+            maxConsecutiveTicks = EasySettings.Current.Get<float>(nameof(maxConsecutiveTicks));
         }
 
         [Client]
@@ -51,6 +52,7 @@ namespace Mastic
             else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
 
             timer += Time.deltaTime;
+            timer = Mathf.Clamp(timer, 0f, Time.fixedDeltaTime * maxConsecutiveTicks);
             while (timer >= Time.fixedDeltaTime)
             {
                 timer -= Time.fixedDeltaTime;

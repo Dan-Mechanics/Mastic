@@ -12,8 +12,6 @@ namespace Mastic
         [SerializeField] private List<Object> serverRemove = default;
 
         private ICameraInterpolation cameraInterpolation;
-        private IReliableAttackAbility[] reliableAttackAbilities;
-        private IUnreliableAttackAbility[] unreliableAttackAbilities;
         private PlayerHealthDisplay playerHealthDisplay;
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
@@ -26,8 +24,6 @@ namespace Mastic
 
         private void Awake()
         {
-            reliableAttackAbilities = GetComponents<IReliableAttackAbility>();
-            unreliableAttackAbilities = GetComponents<IUnreliableAttackAbility>();
             cooldownHandler = GetComponent<CooldownHandler>();
             playerHealthDisplay = GetComponent<PlayerHealthDisplay>();
             playerHealth = GetComponent<PlayerHealth>();
@@ -48,10 +44,9 @@ namespace Mastic
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
             networkMovement.Initialize(standardTickrate, cameraInterpolation);
-            clientSequence.Initialize(networkMovement, reliableAttackAbilities, unreliableAttackAbilities,
-                cooldownHandler, playerEntity);
+            clientSequence.Initialize(networkMovement, cooldownHandler, playerEntity);
 
-            playerHealth.OnRespawn += playerEntity.Reload;
+            playerHealth.OnRespawn += playerEntity.RefreshRollbackBuffer;
             playerHealth.OnRespawn += cooldownHandler.RechargeAll;
             playerHealth.OnHealthChanged += playerHealthDisplay.DisplayHealth;
         }
