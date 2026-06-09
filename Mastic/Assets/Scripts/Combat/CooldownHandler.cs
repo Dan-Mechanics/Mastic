@@ -18,6 +18,7 @@ namespace Mastic
             for (int i = 0; i < registeredCooldowns.Length; i++)
             {
                 string name = registeredCooldowns[i].name.ToLowerInvariant();
+                Debug.LogWarning(name);
                 int stack = easySettings.Get<int>(name + nameof(stack));
                 float cooldown = easySettings.Get<float>(name + nameof(cooldown));
 

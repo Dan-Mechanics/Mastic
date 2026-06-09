@@ -45,6 +45,7 @@ namespace Mastic
             prevOrigin = eyes.position;
             previousTick = -1;
             cooldownName = nameof(Bolt).ToLowerInvariant();
+            Debug.Log(cooldownName);
 
             EasySettings easySettings = EasySettings.Current;
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
