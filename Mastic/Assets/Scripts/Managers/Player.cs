@@ -87,7 +87,7 @@ namespace Mastic
                 gameObject.tag = "Untagged";
                 gameObject.name = $"{defaultName} | unlocal client";
                 unlocalRemove.ForEach(x => Destroy(x));
-                playerHealthDisplay.Initialize("unlocal_health");
+                // playerHealthDisplay.Initialize("unlocal_health");
             }
 
             print($"{gameObject.name}: setup completed".ToUpperInvariant());

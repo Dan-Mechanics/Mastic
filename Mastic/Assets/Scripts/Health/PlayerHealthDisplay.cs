@@ -14,17 +14,18 @@ namespace Mastic
             EasySettings easySettings = EasySettings.Current;
             float maxHealth = easySettings.Get<float>(nameof(maxHealth));
             syncInterval = easySettings.Get<float>(nameof(syncInterval));
-            fillBar = new FillBar();
-            fillBar.Initialize(name, transform, 0f, maxHealth);
-            DisplayHealth(0f, 0f);
+            fillBar = new FillBar(name, transform, 0f, maxHealth);
             fillBar.Set(0f);
         }
 
         [ClientCallback]
         private void FixedUpdate()
         {
-            float t = (Time.time - time) / syncInterval;
-            fillBar.Set(Mathf.Lerp(oldValue, newValue, t));
+            if (fillBar == null)
+                return;
+
+            float lerpValue = (Time.time - time) / syncInterval;
+            fillBar.Set(Mathf.Lerp(oldValue, newValue, lerpValue));
         }
 
         public void DisplayHealth(float oldValue, float newValue)

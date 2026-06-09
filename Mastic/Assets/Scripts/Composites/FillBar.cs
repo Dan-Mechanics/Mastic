@@ -6,10 +6,10 @@ namespace Mastic
 {
     public class FillBar 
     {
-        private Image fill;
-        private float min, max;
-        
-        public void Initialize(string name, Transform transform, float min, float max)
+        private readonly Image fill;
+        private readonly float min, max;
+
+        public FillBar(string name, Transform transform, float min, float max)
         {
             this.min = min;
             this.max = max;

@@ -6,7 +6,7 @@ maxLerpValue 1.5
 
 // GENERAL ===============================
 maxHealth 100
-healingPerSecond 10
+healingPerSecond 8
 syncInterval 0.1
 
 speed 6

@@ -112,14 +112,16 @@ namespace Mastic
             {
                 Transform target = colliders[i].transform.root;
                 if (target == transform)
-                    continue;
+                    continue; // PREVENT SELF-DAMAGE.
 
+                // ADD KNOCKBACK.
                 if (target.TryGetComponent(out NetworkMovement networkMovement))
                 {
                     Vector3 dir = target.position - (point - Vector3.up);
                     networkMovement.AddForce(Utils.Normalize(dir) * explosionForce);
                 }
 
+                // DEAL DAMAGE.
                 if (target.TryGetComponent(out IDamagable damagable))
                 {
                     damagable.Damage(damage);

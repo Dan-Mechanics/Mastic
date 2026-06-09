@@ -12,9 +12,11 @@ namespace Mastic
 
         [SyncVar(hook = nameof(OnHealthChangedHook))] private float health;
         private float maxHealth;
+        private Transform respawn;
 
         private void Awake()
         {
+            respawn = GameObject.FindWithTag("Respawn").transform;
             EasySettings easySettings = EasySettings.Current;
             maxHealth = easySettings.Get<float>(nameof(maxHealth));
             syncInterval = easySettings.Get<float>(nameof(syncInterval));
@@ -55,11 +57,8 @@ namespace Mastic
         }
 
         [Client]
-        private void OnHealthChangedHook(float oldValue, float newValue)
-        {
-            Debug.LogWarningFormat("Health changed: {0} --> {1}.", oldValue, newValue);
-            OnHealthChanged?.Invoke(oldValue, newValue);
-        }
+        private void OnHealthChangedHook(float oldValue, float newValue) 
+            => OnHealthChanged?.Invoke(oldValue, newValue);
 
         [Server]
         public void Die()
@@ -74,6 +73,7 @@ namespace Mastic
         public void Respawn()
         {
             health = maxHealth;
+            transform.position = respawn.GetChild((int)netId % 2).position;
             OnRespawn?.Invoke();
             RpcRespawn();
         }
