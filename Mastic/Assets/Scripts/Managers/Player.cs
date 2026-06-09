@@ -51,8 +51,8 @@ namespace Mastic
             clientSequence.Initialize(networkMovement, reliableAttackAbilities, unreliableAttackAbilities,
                 cooldownHandler, playerEntity);
 
-           // playerHealth.OnRespawn += playerEntity.Reload;
-           // playerHealth.OnRespawn += cooldownHandler.RechargeAll;
+            playerHealth.OnRespawn += playerEntity.Reload;
+            playerHealth.OnRespawn += cooldownHandler.RechargeAll;
             playerHealth.OnHealthChanged += playerHealthDisplay.DisplayHealth;
         }
 
