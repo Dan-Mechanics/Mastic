@@ -410,6 +410,9 @@ GameObject:
   - component: {fileID: 790473191979634726}
   - component: {fileID: -3850514727978609351}
   - component: {fileID: -5172247997270406336}
+  - component: {fileID: 2725046757556269923}
+  - component: {fileID: -945388235591399086}
+  - component: {fileID: 2101675562693342329}
   - component: {fileID: 8367695714156568870}
   m_Layer: 3
   m_Name: lightning
@@ -763,6 +766,45 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   disconnect: {fileID: 11400000, guid: 76fa061607a567d45bc7219f92c14f6f, type: 2}
+--- !u!114 &2725046757556269923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16aa279955275384bade1e13058812f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
+--- !u!114 &-945388235591399086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 165764ac3bcb5b4488db8916bda26184, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2101675562693342329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3751572637676758942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32822e69c1c281144abd52b00a56d584, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8367695714156568870
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -974,7 +1016,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 7, y: 109.1}
+  m_AnchoredPosition: {x: 4.799988, y: 26.400024}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0, y: 0}
 --- !u!225 &5004467313161941165
