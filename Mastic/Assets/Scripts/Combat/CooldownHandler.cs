@@ -17,13 +17,13 @@ namespace Mastic
             nameToCooldown = new Dictionary<string, CooldownValue>();
             for (int i = 0; i < registeredCooldowns.Length; i++)
             {
-                string cooldownName = registeredCooldowns[i].name.ToLowerInvariant();
-                int stack = easySettings.Get<int>(cooldownName + nameof(stack));
-                float cooldown = easySettings.Get<float>(cooldownName + nameof(cooldown));
+                string name = registeredCooldowns[i].name.ToLowerInvariant();
+                int stack = easySettings.Get<int>(name + nameof(stack));
+                float cooldown = easySettings.Get<float>(name + nameof(cooldown));
 
                 int minTicks = Mathf.CeilToInt(cooldown * standardTickrate);
                 int maxTicks = minTicks * stack;
-                nameToCooldown.Add(cooldownName, new CooldownValue(minTicks, maxTicks));
+                nameToCooldown.Add(name, new CooldownValue(minTicks, maxTicks));
             }
 
             ICooldownsRequired[] subscribers = GetComponents<ICooldownsRequired>();
