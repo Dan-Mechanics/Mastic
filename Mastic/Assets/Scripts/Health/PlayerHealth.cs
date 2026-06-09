@@ -74,6 +74,7 @@ namespace Mastic
         {
             health = maxHealth;
             transform.position = respawn.GetChild((int)netId % 2).position;
+            transform.position = respawn.position;
             OnRespawn?.Invoke();
             RpcRespawn();
         }

@@ -31,7 +31,7 @@ namespace Mastic
             serverSequence = FindAnyObjectByType<ServerSequence>();
             cloudVisual = Instantiate(cloudPrefab, cloudPrefab.transform.position, cloudPrefab.transform.rotation);
             cloudVisual.SetActive(false);
-            cooldownName = nameof(Cloud);
+            cooldownName = nameof(Cloud).ToLowerInvariant();
 
             EasySettings easySettings = EasySettings.Current;
             tickDuration = easySettings.Get<int>(GetType().Name + nameof(tickDuration));

@@ -20,7 +20,7 @@ namespace Mastic
         {
             rb = GetComponent<Rigidbody>();
             cooldownHandler = GetComponent<CooldownHandler>();
-            cooldownName = nameof(Jump);
+            cooldownName = nameof(Jump).ToLowerInvariant();
             previousTick = -1;
         }
 

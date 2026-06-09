@@ -57,7 +57,7 @@ namespace Mastic
             EasySettings easySettings = EasySettings.Current;
             int standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
             standardInterval = 1f / standardTickrate;
-            cooldownName = nameof(PiercingIcicle);
+            cooldownName = nameof(PiercingIcicle).ToLowerInvariant();
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
             tolerance = easySettings.Get<float>(nameof(tolerance));
             damage = easySettings.Get<float>(cooldownName + nameof(damage));

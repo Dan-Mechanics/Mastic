@@ -9,16 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a94cb6ba14336a14283a5bce92835469, type: 3}
-  m_Name: settings
+  m_Script: {fileID: 11500000, guid: 4b63eaf4b9c95e141963a9e13bcd64da, type: 3}
+  m_Name: smite
   m_EditorClassIdentifier: 
-  speed: 5.75
-  acceleration: 50
-  multiplier: 0.33
-  topSpeed: 35
-  mask:
-    serializedVersion: 2
-    m_Bits: 1
-  radius: 0.45
-  offset: 0.62
-  slopeLimit: 50
+  icon: {fileID: 21300000, guid: b9108c9b29cb4e44687d099fc5d29b3f, type: 3}

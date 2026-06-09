@@ -32,7 +32,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             physicsMovement = GetComponent<PhysicsMovement>();
             cooldownHandler = GetComponent<CooldownHandler>();
-            cooldownName = nameof(BurningWings);
+            cooldownName = nameof(BurningWings).ToLowerInvariant();
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;

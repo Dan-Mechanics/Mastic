@@ -54,7 +54,7 @@ namespace Mastic
             while (timer >= Time.fixedDeltaTime)
             {
                 timer -= Time.fixedDeltaTime;
-                OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier}");
+                OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier} | fps: {Mathf.RoundToInt(1f / Time.smoothDeltaTime)}");
                 for (int i = 0; i < clientPacketMultiplier; i++)
                 {
                     networkMovement.DoLocalTick(playerEntity.RollbackTick);

@@ -5,6 +5,11 @@ namespace Mastic
 {
     public static class Utils
     {
+        private static readonly string[] roman = new string[]
+        {
+            string.Empty, "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"
+        };
+        
         public static T StringToEnum<T>(string str)
         {
             return (T)Enum.Parse(typeof(T), str);
@@ -44,6 +49,14 @@ namespace Mastic
         public static int GetCurrentServerTick(double networkTime, float standardInterval)
         {
             return Mathf.FloorToInt((float)networkTime / standardInterval);
+        }
+
+        public static string GetRoman(int index)
+        {
+            if (index < 0 || index >= roman.Length)
+                return string.Empty;
+
+            return roman[index];
         }
 
         public static Vector3 Flatten(Vector3 vec)

@@ -7,47 +7,58 @@ namespace Mastic
 {
     public class CooldownHandler : NetworkBehaviour
     {
-        [SerializeField] private string[] cooldownNames = default;
-        private Dictionary<string, Cooldown> cooldowns;
+        [SerializeField] private Cooldown[] registeredCooldowns = default;
+        private Dictionary<string, CooldownValue> nameToCooldown;
 
         public void Initialize()
         {
             EasySettings easySettings = EasySettings.Current;
             int standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
-            cooldowns = new Dictionary<string, Cooldown>();
-            for (int i = 0; i < cooldownNames.Length; i++)
+            nameToCooldown = new Dictionary<string, CooldownValue>();
+            for (int i = 0; i < registeredCooldowns.Length; i++)
             {
-                string cooldownName = cooldownNames[i].ToLowerInvariant();
+                string cooldownName = registeredCooldowns[i].name.ToLowerInvariant();
                 int stack = easySettings.Get<int>(cooldownName + nameof(stack));
                 float cooldown = easySettings.Get<float>(cooldownName + nameof(cooldown));
 
                 int minTicks = Mathf.CeilToInt(cooldown * standardTickrate);
                 int maxTicks = minTicks * stack;
-                cooldowns.Add(cooldownName, new Cooldown(minTicks, maxTicks));
+                nameToCooldown.Add(cooldownName, new CooldownValue(minTicks, maxTicks));
             }
+
+            ICooldownsRequired[] subscribers = GetComponents<ICooldownsRequired>();
+            subscribers.ToList().ForEach(x => x.AssignCooldowns(registeredCooldowns, this));
         }
 
-        public bool CanCast(string cooldownName)
+        public bool CanCast(string name)
         {
-            cooldownName = cooldownName.ToLowerInvariant();
-            if (cooldowns.ContainsKey(cooldownName))
-            {
-                return cooldowns[cooldownName].CanCast();
-            }
-            else
-            {
+            if (!nameToCooldown.ContainsKey(name))
                 return false;
-            }
+
+            return nameToCooldown[name].CanCast();
+        }
+
+        public (int, float) GetCooldownStatus(string name)
+        {
+            if (!nameToCooldown.ContainsKey(name))
+                return (0, 0f);
+
+            CooldownValue value = nameToCooldown[name];
+            int currentStack = Mathf.FloorToInt((float)value.ticks / value.minTicksRequired);
+            float remainderPercentage = (float)(value.ticks - currentStack * value.minTicksRequired) / value.minTicksRequired;
+            if (value.ticks >= value.maxTicksAllowed)
+                remainderPercentage = 1f;
+
+            return (currentStack, remainderPercentage);
         }
         
         /// <summary>
         /// Make sure to also locally predict this change.
         /// </summary>
-        public void Cast(string cooldownName)
+        public void Cast(string name)
         {
-            cooldownName = cooldownName.ToLowerInvariant();
-            if (cooldowns.ContainsKey(cooldownName))
-                cooldowns[cooldownName].Cast();
+            if (nameToCooldown.ContainsKey(name))
+                nameToCooldown[name].Cast();
         }
 
         /// <summary>
@@ -56,29 +67,34 @@ namespace Mastic
         [Server]
         public void RechargeAll()
         {
-            cooldowns.Values.ToList().ForEach(x => x.Recharge());
+            nameToCooldown.Values.ToList().ForEach(x => x.Recharge());
             TargetRechargeAll(connectionToClient);
         }
 
-        public void Charge()
-        {
-            cooldowns.Values.ToList().ForEach(x => x.Charge());
-        }
+        public void Charge() 
+            => nameToCooldown.Values.ToList().ForEach(x => x.Charge());
 
         [TargetRpc]
-        private void TargetRechargeAll(NetworkConnectionToClient conn)
-        {
-            cooldowns.Values.ToList().ForEach(x => x.Recharge());
-        }
+        private void TargetRechargeAll(NetworkConnectionToClient conn) 
+            => nameToCooldown.Values.ToList().ForEach(x => x.Recharge());
 
-        private class Cooldown
+        private class CooldownValue
         {
-            private int ticks;
-            private readonly int minTicksRequired;
-            private readonly int maxTicksAllowed;
+            public int ticks;
+            public readonly int minTicksRequired;
+            public readonly int maxTicksAllowed;
 
-            public Cooldown(int minTicksRequired, int maxTicksAllowed)
+            public CooldownValue(int minTicksRequired, int maxTicksAllowed)
             {
+                if (minTicksRequired <= 0)
+                    minTicksRequired = 1;
+
+                if (maxTicksAllowed <= 0)
+                    maxTicksAllowed = 1;
+
+                if (minTicksRequired > maxTicksAllowed)
+                    (minTicksRequired, maxTicksAllowed) = (maxTicksAllowed, minTicksRequired);
+
                 this.minTicksRequired = minTicksRequired;
                 this.maxTicksAllowed = maxTicksAllowed;
             }

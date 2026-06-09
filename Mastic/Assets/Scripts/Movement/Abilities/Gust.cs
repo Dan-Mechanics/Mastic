@@ -21,7 +21,7 @@ namespace Mastic
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
-            cooldownName = nameof(Gust);
+            cooldownName = nameof(Gust).ToLowerInvariant();
             cooldownHandler = GetComponent<CooldownHandler>();
             eyes = transform.Find("eyes");
             previousTick = -1;
