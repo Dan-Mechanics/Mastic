@@ -31,12 +31,12 @@ namespace Mastic
 
             for (int i = 0; i < cooldowns.Length; i++)
             {
-                (int currentStack, float remainderPercentage) 
-                    = cooldownHandler.GetCooldownStatus(cooldowns[i].name);
-
-                visuals[i].stack.text = Utils.GetRoman(currentStack);
-                visuals[i].icon.fillAmount = remainderPercentage;
-                visuals[i].icon.color = currentStack > 0 ? Color.white : Color.gray;
+              // (int currentStack, float remainderPercentage) 
+              //     = cooldownHandler.GetCooldownStatus(cooldowns[i].name);
+              //
+              // visuals[i].stack.text = Utils.GetRoman(currentStack);
+              // visuals[i].icon.fillAmount = remainderPercentage;
+              // visuals[i].icon.color = currentStack > 0 ? Color.white : Color.gray;
             }
         }
 
