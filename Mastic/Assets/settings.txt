@@ -7,7 +7,7 @@ maxConsecutiveTicks 2
 
 // PLAYER ===============================
 maxHealth 100
-healingPerSecond 6
+healingPerSecond 5
 syncInterval 0.1
 fadeSpeed 4
 respawnDelay 0.5

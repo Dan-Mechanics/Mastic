@@ -12,6 +12,7 @@ namespace Mastic
 
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
+        [SerializeField] private Transform lookBone = default;
         private MouseLook mouseLook;
         private int intangibleLayer;
         private int playerLayer;
@@ -37,9 +38,11 @@ namespace Mastic
         {
             transform.position = frame.position;
             mouseLook.SetRotationTemporarily(frame.xRotation, frame.yRotation);
-            
+
             // THIS IS WHERE LOOKBONE SHOULD GO.
             // INCLUDING HITBOX IF THAT IS NOT ATTACHED TO LOOKBONE.
+            if (!isLocalPlayer)
+                lookBone.localRotation = Quaternion.Euler(0f, 0f, -frame.xRotation);
         }
 
         [Server]

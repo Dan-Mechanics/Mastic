@@ -9,14 +9,16 @@ namespace Mastic
 
         private int standardTickrate;
         private SceneBoilerplate sceneBoilerplate;
-        private SimpleNetworkManager networkManager;
+        private SimpleNetworkManager simpleNetworkManager;
+        private LobbyCanvasHandler lobbyCanvasHandler;
         private ServerSequence serverSequence;
 
         private void Awake()
         {
             sceneBoilerplate = FindAnyObjectByType<SceneBoilerplate>();
-            networkManager = FindAnyObjectByType<SimpleNetworkManager>();   
+            simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();   
             serverSequence = FindAnyObjectByType<ServerSequence>();
+            lobbyCanvasHandler = FindAnyObjectByType<LobbyCanvasHandler>();
 
             EasySettings easySettings = EasySettings.Current;
             if (logSettings)
@@ -31,10 +33,17 @@ namespace Mastic
         {
             sceneBoilerplate.AssignTickrate(standardTickrate);
             sceneBoilerplate.Initialize();
+            lobbyCanvasHandler.Initialize();
 
-            networkManager.Initialize(standardTickrate);
-            networkManager.OnRegisterPlayer += serverSequence.Register;
-            networkManager.OnReload += serverSequence.Clear;
+            simpleNetworkManager.OnClientConnected += lobbyCanvasHandler.Disable;
+            simpleNetworkManager.OnClientDisconnected += lobbyCanvasHandler.Enable;
+
+            simpleNetworkManager.OnServerStarted += lobbyCanvasHandler.Disable;
+            simpleNetworkManager.OnServerDisconnected += lobbyCanvasHandler.Enable;
+
+            simpleNetworkManager.Initialize(standardTickrate);
+            simpleNetworkManager.OnPlayerAdded += serverSequence.Register;
+            simpleNetworkManager.OnServerDisconnected += serverSequence.Clear;
         }
 
         private void Update()
