@@ -63,7 +63,7 @@ namespace Mastic
         [Server]
         private void AddPlayer(NetworkConnectionToClient conn)
         {
-            GameObject player = Instantiate(playerPrefab, respawn.position, Quaternion.identity);
+            GameObject player = Instantiate(playerPrefab, respawn.GetChild(respawn.childCount - 1).position, Quaternion.identity);
             player.name = $"uninitialized_{playerPrefab.name}_[{conn.connectionId}]";
 
             NetworkServer.AddPlayerForConnection(conn, player);

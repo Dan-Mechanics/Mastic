@@ -12,12 +12,14 @@ namespace Mastic
 
         [SyncVar(hook = nameof(OnHealthChangedHook))] private float health;
         private float maxHealth;
+        private float respawnDelay;
         private Transform respawn;
 
         private void Awake()
         {
             respawn = GameObject.FindWithTag("Respawn").transform;
             EasySettings easySettings = EasySettings.Current;
+            respawnDelay = easySettings.Get<float>(nameof(respawnDelay));
             maxHealth = easySettings.Get<float>(nameof(maxHealth));
             syncInterval = easySettings.Get<float>(nameof(syncInterval));
         }
@@ -25,7 +27,7 @@ namespace Mastic
         public override void OnStartServer()
         {
             base.OnStartServer();
-            Respawn();
+            Invoke(nameof(Respawn), respawnDelay);
         }
 
         [Server]
@@ -42,8 +44,8 @@ namespace Mastic
             return true;
         }
 
-        [ContextMenu(nameof(EditorDamage))]
-        public void EditorDamage() => Damage(maxHealth * 0.5f);
+        [ContextMenu(nameof(DoAdminDamage))]
+        public void DoAdminDamage() => Damage(maxHealth * 0.5f);
 
         [Server]
         public void Heal(float amount)
