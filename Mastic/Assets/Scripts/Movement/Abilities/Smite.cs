@@ -38,7 +38,7 @@ namespace Mastic
             physicsMovement = GetComponent<PhysicsMovement>();
             cooldownHandler = GetComponent<CooldownHandler>();
             entity = GetComponent<PlayerEntity>();
-            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Bolt));
+            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Smite));
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;

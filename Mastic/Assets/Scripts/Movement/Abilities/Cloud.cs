@@ -31,12 +31,13 @@ namespace Mastic
             serverSequence = FindAnyObjectByType<ServerSequence>();
             cloudVisual = Instantiate(cloudPrefab, cloudPrefab.transform.position, cloudPrefab.transform.rotation);
             cloudVisual.SetActive(false);
-            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Cloud));
+            cooldownIndex = cooldownHandler.GetIndexFromName(GetType().Name);
 
             EasySettings easySettings = EasySettings.Current;
-            tickDuration = easySettings.Get<int>(GetType().Name + nameof(tickDuration));
-            maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
             standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
+            float duration = easySettings.Get<int>(GetType().Name + nameof(duration));
+            tickDuration = Mathf.CeilToInt(duration * standardTickrate);
+            maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
 
             forceZone = cloudVisual.GetComponent<ForceZone>();
             forceZone.Initialize(expectedColliders, 1f / standardTickrate, force);

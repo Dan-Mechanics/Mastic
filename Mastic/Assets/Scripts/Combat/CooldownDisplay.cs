@@ -24,7 +24,7 @@ namespace Mastic
             for (int i = 0; i < visuals.Length; i++)
             {
                 visuals[i] = new CooldownVisual(cooldownHolder.GetChild(i));
-                visuals[i].icon.sprite = Resources.Load<Sprite>($"{abilities[i]}");
+                visuals[i].icon.sprite = Resources.Load<Sprite>($"Cooldowns/{abilities[i]}");
                 visuals[i].key.text = easySettings.Get<string>(abilities[i] + nameof(CooldownVisual.key));
                 visuals[i].flash.alpha = 1f;
             }

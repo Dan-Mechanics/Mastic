@@ -7,7 +7,7 @@ maxConsecutiveTicks 2
 
 // PLAYER ===============================
 maxHealth 100
-healingPerSecond 8
+healingPerSecond 6
 syncInterval 0.1
 fadeSpeed 4
 respawnDelay 0.5
@@ -24,7 +24,7 @@ multiplier 0.33
 topSpeed 25
 slopeLimit 50
 
-jumpCooldown 0.3
+jumpCooldown 0.25
 jumpStack 1
 
 // LIGHTNING ===============================
@@ -36,11 +36,11 @@ smiteDamage 80
 gustCooldown 3
 gustStack 3
 
-cloudTickDuration 384
+cloudDuration 9
 cloudCooldown 12
 cloudStack 1
 
-boltCooldown 6
+boltCooldown 3
 boltStack 2
 
 // ICE ===============================

@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: settings
   m_EditorClassIdentifier: 
   speed: 6
-  acceleration: 55
-  multiplier: 0.33
-  topSpeed: 35
+  acceleration: 50
+  multiplier: 0.325
+  topSpeed: 32.5
   mask:
     serializedVersion: 2
     m_Bits: 1
   radius: 0.45
   offset: 0.62
-  slopeLimit: 50
+  slopeLimit: 46
