@@ -9,12 +9,12 @@ namespace Mastic
         private float oldValue, newValue;
         private float syncInterval, time;
 
-        public void Initialize(string name)
+        public void Initialize(string fillBarName)
         {
             EasySettings easySettings = EasySettings.Current;
             float maxHealth = easySettings.Get<float>(nameof(maxHealth));
             syncInterval = easySettings.Get<float>(nameof(syncInterval));
-            fillBar = new FillBar(name, transform, 0f, maxHealth);
+            fillBar = new FillBar(fillBarName, transform, 0f, maxHealth);
             fillBar.Set(0f);
         }
 

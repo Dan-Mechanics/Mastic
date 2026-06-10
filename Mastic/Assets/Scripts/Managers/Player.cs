@@ -7,6 +7,7 @@ namespace Mastic
     public class Player : NetworkBehaviour
     {
         [SerializeField] private GameObject player = default;
+        [SerializeField] private string[] abilities = default;
         [SerializeField] private List<Object> localRemove = default;
         [SerializeField] private List<Object> unlocalRemove = default;
         [SerializeField] private List<Object> serverRemove = default;
@@ -18,7 +19,6 @@ namespace Mastic
         private NetworkMovement networkMovement;
         private LagCompensation lagCompensation;
         private ClientSequence clientSequence;
-        private CooldownManager cooldownManager;
         private CooldownDisplay cooldownDisplay;
         private DebugHandler debugHandler;
         private PlayerEntity playerEntity;
@@ -28,7 +28,6 @@ namespace Mastic
         {
             cooldownHandler = GetComponent<CooldownHandler>();
             cooldownDisplay = GetComponent<CooldownDisplay>();
-            cooldownManager = GetComponent<CooldownManager>();
             playerHealthDisplay = GetComponent<PlayerHealthDisplay>();
             playerHealth = GetComponent<PlayerHealth>();
             clientSequence = GetComponent<ClientSequence>();
@@ -38,13 +37,10 @@ namespace Mastic
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
-            InitializeAll();
-        }
 
-        private void InitializeAll()
-        {
+            Utils.LowerStringArray(abilities);
             int standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
-            cooldownManager.Initialize(cooldownHandler, cooldownDisplay);
+            cooldownHandler.Initialize(abilities);
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
             networkMovement.Initialize(standardTickrate, cameraInterpolation);
@@ -72,7 +68,9 @@ namespace Mastic
                 gameObject.name = $"{player.name} | local client";
                 localRemove.ForEach(x => Destroy(x));
 
+                cooldownDisplay.Initialize(abilities);
                 cooldownHandler.OnCast += cooldownDisplay.FlashCooldown;
+
                 playerHealthDisplay.Initialize("local_health");
                 adaptiveTickrate.OnDisplayTickrate += debugHandler.DisplayTickrate;
                 adaptiveTickrate.OnPlayTickrateChangedSound += debugHandler.PlayTickrateChangedSound;

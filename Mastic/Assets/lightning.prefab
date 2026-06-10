@@ -413,7 +413,6 @@ GameObject:
   - component: {fileID: 2725046757556269923}
   - component: {fileID: -945388235591399086}
   - component: {fileID: 2101675562693342329}
-  - component: {fileID: 3421125646533919104}
   - component: {fileID: 1629047567316114364}
   m_Layer: 3
   m_Name: lightning
@@ -521,6 +520,12 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   player: {fileID: 3751572637676758942}
+  abilities:
+  - jump
+  - gust
+  - smite
+  - bolt
+  - cloud
   localRemove:
   - {fileID: 8563719589400999970}
   - {fileID: 7578080967263496900}
@@ -798,24 +803,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32822e69c1c281144abd52b00a56d584, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3421125646533919104
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3751572637676758942}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bc72da5a6a3e1644892f4229171d1c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  abilities:
-  - {fileID: 8685740675525256336}
-  - {fileID: -5984394209105652319}
-  - {fileID: 790473191979634726}
-  - {fileID: -3850514727978609351}
-  - {fileID: -3213554778907423252}
 --- !u!114 &1629047567316114364
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -828,9 +815,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba72d4dea9f60f849b3af36896859bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
   cooldownHolder: {fileID: 6065797567882671535}
 --- !u!1 &3970219889359651778
 GameObject:

@@ -12,7 +12,7 @@ namespace Mastic
         public string keyName;
         public KeyCode keyCode;
 
-        private void OnValidate()
+        public void OnValidate()
         {
             keyCode = KeyCode.None;
             if (keyName.Length == 1)

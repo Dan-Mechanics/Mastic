@@ -20,6 +20,14 @@ namespace Mastic
             return !string.IsNullOrEmpty(str) && !string.IsNullOrWhiteSpace(str);
         }
 
+        public static void LowerStringArray(string[] strings)
+        {
+            for (int i = 0; i < strings.Length; i++)
+            {
+                strings[i] = strings[i].ToLowerInvariant();
+            }
+        }
+
         public static void LockMouse()
         {
             Cursor.visible = false;

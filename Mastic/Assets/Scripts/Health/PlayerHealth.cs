@@ -11,9 +11,9 @@ namespace Mastic
         public Action<float, float> OnHealthChanged;
 
         [SyncVar(hook = nameof(OnHealthChangedHook))] private float health;
-        private float maxHealth;
         private float respawnDelay;
         private Transform respawn;
+        private float maxHealth;
 
         private void Awake()
         {
@@ -45,7 +45,8 @@ namespace Mastic
         }
 
         [ContextMenu(nameof(DoAdminDamage))]
-        public void DoAdminDamage() => Damage(maxHealth * 0.5f);
+        public void DoAdminDamage() 
+            => Damage(maxHealth * 0.5f);
 
         [Server]
         public void Heal(float amount)
@@ -58,7 +59,6 @@ namespace Mastic
                 health = maxHealth;
         }
 
-        [Client]
         private void OnHealthChangedHook(float oldValue, float newValue) 
             => OnHealthChanged?.Invoke(oldValue, newValue);
 
@@ -81,9 +81,11 @@ namespace Mastic
         }
 
         [ClientRpc]
-        private void RpcRespawn() => OnRespawn?.Invoke();
+        private void RpcRespawn() 
+            => OnRespawn?.Invoke();
 
         [ClientRpc]
-        private void RpcDie() => OnDie?.Invoke();
+        private void RpcDie() 
+            => OnDie?.Invoke();
     }
 }

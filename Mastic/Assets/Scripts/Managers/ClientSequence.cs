@@ -14,6 +14,7 @@ namespace Mastic
         private NetworkMovement networkMovement;
         private PlayerEntity playerEntity;
         private CooldownHandler cooldownHandler;
+        private CooldownDisplay cooldownDisplay;
         private float maxConsecutiveTicks;
         private float timer;
 
@@ -24,6 +25,7 @@ namespace Mastic
             this.playerEntity = playerEntity;
             reliableAttackAbilities = GetComponents<IReliableAttackAbility>();
             unreliableAttackAbilities = GetComponents<IUnreliableAttackAbility>();
+            cooldownDisplay = GetComponent<CooldownDisplay>();
             maxConsecutiveTicks = EasySettings.Current.Get<float>(nameof(maxConsecutiveTicks));
         }
 
@@ -63,6 +65,8 @@ namespace Mastic
                     cooldownHandler.Charge();
                 }
             }
+
+            cooldownDisplay.DoLocalUpdate();
 
             // DEBUG.
             if (Input.GetKeyDown(KeyCode.UpArrow))

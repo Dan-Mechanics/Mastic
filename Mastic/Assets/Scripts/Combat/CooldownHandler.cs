@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mastic
@@ -8,15 +7,15 @@ namespace Mastic
     {
         public event Action<int> OnCast;
         private CooldownValues[] cooldowns;
-        private List<string> abilities;
+        private string[] abilities;
 
-        public void Initialize(List<string> abilities)
+        public void Initialize(string[] abilities)
         {
             this.abilities = abilities;
             EasySettings easySettings = EasySettings.Current;
             int standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
 
-            cooldowns = new CooldownValues[abilities.Count];
+            cooldowns = new CooldownValues[abilities.Length];
             for (int i = 0; i < cooldowns.Length; i++)
             {
                 string cooldownName = abilities[i];
@@ -32,7 +31,7 @@ namespace Mastic
         public int GetIndexFromName(string cooldownName)
         {
             cooldownName = cooldownName.ToLowerInvariant();
-            for (int i = 0; i < abilities.Count; i++)
+            for (int i = 0; i < abilities.Length; i++)
             {
                 if (cooldownName == abilities[i])
                     return i;
