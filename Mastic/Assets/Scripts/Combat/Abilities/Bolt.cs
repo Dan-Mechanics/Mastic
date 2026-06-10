@@ -22,7 +22,7 @@ namespace Mastic
         private ShootMessage shootMessage;
         private LagCompensation lagCompensation;
         private MouseLook mouseLook;
-        private string cooldownName;
+        private int cooldownIndex;
         private Rigidbody rb;
         private Transform eyes;
         private Transform cam;
@@ -44,8 +44,7 @@ namespace Mastic
             rb = GetComponent<Rigidbody>();
             prevOrigin = eyes.position;
             previousTick = -1;
-            cooldownName = nameof(Bolt).ToLowerInvariant();
-            Debug.Log(cooldownName);
+            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Bolt));
 
             EasySettings easySettings = EasySettings.Current;
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
@@ -54,10 +53,10 @@ namespace Mastic
 
         public void DoLocalUpdate(int inputTick, int rollbackTick)
         {
-            if (!secondaryFire.WasPressed || !cooldownHandler.CanCast(cooldownName))
+            if (!secondaryFire.WasPressed || !cooldownHandler.CanCast(cooldownIndex))
                 return;
 
-            cooldownHandler.Cast(cooldownName);
+            cooldownHandler.Cast(cooldownIndex);
             shootMessage.debugEnemyPos = Vector3.zero;
             shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, inputTick, rollbackTick);
             if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
@@ -126,10 +125,10 @@ namespace Mastic
             velocity = rb.linearVelocity;
             for (int i = 0; i < pendingShootMessages.Count; i++)
             {
-                if (processedTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownName))
+                if (processedTick < pendingShootMessages[i].inputTick || !cooldownHandler.CanCast(cooldownIndex))
                     continue;
 
-                cooldownHandler.Cast(cooldownName);
+                cooldownHandler.Cast(cooldownIndex);
                 Shoot(pendingShootMessages[i]);
                 pendingShootMessages.RemoveAt(i);
                 break;

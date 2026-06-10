@@ -18,7 +18,7 @@ namespace Mastic
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
         private PhysicsMovement physicsMovement;
-        private string cooldownName;
+        private int cooldownIndex;
         private int previousTick;
         private int startingTick;
         private int endingTick;
@@ -32,7 +32,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             physicsMovement = GetComponent<PhysicsMovement>();
             cooldownHandler = GetComponent<CooldownHandler>();
-            cooldownName = nameof(BurningWings).ToLowerInvariant();
+            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(BurningWings));
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;
@@ -44,7 +44,7 @@ namespace Mastic
             if (!ability2.IsHeld || !CanCast(inputTick))
                 return;
 
-            cooldownHandler.Cast(cooldownName);
+            cooldownHandler.Cast(cooldownIndex);
             pendingRequests.Add(inputTick);
             CmdRequestBurningWings(inputTick);
         }
@@ -86,7 +86,7 @@ namespace Mastic
                 if (inputTick < pendingRequests[i] || !CanCast(serverTick))
                     continue;
 
-                cooldownHandler.Cast(cooldownName);
+                cooldownHandler.Cast(cooldownIndex);
                 Cast(serverTick);
                 pendingRequests.RemoveAt(i);
                 break;
@@ -107,7 +107,7 @@ namespace Mastic
         private bool CanCast(int tick)
         {
             return !IsAbilityActive(tick) &&
-                cooldownHandler.CanCast(cooldownName);
+                cooldownHandler.CanCast(cooldownIndex);
         }
 
         /// <summary>

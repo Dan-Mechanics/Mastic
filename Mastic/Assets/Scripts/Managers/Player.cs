@@ -6,7 +6,7 @@ namespace Mastic
 {
     public class Player : NetworkBehaviour
     {
-        [SerializeField] private string defaultName = default;
+        [SerializeField] private GameObject player = default;
         [SerializeField] private List<Object> localRemove = default;
         [SerializeField] private List<Object> unlocalRemove = default;
         [SerializeField] private List<Object> serverRemove = default;
@@ -18,6 +18,7 @@ namespace Mastic
         private NetworkMovement networkMovement;
         private LagCompensation lagCompensation;
         private ClientSequence clientSequence;
+        private CooldownManager cooldownManager;
         private CooldownDisplay cooldownDisplay;
         private DebugHandler debugHandler;
         private PlayerEntity playerEntity;
@@ -27,6 +28,7 @@ namespace Mastic
         {
             cooldownHandler = GetComponent<CooldownHandler>();
             cooldownDisplay = GetComponent<CooldownDisplay>();
+            cooldownManager = GetComponent<CooldownManager>();
             playerHealthDisplay = GetComponent<PlayerHealthDisplay>();
             playerHealth = GetComponent<PlayerHealth>();
             clientSequence = GetComponent<ClientSequence>();
@@ -42,7 +44,7 @@ namespace Mastic
         private void InitializeAll()
         {
             int standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
-            cooldownHandler.Initialize();
+            cooldownManager.Initialize(cooldownHandler, cooldownDisplay);
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
             networkMovement.Initialize(standardTickrate, cameraInterpolation);
@@ -67,7 +69,7 @@ namespace Mastic
             if (isLocalPlayer)
             {
                 Utils.LockMouse();
-                gameObject.name = $"{defaultName} | local client";
+                gameObject.name = $"{player.name} | local client";
                 localRemove.ForEach(x => Destroy(x));
 
                 cooldownHandler.OnCast += cooldownDisplay.FlashCooldown;
@@ -83,7 +85,7 @@ namespace Mastic
             else
             {
                 gameObject.tag = "Untagged";
-                gameObject.name = $"{defaultName} | unlocal client";
+                gameObject.name = $"{player.name} | unlocal client";
                 unlocalRemove.ForEach(x => Destroy(x));
                 // playerHealthDisplay.Initialize("unlocal_health");
             }

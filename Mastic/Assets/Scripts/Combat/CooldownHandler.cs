@@ -1,122 +1,120 @@
-using Mirror;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Mastic
 {
-    public class CooldownHandler : NetworkBehaviour
+    public class CooldownHandler : MonoBehaviour
     {
-        public event Action<string> OnCast;
-        [SerializeField] private Cooldown[] registeredCooldowns = default;
-        private Dictionary<string, CooldownValue> nameToCooldown;
+        public event Action<int> OnCast;
+        private CooldownValues[] cooldowns;
+        private List<string> abilities;
 
-        public void Initialize()
+        public void Initialize(List<string> abilities)
         {
+            this.abilities = abilities;
             EasySettings easySettings = EasySettings.Current;
             int standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
-            nameToCooldown = new Dictionary<string, CooldownValue>();
-            for (int i = 0; i < registeredCooldowns.Length; i++)
+
+            cooldowns = new CooldownValues[abilities.Count];
+            for (int i = 0; i < cooldowns.Length; i++)
             {
-                string name = registeredCooldowns[i].name.ToLowerInvariant();
-                Debug.LogWarning(name);
-                int stack = easySettings.Get<int>(name + nameof(stack));
-                float cooldown = easySettings.Get<float>(name + nameof(cooldown));
+                string cooldownName = abilities[i];
+                int stack = easySettings.Get<int>(cooldownName + nameof(stack));
+                float cooldown = easySettings.Get<float>(cooldownName + nameof(cooldown));
 
                 int minTicks = Mathf.CeilToInt(cooldown * standardTickrate);
                 int maxTicks = minTicks * stack;
-                nameToCooldown.Add(name, new CooldownValue(minTicks, maxTicks));
+                cooldowns[i] = new CooldownValues(minTicks, maxTicks);
+            }
+        }
+
+        public int GetIndexFromName(string cooldownName)
+        {
+            cooldownName = cooldownName.ToLowerInvariant();
+            for (int i = 0; i < abilities.Count; i++)
+            {
+                if (cooldownName == abilities[i])
+                    return i;
             }
 
-            ICooldownsRequired[] subscribers = GetComponents<ICooldownsRequired>();
-            subscribers.ToList().ForEach(x => x.AssignCooldowns(registeredCooldowns, this));
+            return 0;
         }
 
-        public bool CanCast(string name)
+        public bool CanCast(int index)
         {
-            if (!nameToCooldown.ContainsKey(name))
+            if (index < 0 || index >= cooldowns.Length)
                 return false;
 
-            return nameToCooldown[name].CanCast();
+            return cooldowns[index].value >= cooldowns[index].minValueRequired;
         }
 
-        public (int, float) GetCooldownStatus(string name)
+        public bool GetCooldownStatus(int index, out int stack, out float remainderPercentage)
         {
-            if (!nameToCooldown.ContainsKey(name))
-                return (0, 0f);
+            stack = 0;
+            remainderPercentage = 0f;
+            if (index < 0 || index >= cooldowns.Length)
+                return false;
 
-            CooldownValue cooldown = nameToCooldown[name];
-            int currentStack = Mathf.FloorToInt((float)cooldown.ticks / cooldown.minTicksRequired);
-            float remainderPercentage = (float)(cooldown.ticks - currentStack * cooldown.minTicksRequired) / cooldown.minTicksRequired;
-            if (cooldown.ticks >= cooldown.maxTicksAllowed)
+            CooldownValues cooldown = cooldowns[index];
+            stack = Mathf.FloorToInt((float)cooldown.value / cooldown.minValueRequired);
+            remainderPercentage = (float)(cooldown.value - stack * cooldown.minValueRequired) / cooldown.minValueRequired;
+            if (cooldown.value >= cooldown.maxValueAllowed)
                 remainderPercentage = 1f;
 
-            return (currentStack, remainderPercentage);
+            return true;
         }
         
         /// <summary>
         /// Make sure to also locally predict this change.
         /// </summary>
-        public void Cast(string name)
+        public void Cast(int index)
         {
-            if (!nameToCooldown.ContainsKey(name))
+            if (index < 0 || index >= cooldowns.Length)
                 return;
 
-            nameToCooldown[name].Cast();
-            OnCast?.Invoke(name);
+            CooldownValues cooldown = cooldowns[index];
+            cooldown.value = Mathf.Clamp(cooldown.value - cooldown.minValueRequired, 0, cooldown.maxValueAllowed);
+            OnCast?.Invoke(index);
         }
 
-        /// <summary>
-        /// This is called when player respawns.
-        /// </summary>
-        [Server]
         public void RechargeAll()
         {
-            nameToCooldown.Values.ToList().ForEach(x => x.Recharge());
-            TargetRechargeAll(connectionToClient);
+            for (int i = 0; i < cooldowns.Length; i++)
+            {
+                cooldowns[i].value = cooldowns[i].maxValueAllowed;
+            }
         }
 
-        public void Charge() 
-            => nameToCooldown.Values.ToList().ForEach(x => x.Charge());
-
-        [TargetRpc]
-        private void TargetRechargeAll(NetworkConnectionToClient conn) 
-            => nameToCooldown.Values.ToList().ForEach(x => x.Recharge());
-
-        private class CooldownValue
+        public void Charge()
         {
-            public int ticks;
-            public readonly int minTicksRequired;
-            public readonly int maxTicksAllowed;
-
-            public CooldownValue(int minTicksRequired, int maxTicksAllowed)
+            for (int i = 0; i < cooldowns.Length; i++)
             {
-                if (minTicksRequired <= 0)
-                    minTicksRequired = 1;
-
-                if (maxTicksAllowed <= 0)
-                    maxTicksAllowed = 1;
-
-                this.minTicksRequired = minTicksRequired;
-                this.maxTicksAllowed = maxTicksAllowed;
+                CooldownValues cooldown = cooldowns[i];
+                cooldown.value = Mathf.Clamp(cooldown.value + 1, 0, cooldown.maxValueAllowed);
             }
+        }
 
-            public void Charge()
+        private class CooldownValues
+        {
+            public int value;
+            public readonly int minValueRequired;
+            public readonly int maxValueAllowed;
+
+            public CooldownValues(int minValueRequired, int maxValueAllowed)
             {
-                ticks++;
-                Clamp();
-            }
+                if (minValueRequired <= 0)
+                    minValueRequired = 1;
 
-            public void Cast()
-            {
-                ticks -= minTicksRequired;
-                Clamp();
-            }
+                if (maxValueAllowed <= 0)
+                    maxValueAllowed = 1;
 
-            public bool CanCast() => ticks >= minTicksRequired;
-            public void Recharge() => ticks = maxTicksAllowed;
-            private void Clamp() => ticks = Mathf.Clamp(ticks, 0, maxTicksAllowed);
+                if (minValueRequired > maxValueAllowed)
+                    (minValueRequired, maxValueAllowed) = (maxValueAllowed, minValueRequired);
+
+                this.minValueRequired = minValueRequired;
+                this.maxValueAllowed = maxValueAllowed;
+            }
         }
     }
 }

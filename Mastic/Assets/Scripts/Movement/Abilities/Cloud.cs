@@ -17,7 +17,7 @@ namespace Mastic
         private int maxPendingRequests;
         private GameObject cloudVisual;
         private ForceZone forceZone;
-        private string cooldownName;
+        private int cooldownIndex;
 
         private int standardTickrate;
         private int tickDuration;
@@ -31,7 +31,7 @@ namespace Mastic
             serverSequence = FindAnyObjectByType<ServerSequence>();
             cloudVisual = Instantiate(cloudPrefab, cloudPrefab.transform.position, cloudPrefab.transform.rotation);
             cloudVisual.SetActive(false);
-            cooldownName = nameof(Cloud).ToLowerInvariant();
+            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Cloud));
 
             EasySettings easySettings = EasySettings.Current;
             tickDuration = easySettings.Get<int>(GetType().Name + nameof(tickDuration));
@@ -65,7 +65,7 @@ namespace Mastic
             if (!ability2.IsHeld || !CanCast(inputTick))
                 return;
 
-            cooldownHandler.Cast(cooldownName);
+            cooldownHandler.Cast(cooldownIndex);
             pendingRequests.Add(inputTick);
             CmdRequestCast(inputTick);
         }
@@ -115,7 +115,7 @@ namespace Mastic
                 if (inputTick < pendingRequests[i] || !CanCast(serverTick))
                     continue;
 
-                cooldownHandler.Cast(cooldownName);
+                cooldownHandler.Cast(cooldownIndex);
                 Cast(transform.position, serverTick);
                 pendingRequests.RemoveAt(i);
 
@@ -156,7 +156,7 @@ namespace Mastic
         private bool CanCast(int tick)
         {
             return !IsAbilityActive(tick) &&
-                cooldownHandler.CanCast(cooldownName);
+                cooldownHandler.CanCast(cooldownIndex);
         }
 
         private void Cast(Vector3 pos, int startTick)

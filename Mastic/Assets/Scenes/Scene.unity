@@ -976,10 +976,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: maxConnections
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 3229349398631652857, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_Name
       value: simple_network_manager

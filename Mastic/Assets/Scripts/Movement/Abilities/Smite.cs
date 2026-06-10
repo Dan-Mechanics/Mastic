@@ -23,7 +23,7 @@ namespace Mastic
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
         private PhysicsMovement physicsMovement;
-        private string cooldownName;
+        private int cooldownIndex;
         private PlayerEntity entity;
         private int previousTick;
         private int startingTick;
@@ -38,7 +38,7 @@ namespace Mastic
             physicsMovement = GetComponent<PhysicsMovement>();
             cooldownHandler = GetComponent<CooldownHandler>();
             entity = GetComponent<PlayerEntity>();
-            cooldownName = nameof(Smite).ToLowerInvariant();
+            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Bolt));
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;
@@ -51,7 +51,7 @@ namespace Mastic
                 return;
 
             OnPredictDamage?.Invoke(damage);
-            cooldownHandler.Cast(cooldownName);
+            cooldownHandler.Cast(cooldownIndex);
             pendingRequests.Add(inputTick);
             CmdRequestSmite(inputTick);
         }
@@ -147,7 +147,7 @@ namespace Mastic
                 if (inputTick < pendingRequests[i] || !CanCast(serverTick))
                     continue;
 
-                cooldownHandler.Cast(cooldownName);
+                cooldownHandler.Cast(cooldownIndex);
                 Cast(serverTick);
                 TargetCast(connectionToClient, inputTick);
                 pendingRequests.RemoveAt(i);
@@ -175,7 +175,7 @@ namespace Mastic
         private bool CanCast(int tick)
         {
             return !IsAbilityActive(tick) &&
-                cooldownHandler.CanCast(cooldownName);
+                cooldownHandler.CanCast(cooldownIndex);
         }
 
         private void Cast(int tick)

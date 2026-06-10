@@ -13,7 +13,7 @@ namespace Mastic
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
         private bool isInputChambered;
-        private string cooldownName;
+        private int cooldownIndex;
         private int previousTick;
         private Transform eyes;
         private Rigidbody rb;
@@ -21,8 +21,8 @@ namespace Mastic
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
-            cooldownName = nameof(Gust).ToLowerInvariant();
             cooldownHandler = GetComponent<CooldownHandler>();
+            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Gust));
             eyes = transform.Find("eyes");
             previousTick = -1;
         }
@@ -36,9 +36,9 @@ namespace Mastic
         [Client]
         public void DoLocalTick(int inputTick, IMovement movement)
         {
-            if (isInputChambered && cooldownHandler.CanCast(cooldownName))
+            if (isInputChambered && cooldownHandler.CanCast(cooldownIndex))
             {
-                cooldownHandler.Cast(cooldownName);
+                cooldownHandler.Cast(cooldownIndex);
                 pendingRequests.Add(inputTick);
                 CmdRequestGust(inputTick);
             }
@@ -72,10 +72,10 @@ namespace Mastic
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (inputTick < pendingRequests[i] || !cooldownHandler.CanCast(cooldownName))
+                if (inputTick < pendingRequests[i] || !cooldownHandler.CanCast(cooldownIndex))
                     continue;
 
-                cooldownHandler.Cast(cooldownName);
+                cooldownHandler.Cast(cooldownIndex);
                 PerformGust(movement);
                 pendingRequests.RemoveAt(i);
                 break;
