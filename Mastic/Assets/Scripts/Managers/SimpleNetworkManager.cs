@@ -8,41 +8,43 @@ namespace Mastic
 {
     public class SimpleNetworkManager : NetworkManager
     {
-        public event Action<Transform> OnPlayerAdded;
-        public event Action OnServerStarted;
+        public event Action<List<ConnectInstructions>> OnPlayersConnected;
+        public event Action OnServerGameStarted;
         public event Action OnServerDisconnected;
         public event Action OnClientConnected;
         public event Action OnClientDisconnected;
-
-        private List<NetworkConnectionToClient> connections;
-        private Transform respawns;
+        private List<ConnectInstructions> connections;
 
         public void Initialize(int standardTickrate)
         {
-            respawns = GameObject.FindWithTag("Respawn").transform;
-            connections = new List<NetworkConnectionToClient>();
+            connections = new List<ConnectInstructions>();
             sendRate = standardTickrate;
+        }
+
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            NetworkServer.RegisterHandler<CreatePlayerMessage>(OnCreatePlayer);
+            print("SERVER: START");
         }
 
         public override void OnClientDisconnect()
         {
             base.OnClientDisconnect();
-            print("CLIENT: DISCONNECTED FROM SERVER");
-
             Utils.UnlockMouse();
             OnClientDisconnected?.Invoke();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            print("CLIENT: DISCONNECTED FROM SERVER");
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient conn)
         {
             base.OnServerDisconnect(conn);
-            Debug.Log("SERVER: A CLIENT HAS DISCONNECTED");
-            
             connections.Clear();
             OnServerDisconnected?.Invoke();
             NetworkServer.Shutdown();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            Debug.Log("SERVER: A CLIENT HAS DISCONNECTED");
         }
 
         public override void OnClientConnect()
@@ -52,28 +54,42 @@ namespace Mastic
             Debug.Log("CLIENT: CONNECTED TO SERVER");
         }
 
-        public override void OnServerAddPlayer(NetworkConnectionToClient conn)
+        private void OnCreatePlayer(NetworkConnectionToClient conn, CreatePlayerMessage message)
         {
             if (connections.Count >= maxConnections)
+            {
+                // MAX CAPACITY REACHED.
+                conn.Disconnect();
                 return;
+            }
 
-            connections.Add(conn);
-            if (connections.Count < maxConnections)
-                return;
-
-            connections.ForEach(x => AddPlayer(x));
-            OnServerStarted?.Invoke();
-            print("STARTING GAME");
+            connections.Add(new ConnectInstructions(conn, message.instructions));
+            if (connections.Count >= maxConnections)
+            {
+                OnPlayersConnected?.Invoke(connections);
+                OnServerGameStarted?.Invoke();
+                print("STARTING SERVER");
+            }
         }
 
-        [Server]
-        private void AddPlayer(NetworkConnectionToClient conn)
+        public class ConnectInstructions
         {
-            GameObject player = Instantiate(playerPrefab, respawns.GetChild(respawns.childCount - 1).position, Quaternion.identity);
-            player.name = $"uninitialized_{playerPrefab.name}_[{conn.connectionId}]";
+            public NetworkConnectionToClient conn;
+            public string instructions;
 
-            NetworkServer.AddPlayerForConnection(conn, player);
-            OnPlayerAdded?.Invoke(player.transform);
+            public ConnectInstructions(NetworkConnectionToClient conn, string instructions)
+            {
+                this.conn = conn;
+                this.instructions = instructions;
+            }
+        }
+
+        /// <summary>
+        /// https://mirror-networking.gitbook.io/docs/manual/guides/gameobjects/custom-character-spawning
+        /// </summary>
+        public struct CreatePlayerMessage : NetworkMessage
+        {
+            public string instructions;
         }
     }
 }

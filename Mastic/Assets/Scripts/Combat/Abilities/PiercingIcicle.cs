@@ -11,7 +11,6 @@ namespace Mastic
         public event Action<float> OnPredictDamage;
 
         [SerializeField] private EasyBinding primaryFire = default;
-        [SerializeField] private CooldownHandler cooldownHandler = default;
         [SerializeField] private GameObject projectile = default;
         [SerializeField] private LayerMask mask = default;
         [SerializeField] private LayerMask noregMask = default;
@@ -27,9 +26,9 @@ namespace Mastic
 
         private List<ShootMessage> pendingShootMessages;
         private ShootMessage shootMessage;
-
         private ICameraInterpolation cameraInterpolation;
         private LagCompensation lagCompensation;
+        private CooldownHandler cooldownHandler;
         private int cooldownIndex;
         private MouseLook mouseLook;
         private Collider coll;
@@ -47,18 +46,19 @@ namespace Mastic
             cam = GameObject.FindWithTag("MainCamera").transform;
             cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
             lagCompensation = FindAnyObjectByType<LagCompensation>();
+            cooldownHandler = GetComponent<CooldownHandler>();
             pendingShootMessages = new List<ShootMessage>();
+            coll = GetComponentInChildren<Collider>();
             mouseLook = GetComponent<MouseLook>();
             rb = GetComponent<Rigidbody>();
-            coll = GetComponentInChildren<Collider>();
             prevOrigin = eyes.position;
             previousTick = -1;
 
             EasySettings easySettings = EasySettings.Current;
             int standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
             standardInterval = 1f / standardTickrate;
-            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Bolt));
-            string cooldownName = nameof(PiercingIcicle).ToLowerInvariant();
+            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(PiercingIcicle));
+            string cooldownName = nameof(PiercingIcicle);
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
             tolerance = easySettings.Get<float>(nameof(tolerance));
             damage = easySettings.Get<float>(cooldownName + nameof(damage));
@@ -86,11 +86,12 @@ namespace Mastic
         private void SpawnProjectile(Vector3 origin, Vector3 velocity)
         {
             GameObject proj = Instantiate(projectile, origin, Quaternion.identity);
-            proj.GetComponent<Projectile>().Initialize(velocity, radius, hasGravity, coll, damage, lifetime);
+            proj.GetComponent<Projectile>().Initialize(velocity, radius, hasGravity, coll, isServer, damage, lifetime);
         }
 
         [TargetRpc]
-        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
+        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) 
+            => OnAuthoritativeDamage?.Invoke(damage);
 
         [Command]
         private void CmdShoot(ShootMessage shootMessage)
@@ -110,7 +111,7 @@ namespace Mastic
             cameraInterpolation.Interject(origin, prevOrigin, vel);
             cameraInterpolation.SetValue(shootMessage.lerpValue);
             //AllowNoregLenience(shootMessage);
-            IReliableAttackAbility.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
+            NetcodeUtils.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
 
             // ACCOUNT FOR TRAVEL TIME OF PACKET.
             Vector3 projectileOrigin = cam.position;

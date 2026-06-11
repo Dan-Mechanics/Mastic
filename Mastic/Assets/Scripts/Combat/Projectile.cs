@@ -5,11 +5,13 @@ namespace Mastic
 {
     public class Projectile : MonoBehaviour
     {
+        private bool isServer;
         private float damage;
         
-        public void Initialize(Vector3 velocity, float radius, bool hasGravity, Collider sender, float damage, float lifetime)
+        public void Initialize(Vector3 velocity, float radius, bool hasGravity, Collider sender, bool isServer, float damage, float lifetime)
         {
             this.damage = damage;
+            this.isServer = isServer;
             Physics.IgnoreCollision(GetComponent<Collider>(), sender);
             transform.localScale = 2f * radius * Vector3.one;
             transform.forward = velocity.normalized;
@@ -25,10 +27,12 @@ namespace Mastic
             Destroy(gameObject, lifetime);
         }
 
-        [ServerCallback]
         private void OnCollisionEnter(Collision collision)
         {
             Destroy(gameObject);
+            if (!isServer)
+                return;
+
             if (collision.transform.root.TryGetComponent(out IDamagable damagable))
                 damagable.Damage(damage);
         }

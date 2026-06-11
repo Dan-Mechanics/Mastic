@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Mastic
 {
     /// <summary>
-    /// Lag compensation for scale and enabled.
+    /// Lag compensation for scale and active.
     /// </summary>
     public class BuildableEntity : MonoBehaviour, IEntity
     {
@@ -29,7 +29,8 @@ namespace Mastic
         }
 
         [Server]
-        public void EnableCollision(bool active) => this.active = active;
+        public void EnableCollision(bool active) 
+            => this.active = active;
 
         private void SetAsFrame(Frame frame)
         {
@@ -45,10 +46,12 @@ namespace Mastic
         }
 
         [Server]
-        public void SetAsTick(int tick) => SetAsFrame(recording[tick % recording.Length]);
+        public void SetAsTick(int tick) 
+            => SetAsFrame(recording[tick % recording.Length]);
 
         [Server]
-        public void ReturnToPresent() => SetAsFrame(present);
+        public void ReturnToPresent() 
+            => SetAsFrame(present);
         
         private struct Frame
         {

@@ -97,8 +97,7 @@ namespace Mastic
             mouseLook.SetRotationDirectly(shootMessage.xRotation, shootMessage.yRotation);
             cameraInterpolation.Interject(origin, prevOrigin, velocity);
             cameraInterpolation.SetValue(shootMessage.lerpValue);
-            IReliableAttackAbility.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
-            //AllowNoregLenience(shootMessage);
+            NetcodeUtils.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
 
             if (!Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
                 return;

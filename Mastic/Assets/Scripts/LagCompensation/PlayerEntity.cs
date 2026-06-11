@@ -55,7 +55,8 @@ namespace Mastic
         }
 
         [Server]
-        public void SetAsTick(int tick) => SetAsFrame(recording[tick % recording.Length]);
+        public void SetAsTick(int tick) 
+            => SetAsFrame(recording[tick % recording.Length]);
 
         [ClientRpc(channel = Channels.Unreliable)]
         private void RpcSendAuthState(Frame frame, int tick)
@@ -79,9 +80,11 @@ namespace Mastic
         }
 
         [Server]
-        public void ReturnToPresent() => SetAsFrame(present);
+        public void ReturnToPresent() 
+            => SetAsFrame(present);
 
-        public void EnableHitbox(bool value) => gameObject.layer = value ? playerLayer : intangibleLayer;
+        public void EnableHitbox(bool value) 
+            => gameObject.layer = value ? playerLayer : intangibleLayer;
 
         private struct Frame
         {

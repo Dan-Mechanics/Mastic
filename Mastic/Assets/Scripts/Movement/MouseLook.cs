@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Mirror;
+using System;
 
 namespace Mastic
 {
@@ -8,12 +9,13 @@ namespace Mastic
         public float RotationX => rotation.x;
         public float RotationY => rotation.y;
         
-        [SerializeField] private float sensitivity = default;
+        [SerializeField] private EasyVar sensitivity = default;
         [SerializeField] private float minCamAngle = default;
         [SerializeField] private float maxCamAngle = default;
         [SerializeField] private Vector2 rotation = default;
         private Transform eyes;
         private Transform cam;
+        private float sens;
 
         private void Awake()
         {
@@ -23,6 +25,19 @@ namespace Mastic
                 (minCamAngle, maxCamAngle) = (maxCamAngle, minCamAngle);
         }
 
+        private void Start()
+        {
+            try
+            {
+                sens = sensitivity.Get<float>();
+            }
+            catch (Exception exception)
+            {
+                sens = EasySettings.Current.Get<float>(nameof(sens));
+                Debug.LogWarning(exception.Message);
+            }
+        }
+
         private void Update()
         {
             if (!isLocalPlayer)
@@ -30,7 +45,7 @@ namespace Mastic
 
             float x = -Input.GetAxisRaw("Mouse Y");
             float y = Input.GetAxisRaw("Mouse X");
-            rotation += new Vector2(x, y) * sensitivity;
+            rotation += new Vector2(x, y) * sens;
             SetRotationDirectly(rotation.x, rotation.y);
         }
 

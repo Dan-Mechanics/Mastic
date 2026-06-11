@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 612056518564205773}
   - component: {fileID: 2379774077516351457}
   m_Layer: 0
-  m_Name: lobby_canvas_handler
+  m_Name: lobby_handler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,6 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 4361078184738806864, guid: 34912b5b263a8e24a9897fc4d8b12c27, type: 3}
-  sens: {fileID: 11400000, guid: 366d60df57999534bb813e71c1e42d18, type: 2}
+  sensitivity: {fileID: 11400000, guid: 366d60df57999534bb813e71c1e42d18, type: 2}
   element: {fileID: 11400000, guid: d05b3b5d9fe0a9a42b8ea101e5918687, type: 2}
-  maxConn: {fileID: 11400000, guid: 07f5f732ea444114f95a0c803001a5ff, type: 2}

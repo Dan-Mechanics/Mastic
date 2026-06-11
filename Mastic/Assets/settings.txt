@@ -12,12 +12,15 @@ syncInterval 0.1
 fadeDuration 0.25
 cooldowndisplayinterval 0.02
 respawnDelay 0.5
+defaultSens 0.66
 
 jumpkey space
 gustkey shift
 smitekey lmb
 boltkey rmb
 cloudkey e
+burningwingskey shift
+piercingiciclekey lmb
 
 speed 6
 acceleration 60
@@ -42,7 +45,7 @@ cloudCooldown 12
 cloudStack 1
 
 boltCooldown 3
-boltStack 2
+boltStack 3
 
 // ICE ===============================
 piercingIcicleDamage 40

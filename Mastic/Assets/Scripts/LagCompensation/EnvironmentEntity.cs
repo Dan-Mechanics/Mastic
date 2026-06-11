@@ -6,7 +6,7 @@ namespace Mastic
     /// <summary>
     /// Lag compensation for position and rotation.
     /// </summary>
-    public class EnvironmentEntity : MonoBehaviour, IEntity
+    public class EnvironmentEntity : NetworkBehaviour, IEntity
     {
         private Frame[] recording;
         private Frame present;
@@ -18,20 +18,28 @@ namespace Mastic
             lagCompensation.Register(this);
         }
 
-        private void SetAsFrame(Frame frame) => transform.SetPositionAndRotation(frame.pos, frame.rot);
+        private void SetAsFrame(Frame frame) 
+            => transform.SetPositionAndRotation(frame.pos, frame.rot);
 
         [Server]
         public void RecordFrame(int tick)
         {
             present.SetValues(transform.position, transform.rotation);
             recording[tick % recording.Length] = present;
+            RpcSendAuthState(present);
         }
 
-        [Server]
-        public void SetAsTick(int tick) => SetAsFrame(recording[tick % recording.Length]);
+        [ClientRpc(channel = Channels.Unreliable)]
+        private void RpcSendAuthState(Frame frame)
+            => SetAsFrame(frame);
 
         [Server]
-        public void ReturnToPresent() => SetAsFrame(present);
+        public void SetAsTick(int tick) 
+            => SetAsFrame(recording[tick % recording.Length]);
+
+        [Server]
+        public void ReturnToPresent() 
+            => SetAsFrame(present);
         
         private struct Frame
         {

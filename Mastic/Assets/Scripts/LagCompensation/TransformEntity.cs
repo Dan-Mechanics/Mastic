@@ -6,7 +6,7 @@ namespace Mastic
     /// <summary>
     /// Lag compensation for position, rotation, scale and enabled.
     /// </summary>
-    public class TransformEntity : MonoBehaviour, IEntity
+    public class TransformEntity : NetworkBehaviour, IEntity
     {
         [SerializeField] private GameObject hitbox = default;
         private Frame[] recording;
@@ -20,7 +20,7 @@ namespace Mastic
             EnableCollision(true);
             lagCompensation.Register(this);
         }
-
+         
         [Server]
         public void Deregister(float fullyGoneTime)
         {
@@ -29,7 +29,8 @@ namespace Mastic
         }
 
         [Server]
-        public void EnableCollision(bool active) => this.active = active;
+        public void EnableCollision(bool active) 
+            => this.active = active;
 
         private void SetAsFrame(Frame frame)
         {
@@ -49,13 +50,20 @@ namespace Mastic
                 present.SetValues(transform.localPosition, transform.localRotation, transform.localScale);
 
             recording[tick % recording.Length] = present;
+            RpcSendAuthState(present);
         }
 
-        [Server]
-        public void SetAsTick(int tick) => SetAsFrame(recording[tick % recording.Length]);
+        [ClientRpc(channel = Channels.Unreliable)]
+        private void RpcSendAuthState(Frame frame) 
+            => SetAsFrame(frame);
 
         [Server]
-        public void ReturnToPresent() => SetAsFrame(present);
+        public void SetAsTick(int tick) 
+            => SetAsFrame(recording[tick % recording.Length]);
+
+        [Server]
+        public void ReturnToPresent() 
+            => SetAsFrame(present);
         
         private struct Frame
         {

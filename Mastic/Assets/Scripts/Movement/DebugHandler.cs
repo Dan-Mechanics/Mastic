@@ -23,14 +23,24 @@ namespace Mastic
             source = GetComponentInChildren<AudioSource>();
         }
 
-        public void DisplayTick(int tick) => tickText.text = tick.ToString();
-        public void DisplayCheats(string cheats) => cheatsText.text = cheats;
-        public void DisplayReconsile(bool value) => reconsileIndicator.SetActive(value);
-        public void PlayReconsileSound() => source.PlayOneShot(reconsileSound);
-        public void PlayTickrateChangedSound() => source.PlayOneShot(tickrateChangeSound);
+        public void DisplayTick(int tick) 
+            => tickText.text = tick.ToString();
+
+        public void DisplayCheats(string cheats) 
+            => cheatsText.text = cheats;
+
+        public void DisplayReconsile(bool value) 
+            => reconsileIndicator.SetActive(value);
+
+        public void PlayReconsileSound() 
+            => source.PlayOneShot(reconsileSound);
+
+        public void PlayTickrateChangedSound() 
+            => source.PlayOneShot(tickrateChangeSound);
 
         public void DisplayTickrate(int tickrate) 
         {
+            tickrateText.color = Color.white;
             tickrateText.text = tickrate.ToString();
             if (tickrate > standardTickrate)
             {
@@ -40,14 +50,13 @@ namespace Mastic
             { 
                 tickrateText.color = Color.red;
             }
-            else
-            {
-                tickrateText.color = Color.white;
-            }
         }
 
         public void DisplayServerState(StateMessage stateMessage)
         {
+            if (authPrefab == null)
+                return;
+
             if (authGraphic == null)
                 authGraphic = Instantiate(authPrefab).transform;
 

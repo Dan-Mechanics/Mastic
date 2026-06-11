@@ -10,21 +10,23 @@ namespace Mastic
         private int standardTickrate;
         private SceneBoilerplate sceneBoilerplate;
         private SimpleNetworkManager simpleNetworkManager;
-        private LobbyCanvasHandler lobbyCanvasHandler;
+        private PlayerSpawner playerSpawner;
+        private LobbyHandler lobbyHandler;
         private ServerSequence serverSequence;
 
         private void Awake()
         {
             sceneBoilerplate = FindAnyObjectByType<SceneBoilerplate>();
-            simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();   
+            simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();
+            playerSpawner = FindAnyObjectByType<PlayerSpawner>();
             serverSequence = FindAnyObjectByType<ServerSequence>();
-            lobbyCanvasHandler = FindAnyObjectByType<LobbyCanvasHandler>();
+            lobbyHandler = FindAnyObjectByType<LobbyHandler>();
 
             EasySettings easySettings = EasySettings.Current;
             if (logSettings)
                 easySettings.Log(Debug.Log);
 
-            var interpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
+            ICameraInterpolation interpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
             interpolation.MaxLerpValue = easySettings.Get<float>(nameof(interpolation.MaxLerpValue));
             standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
         }
@@ -33,16 +35,18 @@ namespace Mastic
         {
             sceneBoilerplate.AssignTickrate(standardTickrate);
             sceneBoilerplate.Initialize();
-            lobbyCanvasHandler.Initialize();
+            lobbyHandler.Initialize(simpleNetworkManager);
 
-            simpleNetworkManager.OnClientConnected += lobbyCanvasHandler.Disable;
-            simpleNetworkManager.OnClientDisconnected += lobbyCanvasHandler.Enable;
+            simpleNetworkManager.OnClientConnected += lobbyHandler.Disable;
+            simpleNetworkManager.OnClientConnected += playerSpawner.ConnectToServer;
+            simpleNetworkManager.OnClientDisconnected += lobbyHandler.Enable;
 
-            simpleNetworkManager.OnServerStarted += lobbyCanvasHandler.Disable;
-            simpleNetworkManager.OnServerDisconnected += lobbyCanvasHandler.Enable;
+            simpleNetworkManager.OnServerGameStarted += lobbyHandler.Disable;
+            simpleNetworkManager.OnServerDisconnected += lobbyHandler.Enable;
 
             simpleNetworkManager.Initialize(standardTickrate);
-            simpleNetworkManager.OnPlayerAdded += serverSequence.Register;
+            playerSpawner.OnPlayerSpawned += serverSequence.Register;
+            simpleNetworkManager.OnPlayersConnected += playerSpawner.InitializePlayers;
             simpleNetworkManager.OnServerDisconnected += serverSequence.Clear;
         }
 

@@ -87,10 +87,12 @@ namespace Mastic
         }
 
         [Server]
-        public void Register(Transform player) => players.Add(new ServerPlayer(player));
+        public void Register(Transform player) 
+            => players.Add(new ServerPlayer(player));
 
         [Server]
-        public void Clear() => players.Clear();
+        public void Clear() 
+            => players.Clear();
 
         public (NetworkConnectionToClient, int) GetProcessedTick(int index)
         {
