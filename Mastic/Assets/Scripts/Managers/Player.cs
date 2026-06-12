@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,10 +8,11 @@ namespace Mastic
     public class Player : NetworkBehaviour
     {
         [SerializeField] private GameObject player = default;
+        [SerializeField] private EasyVar sensitivity = default;
         [SerializeField] private string[] abilities = default;
-        [SerializeField] private List<Object> localRemove = default;
-        [SerializeField] private List<Object> unlocalRemove = default;
-        [SerializeField] private List<Object> serverRemove = default;
+        [SerializeField] private List<UnityEngine.Object> localRemove = default;
+        [SerializeField] private List<UnityEngine.Object> unlocalRemove = default;
+        [SerializeField] private List<UnityEngine.Object> serverRemove = default;
 
         private ICameraInterpolation cameraInterpolation;
         private PlayerHealthDisplay playerHealthDisplay;
@@ -23,10 +25,12 @@ namespace Mastic
         private DebugHandler debugHandler;
         private PlayerEntity playerEntity;
         private PlayerHealth playerHealth;
+        private MouseLook mouseLook;
 
         private void Awake()
         {
             cooldownHandler = GetComponent<CooldownHandler>();
+            mouseLook = GetComponent<MouseLook>();
             cooldownDisplay = GetComponent<CooldownDisplay>();
             playerHealthDisplay = GetComponent<PlayerHealthDisplay>();
             playerHealth = GetComponent<PlayerHealth>();
@@ -39,12 +43,16 @@ namespace Mastic
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
 
             Utils.LowerStringArray(abilities);
-            int standardTickrate = EasySettings.Current.Get<int>(nameof(standardTickrate));
+            EasySettings easySettings = EasySettings.Current;
+            int standardTickrate = easySettings.Get<int>(nameof(standardTickrate));
             cooldownHandler.Initialize(abilities);
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
             networkMovement.Initialize(standardTickrate, cameraInterpolation);
             clientSequence.Initialize(networkMovement, cooldownHandler, playerEntity);
+
+            mouseLook.SetSensitivity(easySettings.Get<float>(nameof(sensitivity)));
+            sensitivity.WriteSafely<float>(mouseLook.SetSensitivity);
 
             playerHealth.OnRespawn += playerEntity.RefreshRollbackBuffer;
             playerHealth.OnRespawn += cooldownHandler.RechargeAll;

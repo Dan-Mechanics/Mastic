@@ -500,9 +500,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  sensitivity: {fileID: 11400000, guid: 366d60df57999534bb813e71c1e42d18, type: 2}
-  minCamAngle: -90
-  maxCamAngle: 90
   rotation: {x: 0, y: 0}
 --- !u!114 &321237805516363557
 MonoBehaviour:
@@ -520,6 +517,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   player: {fileID: 3751572637676758942}
+  sensitivity: {fileID: 11400000, guid: 366d60df57999534bb813e71c1e42d18, type: 2}
   abilities:
   - jump
   - gust

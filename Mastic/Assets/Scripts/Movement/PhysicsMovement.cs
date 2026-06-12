@@ -22,8 +22,11 @@ namespace Mastic
             EnableControl(true);
         }
 
-        public void EnableGravity(bool hasGravity) => this.hasGravity = hasGravity;
-        public void EnableControl(bool controllable) => this.controllable = controllable;
+        public void EnableGravity(bool hasGravity) 
+            => this.hasGravity = hasGravity;
+
+        public void EnableControl(bool controllable) 
+            => this.controllable = controllable;
 
         public void Move(float vert, float hori, float interval)
         {

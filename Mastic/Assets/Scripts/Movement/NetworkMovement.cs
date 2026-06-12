@@ -157,7 +157,8 @@ namespace Mastic
             previousInputMessage = inputMessage;
         }
 
-        public InputMessage GetPreviousInputMessage() => previousInputMessage;
+        public InputMessage GetPreviousInputMessage() 
+            => previousInputMessage;
 
         private InputMessage GetNextInputMessage()
         {
@@ -224,7 +225,8 @@ namespace Mastic
         /// This is because afte the simulation step, the velocity is unstable. 
         /// We limit it to make sure it doesn't cause reconsiles.
         /// </summary>
-        public void LimitSpeed() => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, topSpeed);
+        public void LimitSpeed() 
+            => rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, topSpeed);
 
         [Command(channel = Channels.Unreliable)]
         private void CmdSendInputMessageToServer(InputMessage inputMessage)
@@ -325,7 +327,6 @@ namespace Mastic
             while (tickToProcess < InputTick)
             {
                 int index = tickToProcess % bufferSize;
-
                 Vector3 prev = eyes.position;
                 Move(inputBuffer[index], false);
 
