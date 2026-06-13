@@ -188,7 +188,7 @@ namespace Mastic
 
         private InputMessage GetRepeatInputMessage()
         {
-            InputMessage inputMessage = previousInputMessage;
+            InputMessage inputMessage = GetPreviousInputMessage();
             inputMessage.rollbackTick++;
             inputMessage.tick++;
             return inputMessage;
@@ -351,7 +351,8 @@ namespace Mastic
             ServerTick++;
         }
 
-        public void AddForce(Vector3 velocityChange) => movement?.AddForce(velocityChange);
+        public void AddForce(Vector3 velocityChange) 
+            => movement?.AddForce(velocityChange);
 
         private void Move(InputMessage input, bool applyToInterpolation)
         {
