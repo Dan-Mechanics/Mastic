@@ -5,43 +5,43 @@ using UnityEngine;
 namespace Mastic
 {
     /// <summary>
-    /// Lag compensation for player.
+    /// TODO: I AM STILL WORKING ON THE DEPENDENCY STRUCUTRE HERE...
     /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
         public byte DataSize => 5;
 
-        private float time;
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
         [SerializeField] private Transform lookBone = default;
         [SerializeField] private Transform eyes = default;
+        private EasySettings easySettings;
+        private EntityManager entityManager;
         private MouseLook mouseLook;
         private int intangibleLayer;
+        private float maxLerpValue;
         private int playerLayer;
         private Frame[] recording;
         private Frame previous;
         private Frame current;
-        private float maxLerpValue;
-
-        [Server]
-        public void Initialize(int maxRecordingLength)
-        {
-            recording = new Frame[maxRecordingLength];
-        }
+        private float time;
 
         private void Awake()
         {
-            maxLerpValue = EasySettings.Current.Get<float>(nameof(maxLerpValue));
+            easySettings = EasySettings.Current;
+            entityManager = EntityManager.Current;
+            entityManager.Register(netId, this);
+            maxLerpValue = easySettings.Get<float>(nameof(maxLerpValue));
             mouseLook = GetComponent<MouseLook>();
             playerLayer = LayerMask.NameToLayer(playerLayerName);
             intangibleLayer = LayerMask.NameToLayer(intangibleLayerName);
             EnableHitbox(true);
         }
 
-        private void Start()
+        public override void OnStartServer()
         {
-            FindAnyObjectByType<EntityManager>().Register(netId, this);
+            base.OnStartServer();
+            recording = new Frame[entityManager.MaxRecordingLength];
         }
 
         private void Update()
@@ -52,31 +52,20 @@ namespace Mastic
 
             float lerpValue = Mathf.Clamp(Time.time - time, 0f, maxLerpValue);
             Frame lerped = Frame.LerpUnclamped(previous, current, lerpValue);
-            transform.SetPositionAndRotation(lerped.position, lerped.rot);
-            eyes.localRotation = lerped.eyesLocalRot;
-            lookBone.rotation = eyes.rotation;
+            SetAsFrame(lerped);
         }
 
         private void SetAsFrame(Frame frame)
         {
-            transform.position = frame.position;
-            mouseLook.SetRotationTemporarily(frame.xRotation, frame.yRotation);
-
-            // THIS IS WHERE LOOKBONE SHOULD GO.
-            // INCLUDING HITBOX IF THAT IS NOT ATTACHED TO LOOKBONE.
-            if (!isLocalPlayer)
-                lookBone.localRotation = Quaternion.Euler(0f, 0f, -frame.xRotation);
+            transform.SetPositionAndRotation(frame.pos, frame.rot);
+            eyes.localRotation = frame.localEyesRot;
+            lookBone.rotation = eyes.rotation;
         }
 
         [Server]
         public void RecordFrame(int tick)
         {
-            current = new Frame()
-            {
-                position = transform.position,
-                eyesLocalRot = Quaternion.AngleAxis(mouseLook.RotationX, Vector3.right),
-                rot = Quaternion.AngleAxis(mouseLook.RotationY, Vector3.up)
-            };
+            SavePresent();
             recording[tick % recording.Length] = current;
         }
 
@@ -90,12 +79,7 @@ namespace Mastic
         [Server]
         public void RefreshRollbackBuffer()
         {
-            current = new Frame()
-            {
-                position = transform.position,
-                eyesLocalRot = Quaternion.AngleAxis(mouseLook.RotationX, Vector3.right),
-                rot = Quaternion.AngleAxis(mouseLook.RotationY, Vector3.up)
-            };
+            SavePresent();
             for (int i = 0; i < recording.Length; i++)
             {
                 recording[i] = current;
@@ -116,8 +100,8 @@ namespace Mastic
             previous = current;
             current = new Frame()
             {
-                position = new Vector3(data[index], data[index + 1], data[index + 2]),
-                eyesLocalRot = Quaternion.AngleAxis(data[index + 3], Vector3.right),
+                pos = new Vector3(data[index], data[index + 1], data[index + 2]),
+                localEyesRot = Quaternion.AngleAxis(data[index + 3], Vector3.right),
                 rot = Quaternion.AngleAxis(data[index + 4], Vector3.up)
             };
         }
@@ -125,26 +109,42 @@ namespace Mastic
         [Server]
         public void WriteToData(int index, float[] data)
         {
-            data[index] = transform.position.x;
-            data[index + 1] = transform.position.y;
-            data[index + 2] = transform.position.z;
-            data[index + 3] = mouseLook.RotationX;
-            data[index + 4] = mouseLook.RotationY;
+            data[index]     = current.pos.x;
+            data[index + 1] = current.pos.y;
+            data[index + 2] = current.pos.z;       // WE DON'T USE CURRENT HERE BECAUSE
+            data[index + 3] = mouseLook.RotationX; // THEN I WOULD HAVE TO DO CRAZY CONVERSIONS.
+            data[index + 4] = mouseLook.RotationY; // TLDR: FOR PERFORMANCE. 
+        }
+
+        public void SavePresent()
+        {
+            current = new Frame()
+            {
+                pos = transform.position,
+                localEyesRot = Quaternion.AngleAxis(mouseLook.RotationX, Vector3.right),
+                rot = Quaternion.AngleAxis(mouseLook.RotationY, Vector3.up)
+            };
+        }
+
+        public void DoRollback(int prevTick, int currTick, float lerpValue)
+        {
+            Frame frame = Frame.LerpUnclamped(recording[prevTick % recording.Length], recording[currTick % recording.Length], lerpValue);
+            SetAsFrame(frame);
         }
 
         private struct Frame
         {
-            public Vector3 position;
+            public Vector3 pos;
             public Quaternion rot;
-            public Quaternion eyesLocalRot;
+            public Quaternion localEyesRot;
 
             public static Frame LerpUnclamped(Frame a, Frame b, float t)
             {
                 return new Frame()
                 {
-                    position = Vector3.LerpUnclamped(a.position, b.position, t),
+                    pos = Vector3.LerpUnclamped(a.pos, b.pos, t),
                     rot = Quaternion.LerpUnclamped(a.rot, b.rot, t),
-                    eyesLocalRot = Quaternion.LerpUnclamped(a.eyesLocalRot, b.eyesLocalRot, t),
+                    localEyesRot = Quaternion.LerpUnclamped(a.localEyesRot, b.localEyesRot, t),
                 };
             }
         }

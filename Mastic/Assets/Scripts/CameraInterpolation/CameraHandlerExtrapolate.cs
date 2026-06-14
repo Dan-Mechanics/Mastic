@@ -11,7 +11,8 @@ namespace Mastic
         private Vector3 vel;
         private float time;
 
-        private void Awake() => pos = transform.position;
+        private void Awake() 
+            => pos = transform.position;
 
         private void Update()
         {

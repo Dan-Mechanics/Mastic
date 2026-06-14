@@ -10,6 +10,7 @@ namespace Mastic
         private readonly List<ServerPlayer> players = new List<ServerPlayer>();
         private EntityManager entityManager;
         private float maxConsecutiveTicks;
+        private readonly Timer syncTimer = new Timer(1f / 32f);
         private float timer;
 
         private void Awake()
@@ -21,6 +22,10 @@ namespace Mastic
         [ServerCallback]
         private void Update()
         {
+            if (syncTimer.Tick(Time.deltaTime))
+                entityManager.DoSync();
+
+            // USE CONSISTENT TIMER.
             timer += Time.deltaTime;
             timer = Mathf.Clamp(timer, 0f, Time.fixedDeltaTime * maxConsecutiveTicks);
             while (timer >= Time.fixedDeltaTime)

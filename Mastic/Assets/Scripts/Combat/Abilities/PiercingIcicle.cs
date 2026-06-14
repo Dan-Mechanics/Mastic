@@ -26,8 +26,8 @@ namespace Mastic
 
         private List<ShootMessage> pendingShootMessages;
         private ShootMessage shootMessage;
-        private ICameraInterpolation cameraInterpolation;
-        private EntityManager lagCompensation;
+        private ICameraInterpolation interpolation;
+        private EntityManager entityManager;
         private CooldownHandler cooldownHandler;
         private int cooldownIndex;
         private MouseLook mouseLook;
@@ -44,8 +44,8 @@ namespace Mastic
         {
             eyes = transform.Find("eyes");
             cam = GameObject.FindWithTag("MainCamera").transform;
-            cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
-            lagCompensation = FindAnyObjectByType<EntityManager>();
+            interpolation = cam.GetComponent<ICameraInterpolation>();
+            entityManager = FindAnyObjectByType<EntityManager>();
             cooldownHandler = GetComponent<CooldownHandler>();
             pendingShootMessages = new List<ShootMessage>();
             coll = GetComponentInChildren<Collider>();
@@ -68,14 +68,14 @@ namespace Mastic
             hasGravity = easySettings.Get<bool>(cooldownName + nameof(hasGravity));
         }
 
-        public void DoLocalUpdate(int inputTick, int rollbackTick)
+        public void DoLocalUpdate(int inputTick, int rollbackTick, float unlocalLerpValue)
         {
             if (!primaryFire.WasPressed || !cooldownHandler.CanCast(cooldownIndex))
                 return;
 
             OnPredictDamage?.Invoke(damage);
             cooldownHandler.Cast(cooldownIndex);
-            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, inputTick, rollbackTick);
+            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, unlocalLerpValue, inputTick, rollbackTick);
             CmdShoot(shootMessage);
 
             // CONSIDER STORING EACH PROJECTILE WITH AN
@@ -108,18 +108,17 @@ namespace Mastic
         {
             // RECREATE THE SHOT CONDITIONS.
             mouseLook.SetRotationDirectly(shootMessage.xRotation, shootMessage.yRotation);
-            cameraInterpolation.Interject(origin, prevOrigin, vel);
-            cameraInterpolation.SetValue(shootMessage.lerpValue);
-            //AllowNoregLenience(shootMessage);
+            interpolation.Interject(origin, prevOrigin, vel);
+            interpolation.SetValue(shootMessage.localLerpValue);
             NetcodeUtils.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
 
             // ACCOUNT FOR TRAVEL TIME OF PACKET.
             Vector3 projectileOrigin = cam.position;
             Vector3 projectileVelocity = cam.forward * speed;
-            int tickCount = lagCompensation.GetProjectileRollbackTickCount(ref shootMessage.rollbackTick);
+            int tickCount = entityManager.GetProjectileRollbackTickCount(ref shootMessage.rollbackTick);
             for (int i = 0; i < tickCount; i++)
             {
-                lagCompensation.SetAsTick(shootMessage.rollbackTick + i);
+                entityManager.DoRollback(shootMessage.rollbackTick + i, shootMessage.unlocalLerpValue);
                 if (!Physics.SphereCast(projectileOrigin, radius, projectileVelocity.normalized, out RaycastHit hit, projectileVelocity.magnitude * standardInterval, mask, QueryTriggerInteraction.Ignore))
                 {
                     // HAVEN'T HIT SOMETHING YET, INCREMENT POSITION.

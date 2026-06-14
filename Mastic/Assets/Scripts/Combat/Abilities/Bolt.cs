@@ -18,9 +18,9 @@ namespace Mastic
         [SerializeField] private float damage = default;
 
         private List<ShootMessage> pendingShootMessages;
-        private ICameraInterpolation cameraInterpolation;
+        private ICameraInterpolation interpolation;
         private ShootMessage shootMessage;
-        private EntityManager lagCompensation;
+        private EntityManager entityManager;
         private MouseLook mouseLook;
         private int cooldownIndex;
         private Rigidbody rb;
@@ -37,8 +37,8 @@ namespace Mastic
         {
             eyes = transform.Find("eyes");
             cam = GameObject.FindWithTag("MainCamera").transform;
-            cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
-            lagCompensation = FindAnyObjectByType<EntityManager>();
+            interpolation = cam.GetComponent<ICameraInterpolation>();
+            entityManager = FindAnyObjectByType<EntityManager>();
             pendingShootMessages = new List<ShootMessage>();
             mouseLook = GetComponent<MouseLook>();
             rb = GetComponent<Rigidbody>();
@@ -51,14 +51,14 @@ namespace Mastic
             tolerance = easySettings.Get<float>(nameof(tolerance));
         }
 
-        public void DoLocalUpdate(int inputTick, int rollbackTick)
+        public void DoLocalUpdate(int inputTick, int rollbackTick, float unlocalLerpValue)
         {
             if (!secondaryFire.WasPressed || !cooldownHandler.CanCast(cooldownIndex))
                 return;
 
             cooldownHandler.Cast(cooldownIndex);
             shootMessage.debugEnemyPos = Vector3.zero;
-            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, inputTick, rollbackTick);
+            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, unlocalLerpValue, inputTick, rollbackTick);
             if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
             {
                 Transform target = hit.transform.root;
@@ -67,10 +67,6 @@ namespace Mastic
                     OnPredictDamage?.Invoke(damage);
                     shootMessage.debugEnemyPos = target.position;
                 }
-                
-                // REDUCE NO-REGS.
-                if (target.TryGetComponent(out PlayerEntity playerEntity))
-                    shootMessage.rollbackTick = playerEntity.RollbackTick;
             }
 
             CmdShoot(shootMessage);
@@ -93,10 +89,10 @@ namespace Mastic
         private void Shoot(ShootMessage shootMessage)
         {
             // RECREATE THE SHOT CONDITIONS.
-            lagCompensation.SetAsTick(shootMessage.rollbackTick);
+            entityManager.DoRollback(shootMessage.rollbackTick, shootMessage.unlocalLerpValue);
             mouseLook.SetRotationDirectly(shootMessage.xRotation, shootMessage.yRotation);
-            cameraInterpolation.Interject(origin, prevOrigin, velocity);
-            cameraInterpolation.SetValue(shootMessage.lerpValue);
+            interpolation.Interject(origin, prevOrigin, velocity);
+            interpolation.SetValue(shootMessage.localLerpValue);
             NetcodeUtils.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
 
             if (!Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))

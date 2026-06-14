@@ -19,11 +19,7 @@ namespace Mastic
         {
             easySettings = EasySettings.Current;
             entityManager = EntityManager.Current;
-        }
-
-        private void Start()
-        {
-            entityManager.Register(netId, null);
+            entityManager.Register(netId, this);
             maxLerpValue = easySettings.Get<float>(nameof(maxLerpValue));
         }
 
@@ -46,7 +42,7 @@ namespace Mastic
         [Server]
         public void RecordFrame(int tick)
         {
-            current = transform.position;
+            SavePresent();
             recording[tick % recording.Length] = current;
         }
 
@@ -58,7 +54,7 @@ namespace Mastic
         [Server]
         public void DoRollback(int prevTick, int currTick, float lerpValue)
         {
-            Vector3 frame = Vector3.Lerp(recording[prevTick % recording.Length], recording[currTick % recording.Length], lerpValue);
+            Vector3 frame = Vector3.LerpUnclamped(recording[prevTick % recording.Length], recording[currTick % recording.Length], lerpValue);
             SetAsFrame(frame);
         }
 

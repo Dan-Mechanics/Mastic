@@ -626,6 +626,7 @@ MonoBehaviour:
   playerLayerName: Player
   intangibleLayerName: Intangible
   lookBone: {fileID: 7578080967263532688}
+  eyes: {fileID: 2720431899970827215}
 --- !u!114 &-5600370486124146712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1692,7 +1693,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4132194433979372281
 Transform:
   m_ObjectHideFlags: 0

@@ -15,6 +15,8 @@ namespace Mastic
         private PlayerEntity playerEntity;
         private CooldownHandler cooldownHandler;
         private CooldownDisplay cooldownDisplay;
+        private EntityManager entityManager;
+        private ICameraInterpolation interpolation;
         private float maxConsecutiveTicks;
         private float timer;
 
@@ -23,6 +25,8 @@ namespace Mastic
             this.networkMovement = networkMovement;
             this.cooldownHandler = cooldownHandler;
             this.playerEntity = playerEntity;
+            entityManager = EntityManager.Current;
+            interpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
             reliableAttackAbilities = GetComponents<IReliableAttackAbility>();
             unreliableAttackAbilities = GetComponents<IUnreliableAttackAbility>();
             cooldownDisplay = GetComponent<CooldownDisplay>();
@@ -40,7 +44,7 @@ namespace Mastic
 
             foreach (IReliableAttackAbility reliable in reliableAttackAbilities)
             {
-                reliable.DoLocalUpdate(networkMovement.InputTick - 1, playerEntity.RollbackTick);
+                reliable.DoLocalUpdate(networkMovement.InputTick - 1, entityManager.RollbackTick, entityManager.GetUnlocalLerpValue());
             }
 
             foreach (IUnreliableAttackAbility unreliable in unreliableAttackAbilities)
@@ -61,7 +65,7 @@ namespace Mastic
                 OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier} | fps: {Mathf.RoundToInt(1f / Time.smoothDeltaTime)}");
                 for (int i = 0; i < clientPacketMultiplier; i++)
                 {
-                    networkMovement.DoLocalTick(playerEntity.RollbackTick);
+                    networkMovement.DoLocalTick(entityManager.RollbackTick);
                     cooldownHandler.Charge();
                 }
             }

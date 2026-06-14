@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Mastic
@@ -7,24 +8,32 @@ namespace Mastic
     public class EntityManager : NetworkBehaviour
     {
         public static EntityManager Current => FindAnyObjectByType<EntityManager>();
-
         public int MaxRecordingLength => maxRecordingLength;
-        public int Tick { get; private set; }
-        public float CurrentTime { get; private set; }
+        public int RollbackTick { get; private set; }
 
         [SerializeField, Min(1)] private int maxRecordingLength = default;
         private readonly Dictionary<uint, IEntity> entities = new Dictionary<uint, IEntity>();
+        private float maxLerpValue;
         private int prevCount = -1;
         private byte[] dataSizes;
+        private float syncTime;
         private int currentTick;
         private int oldestTick;
         private byte[] netIds;
         private float[] data;
 
+        private void Awake() 
+            => maxLerpValue = EasySettings.Current.Get<float>(nameof(maxLerpValue));
+
+        /// <summary>
+        /// Called every 32th of a second, not more than once per frame.
+        /// </summary>
         [Server]
-        public void DoTick()
+        public void DoSync()
         {
             RemoveNullEntities();
+            RecordFrames();
+
             if (prevCount != entities.Count)
                 Reallocate();
 
@@ -37,8 +46,7 @@ namespace Mastic
                 index += pair.Value.DataSize;
             }
 
-            RpcSync(Tick, netIds, dataSizes, data);
-            Tick++;
+            RpcSync(currentTick - 1, netIds, dataSizes, data);
         }
 
         [ClientRpc]
@@ -46,14 +54,14 @@ namespace Mastic
         {
             RemoveNullEntities();
 
-            Tick = tick;
-            CurrentTime = Time.time;
+            RollbackTick = tick;
+            syncTime = Time.time;
 
             int index = 0;
             for (int i = 0; i < netIds.Length; i++)
             {
                 if (entities.ContainsKey(netIds[i]))
-                    entities[netIds[i]].ReadFromData(index, data, CurrentTime);
+                    entities[netIds[i]].ReadFromData(index, data, syncTime);
 
                 index += dataSizes[i];
             }
@@ -73,7 +81,6 @@ namespace Mastic
             if (entity == null)
                 return;
 
-            entity.Initialize(maxRecordingLength);
             entities[netId] = entity;
         }
 
@@ -95,16 +102,31 @@ namespace Mastic
             data = new float[totalDataLength];
         }
 
+        [Client]
+        public float GetUnlocalLerpValue()
+        {
+            return Mathf.Clamp(Time.time - syncTime, 0f, maxLerpValue);
+        }
+
         [Server]
-        public void SetAsTick(int tick)
+        public void DoRollback(int tick, float lerpValue)
         {
             if (tick >= currentTick)
                 return;
-
+            
             if (tick < oldestTick)
                 tick = oldestTick;
 
-            entities.ForEach(x => x.SetAsTick(tick));
+            lerpValue = Mathf.Clamp(lerpValue, 0f, maxLerpValue);
+            int prevtick = tick - 1;
+            if (prevtick < oldestTick)
+                prevtick = oldestTick;
+
+            foreach (var pair in entities)
+            {
+                pair.Value.DoRollback(prevtick, tick, lerpValue);
+            }
+
             Physics.SyncTransforms();
         }
 
@@ -142,7 +164,7 @@ namespace Mastic
         }
 
         [Server]
-        public void RecordFrame()
+        public void RecordFrames()
         {
             foreach (var pair in entities)
             {

@@ -19,7 +19,7 @@ namespace Mastic
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
-        private EntityManager lagCompensation;
+   //     private EntityManager entityManager;
         private ClientSequence clientSequence;
         private CooldownDisplay cooldownDisplay;
         private DebugHandler debugHandler;
@@ -37,7 +37,7 @@ namespace Mastic
             clientSequence = GetComponent<ClientSequence>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             playerEntity = GetComponent<PlayerEntity>();
-            lagCompensation = FindAnyObjectByType<EntityManager>();
+         //   entityManager = FindAnyObjectByType<EntityManager>();
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
@@ -62,7 +62,7 @@ namespace Mastic
         public override void OnStartServer()
         {
             base.OnStartServer();
-            playerEntity.Initialize(lagCompensation);
+           // playerEntity.Initialize(entityManager);
             serverRemove.ForEach(x => Destroy(x));
             print($"{gameObject.name}: setup completed".ToUpperInvariant());
         }
