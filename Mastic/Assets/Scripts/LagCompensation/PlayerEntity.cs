@@ -11,6 +11,8 @@ namespace Mastic
     {
         public byte DataSize => 5;
 
+        [SyncVar(hook = nameof(OnReceiveUniqueId))] private int uniqueId = -1;
+
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
         [SerializeField] private Transform lookBone = default;
@@ -22,35 +24,42 @@ namespace Mastic
         private float maxLerpValue;
         private int playerLayer;
         private Frame[] recording;
-        private Frame previous;
-        private Frame current;
+        private Frame previous = Frame.Default;
+        private Frame current = Frame.Default;
         private float time;
 
         private void Awake()
         {
             easySettings = EasySettings.Current;
             entityManager = EntityManager.Current;
-            entityManager.Register(netId, this);
+            Debug.LogWarning("playrer");
             maxLerpValue = easySettings.Get<float>(nameof(maxLerpValue));
             mouseLook = GetComponent<MouseLook>();
             playerLayer = LayerMask.NameToLayer(playerLayerName);
             intangibleLayer = LayerMask.NameToLayer(intangibleLayerName);
             EnableHitbox(true);
+            SavePresent();
+            previous = current;
         }
 
         public override void OnStartServer()
         {
             base.OnStartServer();
             recording = new Frame[entityManager.MaxRecordingLength];
+            uniqueId = entityManager.FetchUniqueId();
+            entityManager.Register(uniqueId, this);
         }
+
+        private void OnReceiveUniqueId(int oldUniqueId, int newUniqueId)
+            => EntityManager.Current.Register(newUniqueId, this);
 
         private void Update()
         {
             // ONLY IF UNLOCAL CLIENT.
-            if (isServer || isLocalPlayer)
+            if (isServer || isLocalPlayer || uniqueId < 0)
                 return;
 
-            float lerpValue = Mathf.Clamp(Time.time - time, 0f, maxLerpValue);
+            float lerpValue = Mathf.Clamp((Time.time - time) * 32f, 0f, maxLerpValue);
             Frame lerped = Frame.LerpUnclamped(previous, current, lerpValue);
             SetAsFrame(lerped);
         }
@@ -60,6 +69,7 @@ namespace Mastic
             transform.SetPositionAndRotation(frame.pos, frame.rot);
             eyes.localRotation = frame.localEyesRot;
             lookBone.rotation = eyes.rotation;
+            lookBone.localRotation = Quaternion.Euler(0f, 0f, -eyes.localEulerAngles.x);
         }
 
         [Server]
@@ -68,10 +78,6 @@ namespace Mastic
             SavePresent();
             recording[tick % recording.Length] = current;
         }
-
-        [Server]
-        public void SetAsTick(int tick) 
-            => SetAsFrame(recording[tick % recording.Length]);
 
         /// <summary>
         /// This is called when player respawns.
@@ -90,9 +96,10 @@ namespace Mastic
         public void ReturnToPresent() 
             => SetAsFrame(current);
 
+        [Server]
         public void EnableHitbox(bool value) 
             => gameObject.layer = value ? playerLayer : intangibleLayer;
-
+         
         [Client]
         public void ReadFromData(int index, float[] data, float time)
         {
@@ -116,16 +123,18 @@ namespace Mastic
             data[index + 4] = mouseLook.RotationY; // TLDR: FOR PERFORMANCE. 
         }
 
+        [Server]
         public void SavePresent()
         {
             current = new Frame()
             {
                 pos = transform.position,
-                localEyesRot = Quaternion.AngleAxis(mouseLook.RotationX, Vector3.right),
-                rot = Quaternion.AngleAxis(mouseLook.RotationY, Vector3.up)
+                rot = transform.rotation,
+                localEyesRot = eyes.localRotation
             };
         }
 
+        [Server]
         public void DoRollback(int prevTick, int currTick, float lerpValue)
         {
             Frame frame = Frame.LerpUnclamped(recording[prevTick % recording.Length], recording[currTick % recording.Length], lerpValue);
@@ -137,6 +146,13 @@ namespace Mastic
             public Vector3 pos;
             public Quaternion rot;
             public Quaternion localEyesRot;
+
+            public static Frame Default => new Frame()
+            {
+                pos = Vector3.zero,
+                rot = Quaternion.identity,
+                localEyesRot = Quaternion.identity
+            };
 
             public static Frame LerpUnclamped(Frame a, Frame b, float t)
             {

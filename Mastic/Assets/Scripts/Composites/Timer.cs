@@ -1,5 +1,8 @@
 namespace Mastic
 {
+   /// <summary>
+   /// TODO: FIX THIS, THIS IS BROKEN.
+   /// </summary>
     public struct Timer 
     {
         public float interval;

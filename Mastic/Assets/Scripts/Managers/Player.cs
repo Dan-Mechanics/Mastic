@@ -19,7 +19,6 @@ namespace Mastic
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
-   //     private EntityManager entityManager;
         private ClientSequence clientSequence;
         private CooldownDisplay cooldownDisplay;
         private DebugHandler debugHandler;
@@ -37,7 +36,6 @@ namespace Mastic
             clientSequence = GetComponent<ClientSequence>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             playerEntity = GetComponent<PlayerEntity>();
-         //   entityManager = FindAnyObjectByType<EntityManager>();
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
@@ -54,7 +52,7 @@ namespace Mastic
             mouseLook.SetSensitivity(easySettings.Get<float>(nameof(sensitivity)));
             sensitivity.WriteSafely<float>(mouseLook.SetSensitivity);
 
-            playerHealth.OnRespawn += playerEntity.RefreshRollbackBuffer;
+         //   playerHealth.OnRespawn += playerEntity.RefreshRollbackBuffer;
             playerHealth.OnRespawn += cooldownHandler.RechargeAll;
             playerHealth.OnHealthChanged += playerHealthDisplay.DisplayHealth;
         }
@@ -62,7 +60,7 @@ namespace Mastic
         public override void OnStartServer()
         {
             base.OnStartServer();
-           // playerEntity.Initialize(entityManager);
+            playerHealth.OnRespawn += playerEntity.RefreshRollbackBuffer;
             serverRemove.ForEach(x => Destroy(x));
             print($"{gameObject.name}: setup completed".ToUpperInvariant());
         }

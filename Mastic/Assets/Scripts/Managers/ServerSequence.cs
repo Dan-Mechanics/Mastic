@@ -10,20 +10,25 @@ namespace Mastic
         private readonly List<ServerPlayer> players = new List<ServerPlayer>();
         private EntityManager entityManager;
         private float maxConsecutiveTicks;
-        private readonly Timer syncTimer = new Timer(1f / 32f);
+   //     private readonly Timer syncTimer = new Timer(1f / 32f);
+        private float interval = 1f / 32f;
+        private float next;
         private float timer;
 
         private void Awake()
         {
             maxConsecutiveTicks = EasySettings.Current.Get<float>(nameof(maxConsecutiveTicks));
-            entityManager = FindAnyObjectByType<EntityManager>();
+            entityManager = EntityManager.Current;
         }
 
         [ServerCallback]
         private void Update()
         {
-            if (syncTimer.Tick(Time.deltaTime))
+            if (Time.time >= next)
+            {
                 entityManager.DoSync();
+                next = Time.time + interval;
+            }
 
             // USE CONSISTENT TIMER.
             timer += Time.deltaTime;

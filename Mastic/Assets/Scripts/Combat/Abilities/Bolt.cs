@@ -38,7 +38,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             cam = GameObject.FindWithTag("MainCamera").transform;
             interpolation = cam.GetComponent<ICameraInterpolation>();
-            entityManager = FindAnyObjectByType<EntityManager>();
+            entityManager = EntityManager.Current;
             pendingShootMessages = new List<ShootMessage>();
             mouseLook = GetComponent<MouseLook>();
             rb = GetComponent<Rigidbody>();

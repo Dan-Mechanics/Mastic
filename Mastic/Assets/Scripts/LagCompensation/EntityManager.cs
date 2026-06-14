@@ -1,25 +1,25 @@
 ﻿using Mirror;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Mastic
 {
     public class EntityManager : NetworkBehaviour
     {
-        public static EntityManager Current => FindAnyObjectByType<EntityManager>();
+        public static EntityManager Current => FindAnyObjectByType<EntityManager>(FindObjectsInactive.Include);
         public int MaxRecordingLength => maxRecordingLength;
         public int RollbackTick { get; private set; }
 
         [SerializeField, Min(1)] private int maxRecordingLength = default;
-        private readonly Dictionary<uint, IEntity> entities = new Dictionary<uint, IEntity>();
+        private readonly Dictionary<int, IEntity> entities = new Dictionary<int, IEntity>();
+        private float clientSyncReceiveTime;
         private float maxLerpValue;
-        private int prevCount = -1;
         private byte[] dataSizes;
-        private float syncTime;
         private int currentTick;
         private int oldestTick;
-        private byte[] netIds;
+        private int[] uniqueIds;
+        private int prevCount = -1;
+        private int nextUniqueId;
         private float[] data;
 
         private void Awake() 
@@ -46,22 +46,36 @@ namespace Mastic
                 index += pair.Value.DataSize;
             }
 
-            RpcSync(currentTick - 1, netIds, dataSizes, data);
+            RpcSync(currentTick - 1, uniqueIds, dataSizes, data);
+        }
+
+        private void LogArray<T>(T[] array)
+        {
+            print($"sending array of Length {array.Length}");
+            for (int i = 0; i < array.Length; i++)
+            {
+                print($"{i}: {array[i]}");
+            }
         }
 
         [ClientRpc]
-        private void RpcSync(int tick, byte[] netIds, byte[] dataSizes, float[] data)
+        private void RpcSync(int tick, int[] uniqueIds, byte[] dataSizes, float[] data)
         {
             RemoveNullEntities();
+           // netIdentity.id
+            Debug.Log($"NETID {netId} SPEAKING !! count of shit is {uniqueIds.Length}");
+            LogArray(uniqueIds);
+           LogArray(dataSizes);
+            LogArray(data);
 
             RollbackTick = tick;
-            syncTime = Time.time;
+            clientSyncReceiveTime = Time.time;
 
             int index = 0;
-            for (int i = 0; i < netIds.Length; i++)
+            for (int i = 0; i < uniqueIds.Length; i++)
             {
-                if (entities.ContainsKey(netIds[i]))
-                    entities[netIds[i]].ReadFromData(index, data, syncTime);
+                if (entities.ContainsKey(uniqueIds[i]))
+                    entities[uniqueIds[i]].ReadFromData(index, data, clientSyncReceiveTime);
 
                 index += dataSizes[i];
             }
@@ -76,17 +90,26 @@ namespace Mastic
             }
         }
 
-        public void Register(uint netId, IEntity entity)
-        {
-            if (entity == null)
-                return;
+        [Server]
+        public int FetchUniqueId()
+            => nextUniqueId++;
 
-            entities[netId] = entity;
+        public void Register(int uniqueId, IEntity entity)
+        {
+            Debug.LogWarning($"netidi{uniqueId}");
+            if (entities.ContainsKey(uniqueId) || entity == null)
+            {
+                Debug.LogError($"Register failed for {uniqueId}.");
+                return;
+            }
+            
+            // POSSIBLY ADD INIT HERE FOR DECOUPLING.
+            entities[uniqueId] = entity;
         }
 
         private void Reallocate()
         {
-            netIds = new byte[entities.Count];
+            uniqueIds = new int[entities.Count];
             dataSizes = new byte[entities.Count];
 
             int i = 0;
@@ -94,23 +117,23 @@ namespace Mastic
             foreach (var pair in entities)
             {
                 totalDataLength += pair.Value.DataSize;
-                netIds[i] = (byte)pair.Key;
+                uniqueIds[i] = pair.Key;
                 dataSizes[i] = pair.Value.DataSize;
                 i++;
             }
 
             data = new float[totalDataLength];
+            Debug.LogWarning($"ent counts {entities.Count}");
         }
 
         [Client]
-        public float GetUnlocalLerpValue()
-        {
-            return Mathf.Clamp(Time.time - syncTime, 0f, maxLerpValue);
-        }
+        public float GetUnlocalLerpValue() 
+            => Mathf.Clamp((Time.time - clientSyncReceiveTime) * 32f, 0f, maxLerpValue);
 
         [Server]
         public void DoRollback(int tick, float lerpValue)
         {
+            // THIS IS LITERALLY IMPOSSIBLE BEHAVIOUR, RETURN ON SIGHT.
             if (tick >= currentTick)
                 return;
             
