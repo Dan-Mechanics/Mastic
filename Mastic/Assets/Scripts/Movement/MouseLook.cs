@@ -8,7 +8,7 @@ namespace Mastic
         public float RotationX => rotation.x;
         public float RotationY => rotation.y;
 
-        [Tooltip("Use this to define the spawn rotation.")]
+        [Tooltip("Use this to set the spawn rotation.")]
         [SerializeField] private Vector2 rotation = default;
         private float sensitivity = 1f;
         private Transform eyes;

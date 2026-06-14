@@ -45,11 +45,7 @@ namespace Mastic
         [Server]
         public void ReturnToPresent()
         {
-            for (int i = 0; i < entities.Count; i++)
-            {
-                entities[i].ReturnToPresent();
-            }
-
+            entities.ForEach(x => x.ReturnToPresent());
             Physics.SyncTransforms();
         }
 
@@ -75,7 +71,7 @@ namespace Mastic
         /// This should be called first in the sequence.
         /// </summary>
         [Server]
-        public void RemoveNullEntities()
+        public void CleanNullEntities()
         {
             for (int i = entities.Count - 1; i >= 0; i--)
             {

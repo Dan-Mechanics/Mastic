@@ -1,4 +1,6 @@
 using Mirror;
+using Newtonsoft.Json.Linq;
+using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,24 +18,21 @@ namespace SyncSystem
     {
         public byte DataSize => 9;
 
-        private Vector3 prevPosition;
-        private Vector3 currPosition;
-        private Vector3 prevRotation;
-        private Vector3 currRotation;
-        private Vector3 prevScale;
-        private Vector3 currScale;
+        private Frame current;
+        private Frame previous;
         private float maxLerpValue;
         private float time;
 
         private void Awake()
         {
             maxLerpValue = Mastic.EasySettings.Current.Get<float>(nameof(maxLerpValue));
-            prevPosition = transform.localPosition;
-            currPosition = prevPosition;
-            prevRotation = transform.localEulerAngles;
-            currRotation = prevRotation;
-            prevScale = transform.localScale;
-            currScale = prevScale;
+            current = new Frame()
+            {
+                pos = transform.localPosition,
+                rot = transform.localRotation,
+                scale = transform.localScale
+            };
+            previous = current;
         }
 
         private void Update()
@@ -44,22 +43,26 @@ namespace SyncSystem
 
         private void SetAsLerpValue(float value)
         {
-            transform.localPosition = Vector3.LerpUnclamped(prevPosition, currPosition, value);
-            transform.localEulerAngles = Vector3.LerpUnclamped(prevRotation, currRotation, value);
-            transform.localScale = Vector3.LerpUnclamped(prevScale, currScale, value);
+            Frame frame = Frame.LerpUnclamped(previous, current, value);
+            SetAs(frame);
+        }
+
+        private void SetAs(Frame frame)
+        {
+            transform.SetLocalPositionAndRotation(frame.pos, frame.rot);
+            transform.localScale = frame.scale;
         }
 
         public void ReadFromData(int index, float[] data, float time)
         {
             this.time = time;
-            prevPosition = currPosition;
-            currPosition = new Vector3(data[index], data[index + 1], data[index + 2]);
-
-            prevRotation = currRotation;
-            currRotation = new Vector3(data[index + 3], data[index + 4], data[index + 5]);
-
-            prevScale = currScale;
-            currScale = new Vector3(data[index + 6], data[index + 7], data[index + 8]);
+            previous = current;
+            current = new Frame()
+            {
+                pos = new Vector3(data[index], data[index + 1], data[index + 2]),
+                rot = Quaternion.Euler(data[index + 3], data[index + 4], data[index + 5]),
+                scale = new Vector3(data[index + 6], data[index + 7], data[index + 8])
+            };
         }
 
         public void WriteToData(int index, float[] data)
@@ -73,6 +76,23 @@ namespace SyncSystem
             data[index + 6] = transform.localRotation.x;
             data[index + 7] = transform.localRotation.y;
             data[index + 8] = transform.localRotation.z;
+        }
+
+        private struct Frame
+        {
+            public Vector3 pos;
+            public Quaternion rot;
+            public Vector3 scale;
+
+            public static Frame LerpUnclamped(Frame a, Frame b, float t)
+            {
+                return new Frame()
+                {
+                    pos = Vector3.LerpUnclamped(a.pos, b.pos, t),
+                    rot = Quaternion.LerpUnclamped(a.rot, b.rot, t),
+                    scale = Vector3.LerpUnclamped(a.scale, b.scale, t),
+                };
+            }
         }
     }
 

@@ -33,7 +33,7 @@ namespace Mastic
         private void Tick() 
         {
             RemoveNullPlayers();
-            lagCompensation.RemoveNullEntities();
+            lagCompensation.CleanNullEntities();
             lagCompensation.RecordFrame();
             foreach (ServerPlayer player in players)
             {
