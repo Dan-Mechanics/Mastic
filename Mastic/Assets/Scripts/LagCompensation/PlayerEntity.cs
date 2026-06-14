@@ -11,8 +11,6 @@ namespace Mastic
     {
         public byte DataSize => 5;
 
-        [SyncVar(hook = nameof(OnReceiveUniqueId))] private int uniqueId = -1;
-
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
         [SerializeField] private Transform lookBone = default;
@@ -26,8 +24,14 @@ namespace Mastic
         private Frame[] recording;
         private Frame previous = Frame.Default;
         private Frame current = Frame.Default;
+        private int uniqueId = -1;
         private float time;
 
+        /*private void Hook(int _, int uniqueId)
+        {
+            EntityManager.Current.Register(uniqueId, this);
+        }
+*/
         private void Awake()
         {
             easySettings = EasySettings.Current;
@@ -48,10 +52,19 @@ namespace Mastic
             recording = new Frame[entityManager.MaxRecordingLength];
             uniqueId = entityManager.FetchUniqueId();
             entityManager.Register(uniqueId, this);
+           
+            Invoke(nameof(SyncUniqueId), easySettings.Get<float>("respawndelay"));
         }
 
-        private void OnReceiveUniqueId(int oldUniqueId, int newUniqueId)
-            => EntityManager.Current.Register(newUniqueId, this);
+        private void SyncUniqueId()
+            => RpcSyncUniqueId(uniqueId);
+
+        [ClientRpc]
+        private void RpcSyncUniqueId(int uniqueId)
+        {
+            this.uniqueId = uniqueId;
+            EntityManager.Current.Register(uniqueId, this);
+        }
 
         private void Update()
         {
@@ -60,6 +73,7 @@ namespace Mastic
                 return;
 
             float lerpValue = Mathf.Clamp((Time.time - time) * 32f, 0f, maxLerpValue);
+            Debug.Log(lerpValue);
             Frame lerped = Frame.LerpUnclamped(previous, current, lerpValue);
             SetAsFrame(lerped);
         }
@@ -96,7 +110,7 @@ namespace Mastic
         public void ReturnToPresent() 
             => SetAsFrame(current);
 
-        [Server]
+     //   [Server]
         public void EnableHitbox(bool value) 
             => gameObject.layer = value ? playerLayer : intangibleLayer;
          
@@ -123,7 +137,7 @@ namespace Mastic
             data[index + 4] = mouseLook.RotationY; // TLDR: FOR PERFORMANCE. 
         }
 
-        [Server]
+      //  [Server]
         public void SavePresent()
         {
             current = new Frame()
@@ -141,6 +155,9 @@ namespace Mastic
             SetAsFrame(frame);
         }
 
+        /// <summary>
+        /// Add: pos diff > X == teleport.
+        /// </summary>
         private struct Frame
         {
             public Vector3 pos;
