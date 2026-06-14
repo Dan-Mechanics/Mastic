@@ -8,14 +8,14 @@ namespace Mastic
     {
         public int PlayerCount => players.Count;
         private readonly List<ServerPlayer> players = new List<ServerPlayer>();
-        private LagCompensation lagCompensation;
+        private EntityManager entityManager;
         private float maxConsecutiveTicks;
         private float timer;
 
         private void Awake()
         {
             maxConsecutiveTicks = EasySettings.Current.Get<float>(nameof(maxConsecutiveTicks));
-            lagCompensation = FindAnyObjectByType<LagCompensation>();
+            entityManager = FindAnyObjectByType<EntityManager>();
         }
 
         [ServerCallback]
@@ -33,8 +33,8 @@ namespace Mastic
         private void Tick() 
         {
             RemoveNullPlayers();
-            lagCompensation.CleanNullEntities();
-            lagCompensation.RecordFrame();
+            entityManager.RemoveNullEntities();
+            entityManager.SavePresent();
             foreach (ServerPlayer player in players)
             {
                 player.entity.EnableHitbox(false);
@@ -52,7 +52,7 @@ namespace Mastic
                 player.entity.EnableHitbox(true);
             }
 
-            lagCompensation.ReturnToPresent();
+            entityManager.ReturnToPresent();
 
             // ===
 

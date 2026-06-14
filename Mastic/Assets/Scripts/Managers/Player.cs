@@ -19,7 +19,7 @@ namespace Mastic
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
-        private LagCompensation lagCompensation;
+        private EntityManager lagCompensation;
         private ClientSequence clientSequence;
         private CooldownDisplay cooldownDisplay;
         private DebugHandler debugHandler;
@@ -37,7 +37,7 @@ namespace Mastic
             clientSequence = GetComponent<ClientSequence>();
             adaptiveTickrate = GetComponent<AdaptiveTickrate>();
             playerEntity = GetComponent<PlayerEntity>();
-            lagCompensation = FindAnyObjectByType<LagCompensation>();
+            lagCompensation = FindAnyObjectByType<EntityManager>();
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
             cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();

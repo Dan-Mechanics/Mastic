@@ -27,7 +27,7 @@ namespace Mastic
         private List<ShootMessage> pendingShootMessages;
         private ShootMessage shootMessage;
         private ICameraInterpolation cameraInterpolation;
-        private LagCompensation lagCompensation;
+        private EntityManager lagCompensation;
         private CooldownHandler cooldownHandler;
         private int cooldownIndex;
         private MouseLook mouseLook;
@@ -45,7 +45,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             cam = GameObject.FindWithTag("MainCamera").transform;
             cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
-            lagCompensation = FindAnyObjectByType<LagCompensation>();
+            lagCompensation = FindAnyObjectByType<EntityManager>();
             cooldownHandler = GetComponent<CooldownHandler>();
             pendingShootMessages = new List<ShootMessage>();
             coll = GetComponentInChildren<Collider>();

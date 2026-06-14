@@ -12,89 +12,11 @@ namespace SyncSystem
         byte DataSize { get; }
         void ReadFromData(int index, float[] data, float time);
         void WriteToData(int index, float[] data);
+        void RecordFrame(int tick);
+        void SetAsTick(int tick, float lerpValue);
+        void ReturnToPresent();
     }
 
-    public class ExampleEntity : NetworkBehaviour, ISyncEntity
-    {
-        public byte DataSize => 9;
-
-        private Frame current;
-        private Frame previous;
-        private float maxLerpValue;
-        private float time;
-
-        private void Awake()
-        {
-            maxLerpValue = Mastic.EasySettings.Current.Get<float>(nameof(maxLerpValue));
-            current = new Frame()
-            {
-                pos = transform.localPosition,
-                rot = transform.localRotation,
-                scale = transform.localScale
-            };
-            previous = current;
-        }
-
-        private void Update()
-        {
-            float value = Mathf.Clamp(Time.time - time, 0f, maxLerpValue);
-            SetAsLerpValue(value);
-        }
-
-        private void SetAsLerpValue(float value)
-        {
-            Frame frame = Frame.LerpUnclamped(previous, current, value);
-            SetAs(frame);
-        }
-
-        private void SetAs(Frame frame)
-        {
-            transform.SetLocalPositionAndRotation(frame.pos, frame.rot);
-            transform.localScale = frame.scale;
-        }
-
-        public void ReadFromData(int index, float[] data, float time)
-        {
-            this.time = time;
-            previous = current;
-            current = new Frame()
-            {
-                pos = new Vector3(data[index], data[index + 1], data[index + 2]),
-                rot = Quaternion.Euler(data[index + 3], data[index + 4], data[index + 5]),
-                scale = new Vector3(data[index + 6], data[index + 7], data[index + 8])
-            };
-        }
-
-        public void WriteToData(int index, float[] data)
-        {
-            data[index] = transform.localPosition.x;
-            data[index + 1] = transform.localPosition.y;
-            data[index + 2] = transform.localPosition.z;
-            data[index + 3] = transform.localEulerAngles.x;
-            data[index + 4] = transform.localEulerAngles.y;
-            data[index + 5] = transform.localEulerAngles.z;
-            data[index + 6] = transform.localRotation.x;
-            data[index + 7] = transform.localRotation.y;
-            data[index + 8] = transform.localRotation.z;
-        }
-
-        private struct Frame
-        {
-            public Vector3 pos;
-            public Quaternion rot;
-            public Vector3 scale;
-
-            public static Frame LerpUnclamped(Frame a, Frame b, float t)
-            {
-                return new Frame()
-                {
-                    pos = Vector3.LerpUnclamped(a.pos, b.pos, t),
-                    rot = Quaternion.LerpUnclamped(a.rot, b.rot, t),
-                    scale = Vector3.LerpUnclamped(a.scale, b.scale, t),
-                };
-            }
-        }
-    }
 
     /// <summary>
     /// Requirements:
