@@ -8,14 +8,13 @@ namespace Mastic
     /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
-        public int RollbackTick { get; private set; }
-
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
         [SerializeField] private Transform lookBone = default;
         private MouseLook mouseLook;
         private int intangibleLayer;
         private int playerLayer;
+        private int displayedTick;
         private Frame[] recording;
         private Frame present;
 
@@ -45,12 +44,15 @@ namespace Mastic
                 lookBone.localRotation = Quaternion.Euler(0f, 0f, -frame.xRotation);
         }
 
+        public int GetDisplayedTick()
+            => displayedTick;
+
         [Server]
         public void RecordFrame(int tick)
         {
             present.SetValues(transform.position, mouseLook.RotationX, mouseLook.RotationY);
             recording[tick % recording.Length] = present;
-            RollbackTick = tick;
+            displayedTick = tick;
             RpcSendAuthState(present, tick);
         }
 
@@ -61,7 +63,7 @@ namespace Mastic
         [ClientRpc(channel = Channels.Unreliable)]
         private void RpcSendAuthState(Frame frame, int tick)
         {
-            RollbackTick = tick;
+            displayedTick = tick;
             if (!isLocalPlayer)
                 SetAsFrame(frame);
         }
@@ -86,6 +88,10 @@ namespace Mastic
         public void EnableHitbox(bool value) 
             => gameObject.layer = value ? playerLayer : intangibleLayer;
 
+        /// <summary>
+        /// Player could have active bool in the future.
+        /// Right now this is not relevant.
+        /// </summary>
         private struct Frame
         {
             public Vector3 position;

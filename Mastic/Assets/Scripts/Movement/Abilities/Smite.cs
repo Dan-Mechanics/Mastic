@@ -56,7 +56,8 @@ namespace Mastic
             CmdRequestSmite(inputTick);
         }
 
-        private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
+        private bool IsAbilityActive(int tick) 
+            => tick >= startingTick && tick <= endingTick;
 
         [Command]
         private void CmdRequestSmite(int inputTick)
@@ -134,10 +135,12 @@ namespace Mastic
         }
 
         [TargetRpc]
-        private void TargetCast(NetworkConnectionToClient conn, int inputTick) => Cast(inputTick);
+        private void TargetCast(NetworkConnectionToClient conn, int inputTick) 
+            => Cast(inputTick);
 
         [TargetRpc]
-        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
+        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) 
+            => OnAuthoritativeDamage?.Invoke(damage);
 
         [Server]
         public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)

@@ -53,9 +53,6 @@ namespace Mastic
             }
 
             lagCompensation.ReturnToPresent();
-
-            // ===
-
             foreach (ServerPlayer player in players)
             {
                 player.networkMovement.DoServerTick();

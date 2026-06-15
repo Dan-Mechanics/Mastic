@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Mastic
 {
     /// <summary>
-    /// Lag compensation for scale and active.
+    /// Lag compensation for scale, active.
     /// </summary>
     public class BuildableEntity : MonoBehaviour, IEntity
     {

@@ -45,11 +45,7 @@ namespace Mastic
         [Server]
         public void ReturnToPresent()
         {
-            for (int i = 0; i < entities.Count; i++)
-            {
-                entities[i].ReturnToPresent();
-            }
-
+            entities.ForEach(x => x.ReturnToPresent());
             Physics.SyncTransforms();
         }
 

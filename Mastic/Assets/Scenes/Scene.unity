@@ -1284,23 +1284,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 284187157}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1379806353 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3129894886814924649, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-  m_PrefabInstance: {fileID: 1861253640}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1379806359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1379806353}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30575d744a690e142b7bcd916b12427c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1568345398
 GameObject:
   m_ObjectHideFlags: 0
@@ -1607,18 +1590,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: cam
       objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_BackGroundColor.b
-      value: 0.6886792
-      objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_BackGroundColor.g
-      value: 0.45369226
-      objectReference: {fileID: 0}
-    - target: {fileID: 3129894886814924651, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      propertyPath: m_BackGroundColor.r
-      value: 0.43204877
-      objectReference: {fileID: 0}
     - target: {fileID: 3129894886814924652, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.2
@@ -1659,14 +1630,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 4728821529988146515, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3129894886814924649, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1379806359}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 09adc40a4d023e24da5aaf293e81f1b7, type: 3}
 --- !u!1001 &1996114091
 PrefabInstance:
@@ -1991,30 +1958,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: playerPrefab
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: maxConnections
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: autoCreatePlayer
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: spawnPrefabs.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: 'spawnPrefabs.Array.data[0]'
-      value: 
-      objectReference: {fileID: 5940430478848424146, guid: b9f7e7a2538da3d4d87f27ee64be4430, type: 3}
-    - target: {fileID: 3229349398631652838, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
-      propertyPath: 'spawnPrefabs.Array.data[1]'
-      value: 
-      objectReference: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     - target: {fileID: 3229349398631652857, guid: 253959a23c425764b99eba90ca8b3608, type: 3}
       propertyPath: m_Name
       value: simple_network_manager

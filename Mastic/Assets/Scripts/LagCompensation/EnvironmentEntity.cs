@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Mastic
 {
     /// <summary>
-    /// Lag compensation for position and rotation.
+    /// Lag compensation for pos, rot.
     /// </summary>
     public class EnvironmentEntity : NetworkBehaviour, IEntity
     {

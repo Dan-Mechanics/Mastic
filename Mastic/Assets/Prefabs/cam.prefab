@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3129894886814924651}
   - component: {fileID: 3129894886814924650}
   - component: {fileID: 443060642}
-  - component: {fileID: 4728821529988146515}
+  - component: {fileID: 611556208067234563}
   m_Layer: 8
   m_Name: cam
   m_TagString: MainCamera
@@ -45,7 +45,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.8773585, g: 0.8773585, b: 0.8773585, a: 1}
+  m_BackGroundColor: {r: 0.43204877, g: 0.45369226, b: 0.6886792, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -110,7 +110,7 @@ MonoBehaviour:
   padding: 175
   width: 150
   height: 25
---- !u!114 &4728821529988146515
+--- !u!114 &611556208067234563
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -119,6 +119,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 3129894886814924649}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eabf609273b4f2741a986f2075120d1e, type: 3}
+  m_Script: {fileID: 11500000, guid: 30575d744a690e142b7bcd916b12427c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

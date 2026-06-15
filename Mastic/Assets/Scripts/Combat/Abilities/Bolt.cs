@@ -70,7 +70,7 @@ namespace Mastic
                 
                 // REDUCE NO-REGS.
                 if (target.TryGetComponent(out PlayerEntity playerEntity))
-                    shootMessage.rollbackTick = playerEntity.RollbackTick;
+                    shootMessage.rollbackTick = playerEntity.GetDisplayedTick();
             }
 
             CmdShoot(shootMessage);

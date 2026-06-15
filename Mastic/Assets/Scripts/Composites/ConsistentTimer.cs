@@ -1,5 +1,8 @@
 namespace Mastic
 {
+    /// <summary>
+    /// Note: this may be broken.
+    /// </summary>
     public struct ConsistentTimer
     {
         public float interval;
