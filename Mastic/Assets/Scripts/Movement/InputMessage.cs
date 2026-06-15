@@ -16,14 +16,18 @@ namespace Mastic
         public float yRotation;
         public float lerpValue;
         public int rollbackTick;
+        public float unlocalLerpValue;
+        public bool isCleanSlate;
         public int tick;
 
-        public void SetValues(bool w, bool a, bool s, bool d, float xRotation, float yRotation, float lerpValue, int rollbackTick, int tick)
+        public void SetValues(bool w, bool a, bool s, bool d, float xRotation, float yRotation, float unlocalLerpValue, bool isCleanSlate, float lerpValue, int rollbackTick, int tick)
         {
             this.w = w;
             this.a = a;
             this.s = s;
             this.d = d;
+            this.unlocalLerpValue = unlocalLerpValue;
+            this.isCleanSlate = isCleanSlate;
             this.xRotation = xRotation;
             this.yRotation = yRotation;
             this.lerpValue = lerpValue;

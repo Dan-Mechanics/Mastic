@@ -114,7 +114,7 @@ namespace Mastic
         [Client]
         public void ReadFromDataReal(int index, float[] data, float time)
         {
-            previous = current;
+            MakeCleanSlate();
             current = new Frame()
             {
                 pos = new Vector3(data[index], data[index + 1], data[index + 2]),
@@ -124,10 +124,8 @@ namespace Mastic
         }
 
         [Client]
-        public void ReadFromData(int index, float[] data, float time)
-        {
-            previous = current;
-        }
+        public void MakeCleanSlate()
+            => previous = current;
 
         [Server]
         public void WriteToData(int index, float[] data)
@@ -151,8 +149,11 @@ namespace Mastic
         }
 
         [Server]
-        public void DoRollback(int prevTick, int currTick, float lerpValue)
+        public void DoRollback(int prevTick, int currTick, float lerpValue, bool isCleanSlate)
         {
+            if (isCleanSlate)
+                prevTick = currTick;
+
             Frame frame = Frame.Lerp(recording[prevTick % recording.Length], recording[currTick % recording.Length], lerpValue);
             SetAsFrame(frame);
         }

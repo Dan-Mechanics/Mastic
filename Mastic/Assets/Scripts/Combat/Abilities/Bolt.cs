@@ -58,7 +58,7 @@ namespace Mastic
 
             cooldownHandler.Cast(cooldownIndex);
             shootMessage.debugEnemyPos = Vector3.zero;
-            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, unlocalLerpValue, inputTick, rollbackTick);
+            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, entityManager.IsCleanSlate, interpolation.LerpValue, unlocalLerpValue, inputTick, rollbackTick);
             if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
             {
                 Transform target = hit.transform.root;
@@ -89,7 +89,7 @@ namespace Mastic
         private void Shoot(ShootMessage shootMessage)
         {
             // RECREATE THE SHOT CONDITIONS.
-            entityManager.DoRollback(shootMessage.rollbackTick, shootMessage.unlocalLerpValue);
+            entityManager.DoRollback(shootMessage.rollbackTick, shootMessage.unlocalLerpValue, shootMessage.isCleanSlate);
             mouseLook.SetRotationDirectly(shootMessage.xRotation, shootMessage.yRotation);
             interpolation.Interject(origin, prevOrigin, velocity);
             interpolation.SetValue(shootMessage.localLerpValue);

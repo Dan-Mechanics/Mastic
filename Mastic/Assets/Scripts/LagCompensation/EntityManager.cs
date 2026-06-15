@@ -1,15 +1,12 @@
 ﻿using Mirror;
-using Mirror.BouncyCastle.Bcpg;
-using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Xml;
 using UnityEngine;
 
 namespace Mastic
 {
     public class EntityManager : NetworkBehaviour
     {
+        public bool IsCleanSlate => isCleanSlate;
         public static EntityManager Current => FindAnyObjectByType<EntityManager>(FindObjectsInactive.Include);
         public int MaxRecordingLength => maxRecordingLength;
         public int RollbackTick { get; private set; }
@@ -26,8 +23,10 @@ namespace Mastic
         private int nextUniqueId;
         private float[] data;
         private float time;
-        private float interval = 1 / 32f;
+        private const float INTERVAL = 1 / 32f;
+        public const int LERP_BUFFER_SIZE = 4;
         private float next;
+        private bool isCleanSlate;
 
         private void Awake() 
             => maxLerpValue = EasySettings.Current.Get<float>(nameof(maxLerpValue));
@@ -61,25 +60,27 @@ namespace Mastic
             if (!isClient)
                 return;
 
-            if (buffer.Count > 3 && Time.time > next)
+            if (buffer.Count > LERP_BUFFER_SIZE && Time.time > next)
             {
-                next = Time.time + interval;
+                next = Time.time + INTERVAL;
                 var packet = buffer.Dequeue();
-                var _tick = packet.tick;
-                var _uniqueIds = packet.uniqueIds;
-                var _data = packet.data;
-                var _dataSizes = packet.dataSizes;
+                var tick = packet.tick;
+                var uniqueIds = packet.uniqueIds;
+                var data = packet.data;
+                var dataSizes = packet.dataSizes;
 
                 RemoveNullEntities();
-                RollbackTick = _tick;
+                RollbackTick = tick;
                 int index = 0;
-                for (int i = 0; i < _uniqueIds.Length; i++)
+                for (int i = 0; i < uniqueIds.Length; i++)
                 {
-                    if (entities.ContainsKey(_uniqueIds[i]))
-                        entities[_uniqueIds[i]].ReadFromDataReal(index, _data, time);
+                    if (entities.ContainsKey(uniqueIds[i]))
+                        entities[uniqueIds[i]].ReadFromDataReal(index, data, time);
 
-                    index += _dataSizes[i];
+                    index += dataSizes[i];
                 }
+
+                isCleanSlate = false;
             }
         }
 
@@ -94,35 +95,14 @@ namespace Mastic
                 dataSizes = dataSizes
             });
 
-              int tempIndex = 0;
-              time = Time.time;
-              for (int i = 0; i < uniqueIds.Length; i++)
-              {
-                  if (entities.ContainsKey(uniqueIds[i]))
-                      entities[uniqueIds[i]].ReadFromData(tempIndex, data, time);
-            
-                  tempIndex += dataSizes[i];
-              }
-
-            /*if (buffer.Count > 4)
+            time = Time.time;
+            for (int i = 0; i < uniqueIds.Length; i++)
             {
-                var packet = buffer.Dequeue();
-                int _tick = packet.tick;
-                int[] _uniqueIds = packet.uniqueIds;
-                float[] _data = packet.data;
-                byte[] _dataSizes = packet.dataSizes;
+                if (entities.ContainsKey(uniqueIds[i]))
+                    entities[uniqueIds[i]].MakeCleanSlate();
+            }
 
-                RemoveNullEntities();
-                RollbackTick = _tick;
-                int index = 0;
-                for (int i = 0; i < _uniqueIds.Length; i++)
-                {
-                    if (entities.ContainsKey(_uniqueIds[i]))
-                        entities[_uniqueIds[i]].ReadFromDataReal(index, _data, time);
-
-                    index += _dataSizes[i];
-                }
-            }*/
+            isCleanSlate = true;
         }
 
         private struct Packet
@@ -182,8 +162,13 @@ namespace Mastic
         public float GetUnlocalLerpValue()
             => Mathf.Clamp((Time.time - time) * 32f, 0f, maxLerpValue);
 
+        public static float Increment(float value, float maxLerpValue)
+        {
+            return Mathf.Clamp(value + (1f / 32f), 0f, maxLerpValue);
+        }
+
         [Server]
-        public void DoRollback(int tick, float lerpValue)
+        public void DoRollback(int tick, float lerpValue, bool isCleanSlate)
         {
             // THIS IS LITERALLY IMPOSSIBLE BEHAVIOUR, RETURN ON SIGHT.
             if (tick >= currentTick)
@@ -199,7 +184,7 @@ namespace Mastic
 
             foreach (var pair in entities)
             {
-                pair.Value.DoRollback(prevtick, tick, lerpValue);
+                pair.Value.DoRollback(prevtick, tick, lerpValue, isCleanSlate);
             }
 
             Physics.SyncTransforms();

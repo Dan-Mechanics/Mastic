@@ -65,7 +65,7 @@ namespace Mastic
                 OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier} | fps: {Mathf.RoundToInt(1f / Time.smoothDeltaTime)}");
                 for (int i = 0; i < clientPacketMultiplier; i++)
                 {
-                    networkMovement.DoLocalTick(entityManager.RollbackTick);
+                    networkMovement.DoLocalTick(entityManager.RollbackTick, entityManager.GetUnlocalLerpValue(), entityManager.IsCleanSlate);
                     cooldownHandler.Charge();
                 }
             }

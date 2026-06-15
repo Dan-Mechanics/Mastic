@@ -10,6 +10,7 @@ namespace Mastic
         public float localLerpValue;
         public float unlocalLerpValue;
         public int inputTick;
+        public bool isCleanSlate;
         public int rollbackTick;
 
         /// <summary>
@@ -17,10 +18,11 @@ namespace Mastic
         /// </summary>
         public Vector3 debugEnemyPos;
 
-        public void SetValues(Vector3 origin, float xRotation, float yRotation, float lerpValue, float unlocalLerpValue, int inputTick, int rollbackTick)
+        public void SetValues(Vector3 origin, float xRotation, float yRotation, bool isCleanSlate, float lerpValue, float unlocalLerpValue, int inputTick, int rollbackTick)
         {
             this.origin = origin;
             this.xRotation = xRotation;
+            this.isCleanSlate = isCleanSlate;
             this.yRotation = yRotation;
             this.localLerpValue = lerpValue;
             this.unlocalLerpValue = unlocalLerpValue;

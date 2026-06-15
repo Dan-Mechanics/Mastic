@@ -39,7 +39,7 @@ namespace Mastic
         private Transform eyes;
         private MouseLook mouseLook;
         private AdaptiveTickrate adaptiveTickrate;
-        private ICameraInterpolation cameraInterpolation;
+        private ICameraInterpolation interpolation;
 
         private byte movementIndex;
         private IMovement movement;
@@ -64,7 +64,7 @@ namespace Mastic
 
         public void Initialize(int standardTickrate, ICameraInterpolation cameraInterpolation)
         {
-            this.cameraInterpolation = cameraInterpolation;
+            this.interpolation = cameraInterpolation;
             movementAbilities = GetComponents<IMovementAbility>().ToList();
             standardInterval = 1f / standardTickrate;
 
@@ -110,7 +110,7 @@ namespace Mastic
         }
 
         [Client]
-        public void DoLocalTick(int rollbackTick)
+        public void DoLocalTick(int rollbackTick, float unlocalLerpValue, bool isCleanSlate)
         {
             movementAbilities.ForEach(x => x.DoLocalTick(InputTick, movement));
 
@@ -124,8 +124,8 @@ namespace Mastic
             }
 
             int index = InputTick % bufferSize;
-            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY,
-                cameraInterpolation.LerpValue, rollbackTick, InputTick);
+            inputBuffer[index].SetValues(w, a, s, d, mouseLook.RotationX, mouseLook.RotationY, unlocalLerpValue, isCleanSlate,
+                interpolation.LerpValue, rollbackTick, InputTick);
             Move(inputBuffer[index], true);
 
             stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
@@ -190,6 +190,7 @@ namespace Mastic
         {
             InputMessage inputMessage = GetPreviousInputMessage();
             inputMessage.rollbackTick++;
+            inputMessage.unlocalLerpValue = EntityManager.Increment(inputMessage.unlocalLerpValue, interpolation.MaxLerpValue);
             inputMessage.tick++;
             return inputMessage;
         }
@@ -330,7 +331,7 @@ namespace Mastic
                 Vector3 prev = eyes.position;
                 Move(inputBuffer[index], false);
 
-                cameraInterpolation.Interject(eyes.position, prev, rb.linearVelocity);
+                interpolation.Interject(eyes.position, prev, rb.linearVelocity);
                 stateBuffer[index].SetValues(transform.position, rb.linearVelocity, movementIndex, inputBuffer[index]);
 
                 tickToProcess++;
@@ -342,8 +343,8 @@ namespace Mastic
         {
             // RECREATE CAM POSITION IN THIS MOMENT.
             mouseLook.SetRotationDirectly(previousInputMessage.xRotation, previousInputMessage.yRotation);
-            cameraInterpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
-            cameraInterpolation.SetValue(previousInputMessage.lerpValue);
+            interpolation.Interject(eyes.position, prevEyePos, rb.linearVelocity);
+            interpolation.SetValue(previousInputMessage.lerpValue);
             movementAbilities.ForEach(x => x.CheckAgainstTickServer(previousInputMessage.tick, movement, ServerTick));
             prevEyePos = eyes.position;
 
@@ -372,7 +373,7 @@ namespace Mastic
             // BECAUSE OTHERWISE YOU GET OUT-OF-ORDER BUGS.
 
             if (applyToInterpolation)
-                cameraInterpolation.Apply(eyes.position, rb.linearVelocity);
+                interpolation.Apply(eyes.position, rb.linearVelocity);
         }
     }
 }

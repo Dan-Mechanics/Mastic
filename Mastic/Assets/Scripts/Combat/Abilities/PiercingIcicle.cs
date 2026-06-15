@@ -75,7 +75,7 @@ namespace Mastic
 
             OnPredictDamage?.Invoke(damage);
             cooldownHandler.Cast(cooldownIndex);
-            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, unlocalLerpValue, inputTick, rollbackTick);
+            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, entityManager.IsCleanSlate, interpolation.LerpValue, unlocalLerpValue, inputTick, rollbackTick);
             CmdShoot(shootMessage);
 
             // CONSIDER STORING EACH PROJECTILE WITH AN
@@ -118,7 +118,7 @@ namespace Mastic
             int tickCount = entityManager.GetProjectileRollbackTickCount(ref shootMessage.rollbackTick);
             for (int i = 0; i < tickCount; i++)
             {
-                entityManager.DoRollback(shootMessage.rollbackTick + i, shootMessage.unlocalLerpValue);
+                entityManager.DoRollback(shootMessage.rollbackTick + i, shootMessage.unlocalLerpValue, shootMessage.isCleanSlate);
                 if (!Physics.SphereCast(projectileOrigin, radius, projectileVelocity.normalized, out RaycastHit hit, projectileVelocity.magnitude * standardInterval, mask, QueryTriggerInteraction.Ignore))
                 {
                     // HAVEN'T HIT SOMETHING YET, INCREMENT POSITION.
