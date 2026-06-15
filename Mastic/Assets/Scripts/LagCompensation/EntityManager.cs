@@ -12,7 +12,7 @@ namespace Mastic
 
         [SerializeField, Min(1)] private int maxRecordingLength = default;
         private readonly Dictionary<int, IEntity> entities = new Dictionary<int, IEntity>();
-        private float time;
+        private readonly Queue<Packet> buffer = new Queue<Packet>();
         private float maxLerpValue;
         private byte[] dataSizes;
         private int currentTick;
@@ -21,9 +21,40 @@ namespace Mastic
         private int prevCount = -1;
         private int nextUniqueId;
         private float[] data;
+        private bool isDrainingBuffer;
+        private float time;
 
         private void Awake() 
             => maxLerpValue = EasySettings.Current.Get<float>(nameof(maxLerpValue));
+
+        private void Dequeue()
+        {
+            if (buffer.Count <= 0)
+            {
+                isDrainingBuffer = false;
+                CancelInvoke(nameof(Dequeue));
+                return;
+            }
+
+            Packet packet = buffer.Dequeue();
+            int tick = packet.tick;
+            int[] uniqueIds = packet.uniqueIds;
+            float[] data = packet.data;
+            byte[] dataSizes = packet.dataSizes;
+
+            RemoveNullEntities();
+            RollbackTick = tick;
+            time = Time.time;
+
+            int index = 0;
+            for (int i = 0; i < uniqueIds.Length; i++)
+            {
+                if (entities.ContainsKey(uniqueIds[i]))
+                    entities[uniqueIds[i]].ReadFromData(index, data, time);
+
+                index += dataSizes[i];
+            }
+        }
 
         /// <summary>
         /// Called every 32th of a second, not more than once per frame.
@@ -52,18 +83,27 @@ namespace Mastic
         [ClientRpc]
         private void RpcSync(int tick, int[] uniqueIds, byte[] dataSizes, float[] data)
         {
-            RemoveNullEntities();
-            RollbackTick = tick;
-            time = Time.time;
-
-            int index = 0;
-            for (int i = 0; i < uniqueIds.Length; i++)
+            buffer.Enqueue(new Packet()
             {
-                if (entities.ContainsKey(uniqueIds[i]))
-                    entities[uniqueIds[i]].ReadFromData(index, data, time);
+                tick = tick,
+                uniqueIds = uniqueIds,
+                data = data,
+                dataSizes = dataSizes
+            });
 
-                index += dataSizes[i];
+            if (buffer.Count > 4 && !isDrainingBuffer)
+            {
+                isDrainingBuffer = true;
+                InvokeRepeating(nameof(Dequeue), 0f, 1f / 28f);
             }
+        }
+
+        private struct Packet
+        {
+            public int tick;
+            public int[] uniqueIds;
+            public float[] data;
+            public byte[] dataSizes;
         }
 
         public void RemoveNullEntities()

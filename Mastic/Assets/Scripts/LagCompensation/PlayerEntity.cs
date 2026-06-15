@@ -117,20 +117,12 @@ namespace Mastic
           //  Debug.LogWarning($"new {(time - this.time) * 32f}");
             this.time = time;
             previous = current;
-            buffer.Enqueue(new Frame()
+            current = new Frame()
             {
                 pos = new Vector3(data[index], data[index + 1], data[index + 2]),
                 localEyesRot = Quaternion.AngleAxis(data[index + 3], Vector3.right),
                 rot = Quaternion.AngleAxis(data[index + 4], Vector3.up)
-            });
-
-            // in ovewatch this buffer shrinks and grows
-            // based on network stability, this causes noregs.
-            // this is an example number.
-            if (buffer.Count > 3)
-            {
-                current = buffer.Dequeue();
-            }
+            };
         }
 
         [Server]
@@ -162,7 +154,7 @@ namespace Mastic
         }
 
         /// <summary>
-        /// Add: pos diff > X == teleport.
+        /// Add: pos diff > some_value == teleport.
         /// </summary>
         private struct Frame
         {
