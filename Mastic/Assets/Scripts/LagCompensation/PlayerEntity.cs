@@ -26,11 +26,11 @@ namespace Mastic
         private int intangibleLayer;
         private float maxLerpValue;
         private int playerLayer;
-        private float time;
+      //  private float time;
         private Frame[] recording;
         private Frame previous = Frame.Default;
         private Frame current = Frame.Default;
-        private readonly Queue<Frame> buffer = new Queue<Frame>();   
+    //    private readonly Queue<Frame> buffer = new Queue<Frame>();   
 
         private void Awake()
         {
@@ -68,7 +68,7 @@ namespace Mastic
             // use time float here for better decoupling.
             float lerpValue = entityManager.GetUnlocalLerpValue();
            // Debug.Log(lerpValue);
-            Frame lerped = Frame.LerpUnclamped(previous, current, lerpValue);
+            Frame lerped = Frame.Lerp(previous, current, lerpValue);
             SetAsFrame(lerped);
         }
 
@@ -112,10 +112,8 @@ namespace Mastic
             => gameObject.layer = value ? playerLayer : intangibleLayer;
          
         [Client]
-        public void ReadFromData(int index, float[] data, float time)
+        public void ReadFromDataReal(int index, float[] data, float time)
         {
-          //  Debug.LogWarning($"new {(time - this.time) * 32f}");
-            this.time = time;
             previous = current;
             current = new Frame()
             {
@@ -123,6 +121,12 @@ namespace Mastic
                 localEyesRot = Quaternion.AngleAxis(data[index + 3], Vector3.right),
                 rot = Quaternion.AngleAxis(data[index + 4], Vector3.up)
             };
+        }
+
+        [Client]
+        public void ReadFromData(int index, float[] data, float time)
+        {
+            previous = current;
         }
 
         [Server]
@@ -149,7 +153,7 @@ namespace Mastic
         [Server]
         public void DoRollback(int prevTick, int currTick, float lerpValue)
         {
-            Frame frame = Frame.LerpUnclamped(recording[prevTick % recording.Length], recording[currTick % recording.Length], lerpValue);
+            Frame frame = Frame.Lerp(recording[prevTick % recording.Length], recording[currTick % recording.Length], lerpValue);
             SetAsFrame(frame);
         }
 
@@ -169,13 +173,13 @@ namespace Mastic
                 localEyesRot = Quaternion.identity
             };
 
-            public static Frame LerpUnclamped(Frame a, Frame b, float t)
+            public static Frame Lerp(Frame a, Frame b, float t)
             {
                 return new Frame()
                 {
-                    pos = Vector3.LerpUnclamped(a.pos, b.pos, t),
-                    rot = Quaternion.LerpUnclamped(a.rot, b.rot, t),
-                    localEyesRot = Quaternion.LerpUnclamped(a.localEyesRot, b.localEyesRot, t),
+                    pos = Vector3.Lerp(a.pos, b.pos, t),
+                    rot = Quaternion.Lerp(a.rot, b.rot, t),
+                    localEyesRot = Quaternion.Lerp(a.localEyesRot, b.localEyesRot, t),
                 };
             }
         }

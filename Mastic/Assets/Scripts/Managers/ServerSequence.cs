@@ -11,7 +11,7 @@ namespace Mastic
         private EntityManager entityManager;
         private float maxConsecutiveTicks;
    //     private readonly Timer syncTimer = new Timer(1f / 32f);
-        private float interval = 1f / 32f;
+        private readonly float interval = 1f / 32f;
         private float next;
         private float timer;
 
@@ -26,7 +26,7 @@ namespace Mastic
         {
             if (Time.time >= next)
             {
-                entityManager.DoSync();
+                entityManager.DoServerTick();
                 next = Time.time + interval;
             }
 

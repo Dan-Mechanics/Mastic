@@ -1,5 +1,9 @@
 ﻿using Mirror;
+using Mirror.BouncyCastle.Bcpg;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Xml;
 using UnityEngine;
 
 namespace Mastic
@@ -21,46 +25,18 @@ namespace Mastic
         private int prevCount = -1;
         private int nextUniqueId;
         private float[] data;
-        private bool isDrainingBuffer;
         private float time;
+        private float interval = 1 / 32f;
+        private float next;
 
         private void Awake() 
             => maxLerpValue = EasySettings.Current.Get<float>(nameof(maxLerpValue));
-
-        private void Dequeue()
-        {
-            if (buffer.Count <= 0)
-            {
-                isDrainingBuffer = false;
-                CancelInvoke(nameof(Dequeue));
-                return;
-            }
-
-            Packet packet = buffer.Dequeue();
-            int tick = packet.tick;
-            int[] uniqueIds = packet.uniqueIds;
-            float[] data = packet.data;
-            byte[] dataSizes = packet.dataSizes;
-
-            RemoveNullEntities();
-            RollbackTick = tick;
-            time = Time.time;
-
-            int index = 0;
-            for (int i = 0; i < uniqueIds.Length; i++)
-            {
-                if (entities.ContainsKey(uniqueIds[i]))
-                    entities[uniqueIds[i]].ReadFromData(index, data, time);
-
-                index += dataSizes[i];
-            }
-        }
 
         /// <summary>
         /// Called every 32th of a second, not more than once per frame.
         /// </summary>
         [Server]
-        public void DoSync()
+        public void DoServerTick()
         {
             RemoveNullEntities();
             RecordFrames();
@@ -80,6 +56,33 @@ namespace Mastic
             RpcSync(currentTick - 1, uniqueIds, dataSizes, data);
         }
 
+        private void Update()
+        {
+            if (!isClient)
+                return;
+
+            if (buffer.Count > 3 && Time.time > next)
+            {
+                next = Time.time + interval;
+                var packet = buffer.Dequeue();
+                var _tick = packet.tick;
+                var _uniqueIds = packet.uniqueIds;
+                var _data = packet.data;
+                var _dataSizes = packet.dataSizes;
+
+                RemoveNullEntities();
+                RollbackTick = _tick;
+                int index = 0;
+                for (int i = 0; i < _uniqueIds.Length; i++)
+                {
+                    if (entities.ContainsKey(_uniqueIds[i]))
+                        entities[_uniqueIds[i]].ReadFromDataReal(index, _data, time);
+
+                    index += _dataSizes[i];
+                }
+            }
+        }
+
         [ClientRpc]
         private void RpcSync(int tick, int[] uniqueIds, byte[] dataSizes, float[] data)
         {
@@ -91,11 +94,35 @@ namespace Mastic
                 dataSizes = dataSizes
             });
 
-            if (buffer.Count > 4 && !isDrainingBuffer)
+              int tempIndex = 0;
+              time = Time.time;
+              for (int i = 0; i < uniqueIds.Length; i++)
+              {
+                  if (entities.ContainsKey(uniqueIds[i]))
+                      entities[uniqueIds[i]].ReadFromData(tempIndex, data, time);
+            
+                  tempIndex += dataSizes[i];
+              }
+
+            /*if (buffer.Count > 4)
             {
-                isDrainingBuffer = true;
-                InvokeRepeating(nameof(Dequeue), 0f, 1f / 28f);
-            }
+                var packet = buffer.Dequeue();
+                int _tick = packet.tick;
+                int[] _uniqueIds = packet.uniqueIds;
+                float[] _data = packet.data;
+                byte[] _dataSizes = packet.dataSizes;
+
+                RemoveNullEntities();
+                RollbackTick = _tick;
+                int index = 0;
+                for (int i = 0; i < _uniqueIds.Length; i++)
+                {
+                    if (entities.ContainsKey(_uniqueIds[i]))
+                        entities[_uniqueIds[i]].ReadFromDataReal(index, _data, time);
+
+                    index += _dataSizes[i];
+                }
+            }*/
         }
 
         private struct Packet
