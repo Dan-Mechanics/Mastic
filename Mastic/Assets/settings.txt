@@ -12,6 +12,7 @@ syncInterval 0.1
 fadeDuration 0.25
 cooldowndisplayinterval 0.02
 respawnDelay 0.5
+RegisterPlayerDelayed 0.1
 sensitivity 0.66
 
 jumpkey space

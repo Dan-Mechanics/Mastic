@@ -12,7 +12,7 @@ namespace Mastic
 
         [SerializeField, Min(1)] private int maxRecordingLength = default;
         private readonly Dictionary<int, IEntity> entities = new Dictionary<int, IEntity>();
-        private float clientSyncReceiveTime;
+        private float time;
         private float maxLerpValue;
         private byte[] dataSizes;
         private int currentTick;
@@ -49,33 +49,18 @@ namespace Mastic
             RpcSync(currentTick - 1, uniqueIds, dataSizes, data);
         }
 
-        private void LogArray<T>(T[] array)
-        {
-            print($"sending array of Length {array.Length}");
-            for (int i = 0; i < array.Length; i++)
-            {
-                print($"{i}: {array[i]}");
-            }
-        }
-
         [ClientRpc]
         private void RpcSync(int tick, int[] uniqueIds, byte[] dataSizes, float[] data)
         {
             RemoveNullEntities();
-           // netIdentity.id
-            Debug.Log($"NETID {netId} SPEAKING !! count of shit is {uniqueIds.Length}");
-            LogArray(uniqueIds);
-           LogArray(dataSizes);
-            LogArray(data);
-
             RollbackTick = tick;
-            clientSyncReceiveTime = Time.time;
+            time = Time.time;
 
             int index = 0;
             for (int i = 0; i < uniqueIds.Length; i++)
             {
                 if (entities.ContainsKey(uniqueIds[i]))
-                    entities[uniqueIds[i]].ReadFromData(index, data, clientSyncReceiveTime);
+                    entities[uniqueIds[i]].ReadFromData(index, data, time);
 
                 index += dataSizes[i];
             }
@@ -127,8 +112,8 @@ namespace Mastic
         }
 
         [Client]
-        public float GetUnlocalLerpValue() 
-            => Mathf.Clamp((Time.time - clientSyncReceiveTime) * 32f, 0f, maxLerpValue);
+        public float GetUnlocalLerpValue()
+            => Mathf.Clamp((Time.time - time) * 32f, 0f, maxLerpValue);
 
         [Server]
         public void DoRollback(int tick, float lerpValue)

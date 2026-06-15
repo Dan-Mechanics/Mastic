@@ -1,11 +1,15 @@
 ﻿using Mirror;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mastic
 {
     /// <summary>
     /// TODO: I AM STILL WORKING ON THE DEPENDENCY STRUCUTRE HERE...
+    /// if you are making a buildable, then you would send the unique id
+    /// in the same Rpc message is that the buildable was made itself...
+    /// i think that makes sense yeah. Server --> clients RpcSpawnGlacier ( int uniqueId)
     /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
@@ -15,23 +19,19 @@ namespace Mastic
         [SerializeField] private string intangibleLayerName = default;
         [SerializeField] private Transform lookBone = default;
         [SerializeField] private Transform eyes = default;
+        [SyncVar(hook = nameof(OnNewUniqueId))] private int uniqueId = -1;
         private EasySettings easySettings;
         private EntityManager entityManager;
         private MouseLook mouseLook;
         private int intangibleLayer;
         private float maxLerpValue;
         private int playerLayer;
+        private float time;
         private Frame[] recording;
         private Frame previous = Frame.Default;
         private Frame current = Frame.Default;
-        private int uniqueId = -1;
-        private float time;
+        private readonly Queue<Frame> buffer = new Queue<Frame>();   
 
-        /*private void Hook(int _, int uniqueId)
-        {
-            EntityManager.Current.Register(uniqueId, this);
-        }
-*/
         private void Awake()
         {
             easySettings = EasySettings.Current;
@@ -50,20 +50,13 @@ namespace Mastic
         {
             base.OnStartServer();
             recording = new Frame[entityManager.MaxRecordingLength];
-            uniqueId = entityManager.FetchUniqueId();
-            entityManager.Register(uniqueId, this);
-           
-            Invoke(nameof(SyncUniqueId), easySettings.Get<float>("respawndelay"));
+            Invoke(nameof(RegisterPlayerDelayed), easySettings.Get<float>(nameof(RegisterPlayerDelayed)));
         }
 
-        private void SyncUniqueId()
-            => RpcSyncUniqueId(uniqueId);
-
-        [ClientRpc]
-        private void RpcSyncUniqueId(int uniqueId)
+        private void RegisterPlayerDelayed()
         {
-            this.uniqueId = uniqueId;
-            EntityManager.Current.Register(uniqueId, this);
+            uniqueId = entityManager.FetchUniqueId();
+            entityManager.Register(uniqueId, this);
         }
 
         private void Update()
@@ -72,11 +65,15 @@ namespace Mastic
             if (isServer || isLocalPlayer || uniqueId < 0)
                 return;
 
-            float lerpValue = Mathf.Clamp((Time.time - time) * 32f, 0f, maxLerpValue);
-            Debug.Log(lerpValue);
+            // use time float here for better decoupling.
+            float lerpValue = entityManager.GetUnlocalLerpValue();
+           // Debug.Log(lerpValue);
             Frame lerped = Frame.LerpUnclamped(previous, current, lerpValue);
             SetAsFrame(lerped);
         }
+
+        private void OnNewUniqueId(int _, int uniqueId)
+            => EntityManager.Current.Register(uniqueId, this);
 
         private void SetAsFrame(Frame frame)
         {
@@ -117,14 +114,23 @@ namespace Mastic
         [Client]
         public void ReadFromData(int index, float[] data, float time)
         {
+          //  Debug.LogWarning($"new {(time - this.time) * 32f}");
             this.time = time;
             previous = current;
-            current = new Frame()
+            buffer.Enqueue(new Frame()
             {
                 pos = new Vector3(data[index], data[index + 1], data[index + 2]),
                 localEyesRot = Quaternion.AngleAxis(data[index + 3], Vector3.right),
                 rot = Quaternion.AngleAxis(data[index + 4], Vector3.up)
-            };
+            });
+
+            // in ovewatch this buffer shrinks and grows
+            // based on network stability, this causes noregs.
+            // this is an example number.
+            if (buffer.Count > 3)
+            {
+                current = buffer.Dequeue();
+            }
         }
 
         [Server]
