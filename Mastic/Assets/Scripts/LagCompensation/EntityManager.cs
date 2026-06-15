@@ -23,10 +23,10 @@ namespace Mastic
         private int nextUniqueId;
         private float[] data;
         private float time;
+        private bool isCleanSlate = true;
         private const float INTERVAL = 1 / 32f;
         public const int LERP_BUFFER_SIZE = 4;
         private float next;
-        private bool isCleanSlate;
 
         private void Awake() 
             => maxLerpValue = EasySettings.Current.Get<float>(nameof(maxLerpValue));
@@ -163,9 +163,7 @@ namespace Mastic
             => Mathf.Clamp((Time.time - time) * 32f, 0f, maxLerpValue);
 
         public static float Increment(float value, float maxLerpValue)
-        {
-            return Mathf.Clamp(value + (1f / 32f), 0f, maxLerpValue);
-        }
+            => Mathf.Clamp(value + (1f / 32f), 0f, maxLerpValue);
 
         [Server]
         public void DoRollback(int tick, float lerpValue, bool isCleanSlate)
