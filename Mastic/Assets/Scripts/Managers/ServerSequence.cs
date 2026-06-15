@@ -9,23 +9,22 @@ namespace Mastic
         public int PlayerCount => players.Count;
         private readonly List<ServerPlayer> players = new List<ServerPlayer>();
         private LagCompensation lagCompensation;
-        private float maxConsecutiveTicks;
-        private float timer;
+        private ConsistentTimer timer;
 
         private void Awake()
         {
-            maxConsecutiveTicks = EasySettings.Current.Get<float>(nameof(maxConsecutiveTicks));
+            int maxConsecutiveTicks = EasySettings.Current.Get<int>(nameof(maxConsecutiveTicks));
+            timer = new ConsistentTimer(Time.fixedDeltaTime, 0f, maxConsecutiveTicks);
             lagCompensation = FindAnyObjectByType<LagCompensation>();
         }
 
         [ServerCallback]
         private void Update()
         {
-            timer += Time.deltaTime;
-            timer = Mathf.Clamp(timer, 0f, Time.fixedDeltaTime * maxConsecutiveTicks);
-            while (timer >= Time.fixedDeltaTime)
+            timer.interval = Time.fixedDeltaTime;
+            int ticks = timer.Tick(Time.deltaTime);
+            for (int i = 0; i < ticks; i++)
             {
-                timer -= Time.fixedDeltaTime;
                 Tick();
             }
         }

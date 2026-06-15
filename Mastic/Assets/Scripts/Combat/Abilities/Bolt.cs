@@ -18,7 +18,7 @@ namespace Mastic
         [SerializeField] private float damage = default;
 
         private List<ShootMessage> pendingShootMessages;
-        private ICameraInterpolation cameraInterpolation;
+        private ICameraInterpolation interpolation;
         private ShootMessage shootMessage;
         private LagCompensation lagCompensation;
         private MouseLook mouseLook;
@@ -37,7 +37,7 @@ namespace Mastic
         {
             eyes = transform.Find("eyes");
             cam = GameObject.FindWithTag("MainCamera").transform;
-            cameraInterpolation = cam.GetComponent<ICameraInterpolation>();
+            interpolation = cam.GetComponent<ICameraInterpolation>();
             lagCompensation = FindAnyObjectByType<LagCompensation>();
             pendingShootMessages = new List<ShootMessage>();
             mouseLook = GetComponent<MouseLook>();
@@ -58,7 +58,7 @@ namespace Mastic
 
             cooldownHandler.Cast(cooldownIndex);
             shootMessage.debugEnemyPos = Vector3.zero;
-            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, cameraInterpolation.LerpValue, inputTick, rollbackTick);
+            shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, inputTick, rollbackTick);
             if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
             {
                 Transform target = hit.transform.root;
@@ -77,7 +77,8 @@ namespace Mastic
         }
 
         [TargetRpc]
-        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) => OnAuthoritativeDamage?.Invoke(damage);
+        public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) 
+            => OnAuthoritativeDamage?.Invoke(damage);
 
         [Command]
         private void CmdShoot(ShootMessage shootMessage) 
@@ -95,8 +96,8 @@ namespace Mastic
             // RECREATE THE SHOT CONDITIONS.
             lagCompensation.SetAsTick(shootMessage.rollbackTick);
             mouseLook.SetRotationDirectly(shootMessage.xRotation, shootMessage.yRotation);
-            cameraInterpolation.Interject(origin, prevOrigin, velocity);
-            cameraInterpolation.SetValue(shootMessage.lerpValue);
+            interpolation.Interject(origin, prevOrigin, velocity);
+            interpolation.SetValue(shootMessage.lerpValue);
             NetcodeUtils.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
 
             if (!Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))

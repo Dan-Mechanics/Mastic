@@ -14,7 +14,7 @@ namespace Mastic
         [SerializeField] private List<UnityEngine.Object> unlocalRemove = default;
         [SerializeField] private List<UnityEngine.Object> serverRemove = default;
 
-        private ICameraInterpolation cameraInterpolation;
+        private ICameraInterpolation interpolation;
         private PlayerHealthDisplay playerHealthDisplay;
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
@@ -40,7 +40,7 @@ namespace Mastic
             lagCompensation = FindAnyObjectByType<LagCompensation>();
             debugHandler = GetComponent<DebugHandler>();
             networkMovement = GetComponent<NetworkMovement>();
-            cameraInterpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
+            interpolation = GameObject.FindWithTag("MainCamera").GetComponent<ICameraInterpolation>();
 
             Utils.LowerStringArray(abilities);
             EasySettings easySettings = EasySettings.Current;
@@ -48,13 +48,12 @@ namespace Mastic
             cooldownHandler.Initialize(abilities);
             debugHandler.Initialize(standardTickrate);
             adaptiveTickrate.Initialize(standardTickrate);
-            networkMovement.Initialize(standardTickrate, cameraInterpolation);
+            networkMovement.Initialize(standardTickrate, interpolation);
             clientSequence.Initialize(networkMovement, cooldownHandler, playerEntity);
 
             mouseLook.SetSensitivity(easySettings.Get<float>(nameof(sensitivity)));
             sensitivity.WriteSafely<float>(mouseLook.SetSensitivity);
 
-            playerHealth.OnRespawn += playerEntity.RefreshRollbackBuffer;
             playerHealth.OnRespawn += cooldownHandler.RechargeAll;
             playerHealth.OnHealthChanged += playerHealthDisplay.DisplayHealth;
         }
@@ -63,6 +62,7 @@ namespace Mastic
         {
             base.OnStartServer();
             playerEntity.Initialize(lagCompensation);
+            playerHealth.OnRespawn += playerEntity.RefreshRollbackBuffer;
             serverRemove.ForEach(x => Destroy(x));
             print($"{gameObject.name}: setup completed".ToUpperInvariant());
         }

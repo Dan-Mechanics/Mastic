@@ -11,7 +11,6 @@ namespace Mastic
         private CooldownVisual[] visuals;
         private float fadeDuration;
         private Timer timer;
-        private float next;
 
         public void Initialize(string[] abilities)
         {

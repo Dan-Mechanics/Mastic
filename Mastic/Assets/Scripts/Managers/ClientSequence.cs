@@ -15,8 +15,7 @@ namespace Mastic
         private PlayerEntity playerEntity;
         private CooldownHandler cooldownHandler;
         private CooldownDisplay cooldownDisplay;
-        private float maxConsecutiveTicks;
-        private float timer;
+        private ConsistentTimer timer;
 
         public void Initialize(NetworkMovement networkMovement, CooldownHandler cooldownHandler, PlayerEntity playerEntity) 
         {
@@ -26,7 +25,8 @@ namespace Mastic
             reliableAttackAbilities = GetComponents<IReliableAttackAbility>();
             unreliableAttackAbilities = GetComponents<IUnreliableAttackAbility>();
             cooldownDisplay = GetComponent<CooldownDisplay>();
-            maxConsecutiveTicks = EasySettings.Current.Get<float>(nameof(maxConsecutiveTicks));
+            int maxConsecutiveTicks = EasySettings.Current.Get<int>(nameof(maxConsecutiveTicks));
+            timer = new ConsistentTimer(Time.fixedDeltaTime, 0f, maxConsecutiveTicks);
         }
 
         [Client]
@@ -53,13 +53,25 @@ namespace Mastic
             if (Input.GetKey(KeyCode.Mouse4)) { clientPacketMultiplier = 2; }
             else if (Input.GetKey(KeyCode.Mouse2)) { clientPacketMultiplier = 0; }
 
-            timer += Time.deltaTime;
+            /*timer += Time.deltaTime;
             timer = Mathf.Clamp(timer, 0f, Time.fixedDeltaTime * maxConsecutiveTicks);
             while (timer >= Time.fixedDeltaTime)
             {
                 timer -= Time.fixedDeltaTime;
                 OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier} | fps: {Mathf.RoundToInt(1f / Time.smoothDeltaTime)}");
                 for (int i = 0; i < clientPacketMultiplier; i++)
+                {
+                    networkMovement.DoLocalTick(playerEntity.GetDisplayedTick());
+                    cooldownHandler.Charge();
+                }
+            }*/
+
+            timer.interval = Time.fixedDeltaTime;
+            int ticks = timer.Tick(Time.deltaTime);
+            for (int i = 0; i < ticks; i++)
+            {
+                OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier} | fps: {Mathf.RoundToInt(1f / Time.smoothDeltaTime)}");
+                for (int j = 0; j < clientPacketMultiplier; j++)
                 {
                     networkMovement.DoLocalTick(playerEntity.GetDisplayedTick());
                     cooldownHandler.Charge();
