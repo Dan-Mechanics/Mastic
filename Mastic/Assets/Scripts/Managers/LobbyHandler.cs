@@ -1,6 +1,7 @@
 using Mirror;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Mastic
 {
@@ -8,28 +9,42 @@ namespace Mastic
     {
         [SerializeField] private EasyVar sensitivity = default;
         [SerializeField] private EasyVar element = default;
+        [SerializeField] private GameObject heroSelectPanel = default;
+
+        private Button beginHeroSelect;
         private NetworkManager networkManager;
         private TMP_Dropdown connectionsField;
-        private TMP_Dropdown elementField;
         private TMP_Dropdown sensitivityField;
         
         public void Initialize(NetworkManager networkManager)
         {
             this.networkManager = networkManager;
-        //    canvas = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+            Enable();
+            EnableHeroSelect(true);
 
             connectionsField = transform.transform.Find(nameof(connectionsField)).GetComponent<TMP_Dropdown>();
-            elementField = transform.transform.Find(nameof(elementField)).GetComponent<TMP_Dropdown>();
+            beginHeroSelect = transform.transform.Find(nameof(beginHeroSelect)).GetComponent<Button>();
             sensitivityField = transform.transform.Find(nameof(sensitivityField)).GetComponent<TMP_Dropdown>();
 
+            beginHeroSelect.onClick.AddListener(() => { EnableHeroSelect(true); });
+            ButtonArray selection = GetComponentInChildren<ButtonArray>();
+            selection.OnSelectIndex += SelectHero;
+
             connectionsField.onValueChanged.AddListener(OnMaxConnectionsChanged);
-            elementField.onValueChanged.AddListener(OnElementChanged);
             sensitivityField.onValueChanged.AddListener(OnSensitivityChanged);
 
             OnMaxConnectionsChanged(connectionsField.value);
-            OnElementChanged(elementField.value);
             OnSensitivityChanged(sensitivityField.value);
-            Enable();
+            SelectHero(0);
+        }
+
+        public void EnableHeroSelect(bool value)
+            => heroSelectPanel.SetActive(value);
+
+        private void SelectHero(int index)
+        {
+            element.Set(index);
+            EnableHeroSelect(false);
         }
 
         private void OnMaxConnectionsChanged(int value)
@@ -37,9 +52,6 @@ namespace Mastic
 
         private void OnSensitivityChanged(int value) 
             => sensitivity.Set(sensitivityField.options[value].text);
-
-        private void OnElementChanged(int value)
-            => element.Set(value);
 
         public void Enable() 
             => gameObject.SetActive(true);

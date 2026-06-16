@@ -20,7 +20,7 @@ namespace Mastic
             simpleNetworkManager = FindAnyObjectByType<SimpleNetworkManager>();
             playerSpawner = FindAnyObjectByType<PlayerSpawner>();
             serverSequence = FindAnyObjectByType<ServerSequence>();
-            lobbyHandler = FindAnyObjectByType<LobbyHandler>();
+            lobbyHandler = FindAnyObjectByType<LobbyHandler>(FindObjectsInactive.Include);
 
             EasySettings easySettings = EasySettings.Current;
             if (logSettings)
