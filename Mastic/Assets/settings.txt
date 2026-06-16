@@ -9,6 +9,7 @@ maxConsecutiveTicks 2
 maxHealth 100
 healingPerSecond 5
 syncInterval 0.1
+uiTimerInterval 0.02
 fadeDuration 0.25
 cooldowndisplayinterval 0.02
 respawnDelay 0.5

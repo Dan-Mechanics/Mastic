@@ -6,11 +6,9 @@ namespace Mastic
 {
     public class LobbyHandler : MonoBehaviour
     {
-        [SerializeField] private GameObject prefab = default;
         [SerializeField] private EasyVar sensitivity = default;
         [SerializeField] private EasyVar element = default;
         private NetworkManager networkManager;
-        private GameObject canvas;
         private TMP_Dropdown connectionsField;
         private TMP_Dropdown elementField;
         private TMP_Dropdown sensitivityField;
@@ -18,11 +16,11 @@ namespace Mastic
         public void Initialize(NetworkManager networkManager)
         {
             this.networkManager = networkManager;
-            canvas = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+        //    canvas = Instantiate(prefab, Vector3.zero, Quaternion.identity);
 
-            connectionsField = canvas.transform.Find(nameof(connectionsField)).GetComponent<TMP_Dropdown>();
-            elementField = canvas.transform.Find(nameof(elementField)).GetComponent<TMP_Dropdown>();
-            sensitivityField = canvas.transform.Find(nameof(sensitivityField)).GetComponent<TMP_Dropdown>();
+            connectionsField = transform.transform.Find(nameof(connectionsField)).GetComponent<TMP_Dropdown>();
+            elementField = transform.transform.Find(nameof(elementField)).GetComponent<TMP_Dropdown>();
+            sensitivityField = transform.transform.Find(nameof(sensitivityField)).GetComponent<TMP_Dropdown>();
 
             connectionsField.onValueChanged.AddListener(OnMaxConnectionsChanged);
             elementField.onValueChanged.AddListener(OnElementChanged);
@@ -44,9 +42,9 @@ namespace Mastic
             => element.Set(value);
 
         public void Enable() 
-            => canvas.SetActive(true);
+            => gameObject.SetActive(true);
 
         public void Disable() 
-            => canvas.SetActive(false);
+            => gameObject.SetActive(false);
     }
 }
