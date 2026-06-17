@@ -16,6 +16,7 @@ namespace Mastic
 
         private ICameraInterpolation interpolation;
         private PlayerHealthDisplay playerHealthDisplay;
+        private UniqueToElement uniqueToElement;
         private AdaptiveTickrate adaptiveTickrate;
         private CooldownHandler cooldownHandler;
         private NetworkMovement networkMovement;
@@ -32,6 +33,7 @@ namespace Mastic
             cooldownHandler = GetComponent<CooldownHandler>();
             mouseLook = GetComponent<MouseLook>();
             cooldownDisplay = GetComponent<CooldownDisplay>();
+            uniqueToElement = GetComponent<UniqueToElement>();
             playerHealthDisplay = GetComponent<PlayerHealthDisplay>();
             playerHealth = GetComponent<PlayerHealth>();
             clientSequence = GetComponent<ClientSequence>();
@@ -79,6 +81,7 @@ namespace Mastic
                 cooldownDisplay.Initialize(abilities);
                 cooldownHandler.OnCast += cooldownDisplay.FlashCooldown;
 
+                uniqueToElement.InitializeLocalPlayer();
                 playerHealthDisplay.Initialize("local_health");
                 adaptiveTickrate.OnDisplayTickrate += debugHandler.DisplayTickrate;
                 adaptiveTickrate.OnPlayTickrateChangedSound += debugHandler.PlayTickrateChangedSound;

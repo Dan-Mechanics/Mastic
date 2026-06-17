@@ -8,6 +8,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -7368971351642150349, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      propertyPath: element
+      value: fire
+      objectReference: {fileID: 0}
+    - target: {fileID: -7368971351642150349, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      propertyPath: playerPrefab
+      value: 
+      objectReference: {fileID: 5940430478848424146}
     - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'abilities.Array.data[1]'
       value: burningwings
@@ -66,7 +74,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: m_Name
-      value: fire Variant
+      value: fire
       objectReference: {fileID: 0}
     - target: {fileID: 3751572637676758943, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: m_LocalPosition.x
@@ -167,7 +175,7 @@ PrefabInstance:
     - target: {fileID: 7578080967251929028, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 71dd89bb5351822458b089de9f29442d, type: 2}
+      objectReference: {fileID: 2100000, guid: 3a0c8e77eb777bf4fae94e53e323b87b, type: 2}
     - target: {fileID: 8148181345602170176, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

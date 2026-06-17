@@ -20,13 +20,6 @@ namespace Mastic
             return !string.IsNullOrEmpty(str) && !string.IsNullOrWhiteSpace(str);
         }
 
-        public static void SetAsLastChild(Transform transform)
-        {
-            Transform parent = transform.parent;
-            transform.SetParent(null);
-            transform.SetParent(parent);
-        }
-
         public static void LowerStringArray(string[] strings)
         {
             for (int i = 0; i < strings.Length; i++)

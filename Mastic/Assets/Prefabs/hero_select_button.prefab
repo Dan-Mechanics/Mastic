@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.764151, g: 0.764151, b: 0.764151, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -223,7 +223,7 @@ MonoBehaviour:
   bRot: {x: 0, y: 0, z: 0, w: 1}
   aScale: {x: 0, y: 1, z: 1}
   bScale: {x: 1, y: 1, z: 1}
-  lerpSpeed: 2
+  lerpSpeed: 3.5
   sync: 0
 --- !u!1 &5417492563459820708
 GameObject:
@@ -324,11 +324,11 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 22
+  m_fontStyle: 23
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 74.51
+  m_characterSpacing: 70
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
@@ -774,7 +774,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.764151, g: 0.764151, b: 0.764151, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -834,5 +834,5 @@ MonoBehaviour:
   bRot: {x: 0, y: 0, z: 0, w: 1}
   aScale: {x: 0, y: 1, z: 1}
   bScale: {x: 1, y: 1, z: 1}
-  lerpSpeed: 2
+  lerpSpeed: 3.5
   sync: 0
