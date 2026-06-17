@@ -33,6 +33,9 @@ jumpCooldown 0.25
 jumpStack 1
 
 // LIGHTNING ===============================
+smiteEffectDuration 1
+boltEffectSize 0.5
+boltEffectLifetime 0.3
 smiteCooldown 9
 smiteStack 1
 smiteDuration 1

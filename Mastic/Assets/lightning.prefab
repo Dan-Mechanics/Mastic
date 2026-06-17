@@ -749,6 +749,7 @@ MonoBehaviour:
   syncInterval: 0
   speed: 8
   ability1: {fileID: 11400000, guid: 00ce751e8eeaaf241bc6e06f96db00e0, type: 2}
+  gustEffect: {fileID: 675541231718656312, guid: 6b42d4a4fb843e340a2ec41356d813a2, type: 3}
   maxPendingRequests: 8
 --- !u!114 &-3213554778907423252
 MonoBehaviour:
@@ -794,6 +795,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
+  smiteEffect: {fileID: 1000011128802252, guid: bb120869ba38efa42a04d68fbfc56811, type: 3}
+  smiteImpactEffect: {fileID: 4462063306409268879, guid: aa6355290ab3211469f8525f7d790046, type: 3}
   maxPendingRequests: 8
   tickDuration: 64
   damage: 80
@@ -820,6 +823,7 @@ MonoBehaviour:
   noregMask:
     serializedVersion: 2
     m_Bits: 1
+  boltEffect: {fileID: 6323148216478040967, guid: e64803ac8f27c494181c742fa822de79, type: 3}
   range: 300
   damage: 30
 --- !u!114 &-5172247997270406336

@@ -16,6 +16,8 @@ namespace Mastic
         [SerializeField] private float explosionRadius = default;
         [SerializeField] private LayerMask explosionMask = default;
         [SerializeField] private EasyBinding primaryFire = default;
+        [SerializeField] private GameObject smiteEffect = default;
+        [SerializeField] private GameObject smiteImpactEffect = default;
         [SerializeField] private int maxPendingRequests = default;
         [SerializeField] private int tickDuration = default;
         [SerializeField] private float damage = default;
@@ -23,6 +25,7 @@ namespace Mastic
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
         private PhysicsMovement physicsMovement;
+        private float smiteEffectDuration;
         private int cooldownIndex;
         private PlayerEntity entity;
         private int previousTick;
@@ -39,6 +42,8 @@ namespace Mastic
             cooldownHandler = GetComponent<CooldownHandler>();
             entity = GetComponent<PlayerEntity>();
             cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Smite));
+            EasySettings easySettings = EasySettings.Current;
+            smiteEffectDuration = easySettings.Get<float>(nameof(smiteEffectDuration));
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;
@@ -75,8 +80,11 @@ namespace Mastic
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (inputTick == pendingRequests[i])
-                    Cast(inputTick);
+                if (inputTick != pendingRequests[i])
+                    continue;
+
+                Instantiate(smiteEffect, transform.position, Quaternion.identity);
+                Cast(inputTick);
             }
 
             physicsMovement.EnableGravity(!IsAbilityActive(inputTick));
@@ -101,6 +109,8 @@ namespace Mastic
 
         private void Teleport(Vector3 point)
         {
+            SpawnImpactEffect(point);
+
             point += Vector3.up;
             transform.position = point;
             rb.linearVelocity = Vector3.zero;
@@ -134,6 +144,12 @@ namespace Mastic
                 TargetDisplayHitPip(connectionToClient, totalDamage);
         }
 
+        private void SpawnImpactEffect(Vector3 point) 
+        {
+            GameObject go = Instantiate(smiteImpactEffect, point, Quaternion.identity);
+            Destroy(go, smiteEffectDuration);
+        }
+
         [TargetRpc]
         private void TargetCast(NetworkConnectionToClient conn, int inputTick) 
             => Cast(inputTick);
@@ -151,6 +167,7 @@ namespace Mastic
                     continue;
 
                 cooldownHandler.Cast(cooldownIndex);
+                Instantiate(smiteEffect, transform.position, Quaternion.identity);
                 Cast(serverTick);
                 TargetCast(connectionToClient, inputTick);
                 pendingRequests.RemoveAt(i);

@@ -8,6 +8,7 @@ namespace Mastic
     {
         [SerializeField] private float speed = default;
         [SerializeField] private EasyBinding ability1 = default;
+        [SerializeField] private GameObject gustEffect = default;
         [SerializeField] private int maxPendingRequests = default;
 
         private readonly List<int> pendingRequests = new List<int>();
@@ -93,6 +94,7 @@ namespace Mastic
 
         private void PerformGust(IMovement movement)
         {
+            Instantiate(gustEffect, transform.position, Quaternion.identity);
             Vector3 force = eyes.forward * speed;
             if (force.y >= 0f && rb.linearVelocity.y < 0f)
                 force.y -= rb.linearVelocity.y;

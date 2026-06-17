@@ -14,6 +14,7 @@ namespace Mastic
         [SerializeField] private CooldownHandler cooldownHandler = default;
         [SerializeField] private LayerMask mask = default;
         [SerializeField] private LayerMask noregMask = default;
+        [SerializeField] private GameObject boltEffect = default;
         [SerializeField] private float range = default;
         [SerializeField] private float damage = default;
 
@@ -25,6 +26,8 @@ namespace Mastic
         private int cooldownIndex;
         private Rigidbody rb;
         private Transform eyes;
+        private float boltEffectLifetime;
+        private float boltEffectSize;
         private Transform cam;
         private Vector3 origin;
         private Vector3 prevOrigin;
@@ -47,6 +50,8 @@ namespace Mastic
             cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Bolt));
 
             EasySettings easySettings = EasySettings.Current;
+            boltEffectLifetime = easySettings.Get<float>(nameof(boltEffectLifetime));
+            boltEffectSize = easySettings.Get<float>(nameof(boltEffectSize));
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
             tolerance = easySettings.Get<float>(nameof(tolerance));
         }
@@ -56,6 +61,7 @@ namespace Mastic
             if (!secondaryFire.WasPressed || !cooldownHandler.CanCast(cooldownIndex))
                 return;
 
+            SpawnBoltBeam(cam.position, cam.position + (cam.forward * range));
             cooldownHandler.Cast(cooldownIndex);
             shootMessage.debugEnemyPos = Vector3.zero;
             shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, inputTick, rollbackTick);
@@ -88,6 +94,17 @@ namespace Mastic
 
             pendingShootMessages.Add(shootMessage);
             previousTick = shootMessage.inputTick;
+        }
+
+        private void SpawnBoltBeam(Vector3 start, Vector3 end)
+        {
+            GameObject go = Instantiate(boltEffect);
+            go.transform.position = (start + end) * 0.5f;
+            go.transform.localScale = Vector3.one * boltEffectSize;
+            Vector3 scale = go.transform.localScale;
+            scale.z = Vector3.Distance(start, end);
+            go.transform.localScale = scale;
+            Destroy(go, boltEffectLifetime);
         }
 
         [Server]
