@@ -52,7 +52,7 @@ boltStack 3
 piercingIcicleDamage 40
 piercingIcicleLifetime 3.5
 piercingIcicleSpeed 40
-piercingIcicleRadius 0.25
+piercingIcicleRadius 0.2
 piercingIcicleHasGravity false
 
 piercingIcicleCooldown 3
