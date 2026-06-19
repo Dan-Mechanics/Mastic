@@ -14,14 +14,7 @@ fadeDuration 0.25
 cooldowndisplayinterval 0.02
 respawnDelay 0.5
 sensitivity 0.66
-
 jumpkey space
-gustkey shift
-smitekey lmb
-boltkey rmb
-cloudkey e
-burningwingskey shift
-piercingiciclekey lmb
 
 speed 6
 acceleration 60
@@ -33,9 +26,9 @@ jumpCooldown 0.25
 jumpStack 1
 
 // LIGHTNING ===============================
-smiteEffectDuration 1
-boltEffectSize 0.5
-boltEffectLifetime 0.3
+smiteImpactEffectDuration 1
+boltEffectSize 0.3
+boltEffectLifetime 0.1
 smiteCooldown 9
 smiteStack 1
 smiteDuration 1
@@ -51,6 +44,11 @@ cloudStack 1
 boltCooldown 3
 boltStack 3
 
+gustkey shift
+smitekey lmb
+boltkey rmb
+cloudkey e
+
 // ICE ===============================
 piercingIcicleDamage 40
 piercingIcicleLifetime 3.5
@@ -61,6 +59,36 @@ piercingIcicleHasGravity false
 piercingIcicleCooldown 3
 piercingIcicleStack 2
 
-// FIRE ===============================
-burningWingsCooldown 6
-burningWingsStack 1
+glacierDuration 5
+glacierCooldown 10
+glacierStack 1
+
+icicleVolleyCooldown 10
+icicleVolleyStack 1
+
+icechargeCooldown 6
+icechargeStack 1
+
+icechargekey shift
+piercingiciclekey lmb
+iciclevolleykey rmb
+glacierkey e
+
+// NATURE ===============================
+soothingroseCooldown 3
+soothingroseStack 2
+
+bouncelilyCooldown 3
+bouncelilyStack 1
+bouncelilyduration 3
+
+vinewhipCooldown 10
+vinewhipStack 1
+
+logCooldown 6
+logStack 1
+
+bouncelilykey shift
+vinewhipkey lmb
+logkey rmb
+soothingrosekey e

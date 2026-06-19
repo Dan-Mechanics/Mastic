@@ -61,12 +61,13 @@ namespace Mastic
             if (!secondaryFire.WasPressed || !cooldownHandler.CanCast(cooldownIndex))
                 return;
 
-            SpawnBoltBeam(cam.position, cam.position + (cam.forward * range));
+            Vector3 endPosition = cam.position + (cam.forward * range);
             cooldownHandler.Cast(cooldownIndex);
             shootMessage.debugEnemyPos = Vector3.zero;
             shootMessage.SetValues(cam.position, mouseLook.RotationX, mouseLook.RotationY, interpolation.LerpValue, inputTick, rollbackTick);
             if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
             {
+                endPosition = hit.point;
                 Transform target = hit.transform.root;
                 if (target.TryGetComponent(out IDamagable damagable))
                 {
@@ -79,6 +80,7 @@ namespace Mastic
                     shootMessage.rollbackTick = playerEntity.GetDisplayedTick();
             }
 
+            SpawnBoltBeam(cam.position, endPosition);
             CmdShoot(shootMessage);
         }
 
@@ -98,13 +100,12 @@ namespace Mastic
 
         private void SpawnBoltBeam(Vector3 start, Vector3 end)
         {
-            GameObject go = Instantiate(boltEffect);
-            go.transform.position = (start + end) * 0.5f;
-            go.transform.localScale = Vector3.one * boltEffectSize;
-            Vector3 scale = go.transform.localScale;
-            scale.z = Vector3.Distance(start, end);
-            go.transform.localScale = scale;
-            Destroy(go, boltEffectLifetime);
+            Transform effect = Instantiate(boltEffect).transform;
+            effect.position = (start + end) * 0.5f;
+            effect.Translate(Vector3.down * 0.5f);
+            effect.localScale = new Vector3(boltEffectSize, boltEffectSize, Vector3.Distance(start, end));
+            effect.forward = (end - start).normalized;
+            Destroy(effect.gameObject, boltEffectLifetime);
         }
 
         [Server]
@@ -117,6 +118,8 @@ namespace Mastic
             interpolation.SetValue(shootMessage.lerpValue);
             NetcodeUtils.AllowNoregLenience(cam, shootMessage, tolerance, noregMask);
 
+            Vector3 endPosition = cam.position + (cam.forward * range);
+            SpawnBoltBeam(cam.position, endPosition);
             if (!Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore))
                 return;
 

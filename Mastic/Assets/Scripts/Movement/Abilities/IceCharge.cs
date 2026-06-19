@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Mastic
 {
-    public class BurningWings : NetworkBehaviour, IMovement, IMovementAbility
+    public class IceCharge : NetworkBehaviour, IMovement, IMovementAbility
     {
         public byte Index { get; set; }
         public bool IsGrounded => false;
@@ -32,7 +32,7 @@ namespace Mastic
             eyes = transform.Find("eyes");
             physicsMovement = GetComponent<PhysicsMovement>();
             cooldownHandler = GetComponent<CooldownHandler>();
-            cooldownIndex = cooldownHandler.GetIndexFromName(nameof(BurningWings));
+            cooldownIndex = cooldownHandler.GetIndexFromName(GetType().Name);
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;

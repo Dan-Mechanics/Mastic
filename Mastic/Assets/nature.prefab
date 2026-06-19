@@ -18,11 +18,19 @@ PrefabInstance:
       objectReference: {fileID: 5940430478848424146}
     - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'abilities.Array.data[1]'
-      value: burningwings
+      value: soothingrose
       objectReference: {fileID: 0}
     - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'abilities.Array.data[2]'
-      value: piercingicicle
+      value: log
+      objectReference: {fileID: 0}
+    - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      propertyPath: 'abilities.Array.data[3]'
+      value: bouncelily
+      objectReference: {fileID: 0}
+    - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      propertyPath: 'abilities.Array.data[4]'
+      value: vinewhip
       objectReference: {fileID: 0}
     - target: {fileID: 1608099700656574563, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: m_AnchorMax.y
@@ -207,22 +215,21 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 790473191979634726, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     - {fileID: -5984394209105652319, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+    - {fileID: -3850514727978609351, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+    - {fileID: -3213554778907423252, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3441847662140400784}
-    - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4295219161481495862}
+      addedObject: {fileID: 2454307069399641823}
   m_SourcePrefab: {fileID: 100100000, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
 --- !u!1 &5940430478848424146 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
   m_PrefabInstance: {fileID: 7377148407450017612}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3441847662140400784
+--- !u!114 &2454307069399641823
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -231,36 +238,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 5940430478848424146}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f5be428ca6c91646b9162c2d609827b, type: 3}
+  m_Script: {fileID: 11500000, guid: 1a2c7db463b709c4580385b6fd8ec83d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  speed: 12
   ability2: {fileID: 11400000, guid: 00ce751e8eeaaf241bc6e06f96db00e0, type: 2}
-  maxPendingRequests: 8
-  tickDuration: 160
---- !u!114 &4295219161481495862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5940430478848424146}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6766d17eb944f544f897bbe86f486907, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
-  projectile: {fileID: 4199077544637763028, guid: ed4601bdc7f8511408e381ae3964e9ee, type: 3}
+  bounceLily: {fileID: 106363770380491094, guid: 5e3398740ad04214c82c2e84ac70df51, type: 3}
+  range: 100
   mask:
     serializedVersion: 2
-    m_Bits: 9
-  noregMask:
-    serializedVersion: 2
     m_Bits: 1
+  force: {x: 0, y: 45, z: 0}
+  expectedColliders: 12

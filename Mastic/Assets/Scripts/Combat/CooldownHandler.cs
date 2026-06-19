@@ -77,6 +77,15 @@ namespace Mastic
             OnCast?.Invoke(index);
         }
 
+        public void Refund(int index)
+        {
+            if (index < 0 || index >= cooldowns.Length)
+                return;
+
+            CooldownValues cooldown = cooldowns[index];
+            cooldown.value = Mathf.Clamp(cooldown.value + cooldown.minValueRequired, 0, cooldown.maxValueAllowed);
+        }
+
         public void RechargeAll()
         {
             for (int i = 0; i < cooldowns.Length; i++)

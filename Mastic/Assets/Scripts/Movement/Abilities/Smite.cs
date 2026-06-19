@@ -1,6 +1,7 @@
 using Mirror;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 
 namespace Mastic
@@ -25,7 +26,7 @@ namespace Mastic
         private readonly List<int> pendingRequests = new List<int>();
         private CooldownHandler cooldownHandler;
         private PhysicsMovement physicsMovement;
-        private float smiteEffectDuration;
+        private float smiteImpactEffectDuration;
         private int cooldownIndex;
         private PlayerEntity entity;
         private int previousTick;
@@ -43,7 +44,7 @@ namespace Mastic
             entity = GetComponent<PlayerEntity>();
             cooldownIndex = cooldownHandler.GetIndexFromName(nameof(Smite));
             EasySettings easySettings = EasySettings.Current;
-            smiteEffectDuration = easySettings.Get<float>(nameof(smiteEffectDuration));
+            smiteImpactEffectDuration = easySettings.Get<float>(nameof(smiteImpactEffectDuration));
             previousTick = -1;
             startingTick = -1;
             endingTick = -1;
@@ -56,6 +57,7 @@ namespace Mastic
                 return;
 
             OnPredictDamage?.Invoke(damage);
+            Instantiate(smiteEffect, transform.position, Quaternion.identity);
             cooldownHandler.Cast(cooldownIndex);
             pendingRequests.Add(inputTick);
             CmdRequestSmite(inputTick);
@@ -91,12 +93,12 @@ namespace Mastic
             if (inputTick == endingTick)
             {
                 Vector3 point = Vector3.zero;
-                if (GetTeleportPoint(ref point))
+                if (NetcodeUtils.GetAimingPoint(entity, cam, teleportRange, teleportMask, ref point))
                     Teleport(point);
             }
         }
 
-        private bool GetTeleportPoint(ref Vector3 point)
+        /*private bool GetTeleportPoint(ref Vector3 point)
         {
             entity.EnableHitbox(false);
             bool found = Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, teleportRange, teleportMask, QueryTriggerInteraction.Ignore);
@@ -105,17 +107,20 @@ namespace Mastic
                 point = hit.point;
 
             return found;
-        }
+        }*/
 
         private void Teleport(Vector3 point)
         {
-            SpawnImpactEffect(point);
+            Vector3 effectPos = point;
+            SpawnImpactEffect(effectPos);
 
             point += Vector3.up;
             transform.position = point;
             rb.linearVelocity = Vector3.zero;
             if (!isServer)
                 return;
+
+            RpcTeleport(effectPos);
 
             float totalDamage = 0f;
             Collider[] colliders = Physics.OverlapSphere(point, explosionRadius, explosionMask, QueryTriggerInteraction.Ignore);
@@ -144,10 +149,10 @@ namespace Mastic
                 TargetDisplayHitPip(connectionToClient, totalDamage);
         }
 
-        private void SpawnImpactEffect(Vector3 point) 
+        private void SpawnImpactEffect(Vector3 effectPos)
         {
-            GameObject go = Instantiate(smiteImpactEffect, point, Quaternion.identity);
-            Destroy(go, smiteEffectDuration);
+            GameObject go = Instantiate(smiteImpactEffect, effectPos, Quaternion.identity);
+            Destroy(go, smiteImpactEffectDuration);
         }
 
         [TargetRpc]
@@ -157,6 +162,13 @@ namespace Mastic
         [TargetRpc]
         public void TargetDisplayHitPip(NetworkConnectionToClient conn, float damage) 
             => OnAuthoritativeDamage?.Invoke(damage);
+
+        [ClientRpc]
+        private void RpcTeleport(Vector3 effectPos)
+        {
+            if (!isLocalPlayer)
+                SpawnImpactEffect(effectPos);
+        }
 
         [Server]
         public void CheckAgainstTickServer(int inputTick, IMovement movement, int serverTick)
@@ -178,7 +190,7 @@ namespace Mastic
             if (endingTick == serverTick)
             {
                 Vector3 point = Vector3.zero;
-                if (GetTeleportPoint(ref point))
+                if (NetcodeUtils.GetAimingPoint(entity, cam, teleportRange, teleportMask, ref point))
                     Teleport(point);
             }
         }

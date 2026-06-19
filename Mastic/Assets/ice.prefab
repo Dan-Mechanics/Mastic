@@ -18,11 +18,19 @@ PrefabInstance:
       objectReference: {fileID: 5940430478848424146}
     - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'abilities.Array.data[1]'
-      value: burningwings
+      value: icecharge
       objectReference: {fileID: 0}
     - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'abilities.Array.data[2]'
       value: piercingicicle
+      objectReference: {fileID: 0}
+    - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      propertyPath: 'abilities.Array.data[3]'
+      value: iciclevolley
+      objectReference: {fileID: 0}
+    - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      propertyPath: 'abilities.Array.data[4]'
+      value: glacier
       objectReference: {fileID: 0}
     - target: {fileID: 1608099700656574563, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: m_AnchorMax.y
@@ -207,6 +215,7 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 790473191979634726, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     - {fileID: -5984394209105652319, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+    - {fileID: -3213554778907423252, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -216,6 +225,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4295219161481495862}
+    - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -2685977814762812758}
   m_SourcePrefab: {fileID: 100100000, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
 --- !u!1 &5940430478848424146 stripped
 GameObject:
@@ -262,5 +274,26 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 9
   noregMask:
+    serializedVersion: 2
+    m_Bits: 1
+--- !u!114 &-2685977814762812758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5940430478848424146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0803ed048f733d34eaf3a3d2b19dd56f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  ability2: {fileID: 11400000, guid: c616e6e823b59d14b9712499bf992211, type: 2}
+  glacierPrefab: {fileID: 676249407166755652, guid: 8cf1417f4cc9e954f9062bf899b7c296, type: 3}
+  range: 100
+  mask:
     serializedVersion: 2
     m_Bits: 1

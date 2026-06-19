@@ -34,5 +34,16 @@ namespace Mastic
                 }
             }
         }
+
+        public static bool GetAimingPoint(PlayerEntity entity, Transform cam, float range, LayerMask mask, ref Vector3 point)
+        {
+            entity.EnableHitbox(false);
+            bool found = Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Ignore);
+            entity.EnableHitbox(true);
+            if (found)
+                point = hit.point;
+
+            return found;
+        }
     }
 }

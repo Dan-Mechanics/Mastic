@@ -17,19 +17,11 @@ namespace Mastic
         public void Initialize(LagCompensation lagCompensation)
         {
             recording = new Frame[lagCompensation.MaxRecordingLength];
-            EnableCollision(true);
             lagCompensation.Register(this);
         }
 
         [Server]
-        public void Deregister(float fullyGoneTime)
-        {
-            EnableCollision(false);
-            Destroy(gameObject, fullyGoneTime);
-        }
-
-        [Server]
-        public void EnableCollision(bool active) 
+        public void SetCollision(bool active) 
             => this.active = active;
 
         private void SetAsFrame(Frame frame)

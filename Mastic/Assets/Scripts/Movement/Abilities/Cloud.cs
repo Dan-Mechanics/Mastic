@@ -71,7 +71,8 @@ namespace Mastic
             CmdRequestCast(inputTick);
         }
 
-        private bool IsAbilityActive(int tick) => tick >= startingTick && tick <= endingTick;
+        private bool IsAbilityActive(int tick) 
+            => tick >= startingTick && tick <= endingTick;
 
         [Command]
         private void CmdRequestCast(int inputTick)
@@ -143,7 +144,8 @@ namespace Mastic
         /// you get even more reconsiled.
         /// </summary>
         [TargetRpc]
-        private void TargetCast(NetworkConnectionToClient conn, Vector3 pos, int inputTick) => Cast(pos, inputTick);
+        private void TargetCast(NetworkConnectionToClient conn, Vector3 pos, int inputTick) 
+            => Cast(pos, inputTick);
 
         public void CleanPendingRequests(int upTo)
         {
