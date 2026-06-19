@@ -40,7 +40,6 @@ Icon?
 ehthumbs.db
 Thumbs.db
 
-*.zip
 /Mastic/.vs
 /Mastic/Logs
 /Mastic/UserSettings
