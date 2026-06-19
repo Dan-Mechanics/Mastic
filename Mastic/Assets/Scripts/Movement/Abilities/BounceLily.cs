@@ -126,7 +126,7 @@ namespace Mastic
         {
             for (int i = 0; i < pendingRequests.Count; i++)
             {
-                if (inputTick < pendingRequests[i] || !CanCast(serverTick))
+                if (inputTick != pendingRequests[i] || !CanCast(serverTick))
                     continue;
 
                 Vector3 point = Vector3.zero;
@@ -143,7 +143,7 @@ namespace Mastic
                 for (int j = 0; j < playerCount; j++)
                 {
                     (NetworkConnectionToClient conn, int processedTick) = serverSequence.GetProcessedTick(j);
-                    TargetCast(conn, transform.position, processedTick);
+                    TargetCast(conn, point, processedTick);
                 }
 
                 break;

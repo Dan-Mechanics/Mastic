@@ -78,9 +78,9 @@ glacierkey e
 soothingroseCooldown 3
 soothingroseStack 2
 
-bouncelilyCooldown 3
+bouncelilyCooldown 10
 bouncelilyStack 1
-bouncelilyduration 3
+bouncelilyduration 10
 
 vinewhipCooldown 10
 vinewhipStack 1

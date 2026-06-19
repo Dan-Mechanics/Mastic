@@ -190,7 +190,7 @@ namespace Mastic
 
         private void Cast(Vector3 pos, int startingTick)
         {
-            Debug.LogWarning($"first cast, og was {this.startingTick}, {startingTick}");
+            // Debug.LogWarning($"first cast, og was {this.startingTick}, {startingTick}");
             glacierVisual.transform.position = pos;
             this.startingTick = startingTick;
             endingTick = startingTick + tickDuration;

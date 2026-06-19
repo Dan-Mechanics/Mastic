@@ -26,7 +26,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'abilities.Array.data[3]'
-      value: bouncelily
+      value: BounceLily
       objectReference: {fileID: 0}
     - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'abilities.Array.data[4]'
