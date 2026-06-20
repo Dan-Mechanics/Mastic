@@ -223,6 +223,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2454307069399641823}
+    - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8238442787203568596}
+    - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -578487031515422524}
+    - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7132126529075779994}
   m_SourcePrefab: {fileID: 100100000, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
 --- !u!1 &5940430478848424146 stripped
 GameObject:
@@ -250,5 +259,79 @@ MonoBehaviour:
   mask:
     serializedVersion: 2
     m_Bits: 1
-  force: {x: 0, y: 45, z: 0}
+  force: {x: 0, y: 80, z: 0}
   expectedColliders: 12
+--- !u!114 &8238442787203568596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5940430478848424146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ef158b9697f87549b8e9b6a38a0d6eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  binding: {fileID: 11400000, guid: c616e6e823b59d14b9712499bf992211, type: 2}
+  prefab: {fileID: 6860090424510747374, guid: 8ffacdc462d7f714bbcf43872db5dba8, type: 3}
+  range: 100
+  mask:
+    serializedVersion: 2
+    m_Bits: 1
+--- !u!114 &-578487031515422524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5940430478848424146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 394bb26048d8f0047a32d273427be258, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  binding: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
+  mask:
+    serializedVersion: 2
+    m_Bits: 9
+  noregMask:
+    serializedVersion: 2
+    m_Bits: 1
+  prefab: {fileID: 6323148216478040967, guid: 667c8d7c9fff54244b4d29711df03199, type: 3}
+  particleEffect: {fileID: 1000011945391522, guid: d1c7ab5237bcfa0418250bef93c1d35f, type: 3}
+  range: 300
+  speed: 15
+  damage: 10
+--- !u!114 &7132126529075779994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5940430478848424146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6766d17eb944f544f897bbe86f486907, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  primaryFire: {fileID: 11400000, guid: d21a50d1d68a6cd4ab1e76f523708be3, type: 2}
+  projectile: {fileID: 4199077544637763028, guid: a5c429aed36d9d44cae91e33aeaaac19, type: 3}
+  mask:
+    serializedVersion: 2
+    m_Bits: 9
+  noregMask:
+    serializedVersion: 2
+    m_Bits: 1
+  isVolley: 0
+  spread: 0
+  damage: 50

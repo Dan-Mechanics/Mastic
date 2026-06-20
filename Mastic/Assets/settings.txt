@@ -82,7 +82,7 @@ bouncelilyCooldown 10
 bouncelilyStack 1
 bouncelilyduration 10
 
-vinewhipCooldown 10
+vinewhipCooldown 3
 vinewhipStack 1
 
 logCooldown 6

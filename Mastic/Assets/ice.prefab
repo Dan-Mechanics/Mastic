@@ -16,6 +16,14 @@ PrefabInstance:
       propertyPath: playerPrefab
       value: 
       objectReference: {fileID: 5940430478848424146}
+    - target: {fileID: -3850514727978609351, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      propertyPath: boltEffect
+      value: 
+      objectReference: {fileID: 6323148216478040967, guid: a8d1acd280868e044a3281e112c6798b, type: 3}
+    - target: {fileID: -3850514727978609351, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      propertyPath: secondaryFire
+      value: 
+      objectReference: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
     - target: {fileID: 321237805516363557, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       propertyPath: 'abilities.Array.data[1]'
       value: icecharge
@@ -216,6 +224,7 @@ PrefabInstance:
     - {fileID: 790473191979634726, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     - {fileID: -5984394209105652319, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     - {fileID: -3213554778907423252, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+    - {fileID: -3850514727978609351, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -228,6 +237,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
       insertIndex: -1
       addedObject: {fileID: -2685977814762812758}
+    - targetCorrespondingSourceObject: {fileID: 3751572637676758942, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -1851097441883699836}
   m_SourcePrefab: {fileID: 100100000, guid: c7f0f4ca78c2a0d4b88802016e6b9b92, type: 3}
 --- !u!1 &5940430478848424146 stripped
 GameObject:
@@ -268,7 +280,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
+  primaryFire: {fileID: 11400000, guid: d21a50d1d68a6cd4ab1e76f523708be3, type: 2}
   projectile: {fileID: 4199077544637763028, guid: ed4601bdc7f8511408e381ae3964e9ee, type: 3}
   mask:
     serializedVersion: 2
@@ -276,6 +288,9 @@ MonoBehaviour:
   noregMask:
     serializedVersion: 2
     m_Bits: 1
+  isVolley: 1
+  spread: 1
+  damage: 50
 --- !u!114 &-2685977814762812758
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,3 +312,29 @@ MonoBehaviour:
   mask:
     serializedVersion: 2
     m_Bits: 1
+--- !u!114 &-1851097441883699836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5940430478848424146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6766d17eb944f544f897bbe86f486907, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  primaryFire: {fileID: 11400000, guid: ac3c5607dfd9ff34e927d21a1c38d4cf, type: 2}
+  projectile: {fileID: 4199077544637763028, guid: 3c5aabc62044d8c45a92f6db6f470d67, type: 3}
+  mask:
+    serializedVersion: 2
+    m_Bits: 9
+  noregMask:
+    serializedVersion: 2
+    m_Bits: 1
+  isVolley: 0
+  spread: 0
+  damage: 80

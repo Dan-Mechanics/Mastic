@@ -14,9 +14,11 @@ namespace Mastic
         [SerializeField] private GameObject projectile = default;
         [SerializeField] private LayerMask mask = default;
         [SerializeField] private LayerMask noregMask = default;
+        [SerializeField] private bool isVolley = default;
+        [SerializeField] private float spread = default;
+        [SerializeField] private float damage = default;
 
         private float lifetime;
-        private float damage;
         private int maxPendingRequests;
         private float tolerance;
         private float speed;
@@ -61,7 +63,7 @@ namespace Mastic
             string cooldownName = nameof(PiercingIcicle);
             maxPendingRequests = easySettings.Get<int>(nameof(maxPendingRequests));
             tolerance = easySettings.Get<float>(nameof(tolerance));
-            damage = easySettings.Get<float>(cooldownName + nameof(damage));
+           // damage = easySettings.Get<float>(cooldownName + nameof(damage));
             lifetime = easySettings.Get<float>(cooldownName + nameof(lifetime));
             speed = easySettings.Get<float>(cooldownName + nameof(speed));
             radius = easySettings.Get<float>(cooldownName + nameof(radius));
@@ -85,8 +87,22 @@ namespace Mastic
 
         private void SpawnProjectile(Vector3 origin, Vector3 velocity)
         {
-            GameObject proj = Instantiate(projectile, origin, Quaternion.identity);
-            proj.GetComponent<Projectile>().Initialize(velocity, radius, hasGravity, coll, isServer, damage, lifetime);
+            if (!isVolley)
+            {
+                GameObject proj = Instantiate(projectile, origin, Quaternion.identity);
+                proj.transform.forward = velocity.normalized;
+                proj.GetComponent<Projectile>().Initialize(velocity, radius, hasGravity, coll, isServer, damage, lifetime);
+            }
+            else
+            {
+                for (int i = -1; i <= 1; i++)
+                {
+                    Vector3 offset = spread * i * cam.right;
+                    GameObject proj = Instantiate(projectile, origin + offset, Quaternion.identity);
+                    proj.transform.forward = velocity.normalized;
+                    proj.GetComponent<Projectile>().Initialize(velocity, radius, hasGravity, coll, isServer, damage, lifetime);
+                }
+            }
         }
 
         [TargetRpc]
