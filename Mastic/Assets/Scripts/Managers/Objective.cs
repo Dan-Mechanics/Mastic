@@ -3,7 +3,7 @@ using Mirror;
 
 namespace Mastic
 {
-    public class Objective : MonoBehaviour
+    public class Objective : NetworkBehaviour
     {
         [SerializeField] private float interval = default;
         [SerializeField] private float speed = default;
@@ -17,17 +17,22 @@ namespace Mastic
         private Timer timer;
 
         private void Awake()
-        {
-            timer = new Timer(interval);
-        }
+            => timer = new Timer(interval);
 
         private void Start()
+            => startingPoint = transform.position;
+
+        public override void OnStartServer()
         {
-            startingPoint = transform.position;
+            base.OnStartServer();
+            GetComponent<EnvironmentEntity>().Initialize(FindAnyObjectByType<LagCompensation>());
         }
 
         private void Update()
         {
+            if (!isServer)
+                return;
+
             if (reachedTarget)
                 return;
             
@@ -40,10 +45,11 @@ namespace Mastic
             var colliders = Physics.OverlapSphere(transform.position, radius, mask, QueryTriggerInteraction.Ignore);
             foreach (var coll in colliders)
             {
-                if (!coll.transform.root.CompareTag("Player"))
+                var player = coll.transform.root;
+                if (!player.CompareTag("Player"))
                     continue;
 
-                if (!coll.transform.root.TryGetComponent(out NetworkIdentity identity))
+                if (!player.TryGetComponent(out NetworkIdentity identity))
                     continue;
 
                 if (identity.netId % 2 == 0 == team)
@@ -55,6 +61,9 @@ namespace Mastic
 
         private void FixedUpdate()
         {
+            if (!isServer)
+                return;
+            
             if (reachedTarget)
                 return;
 
