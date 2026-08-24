@@ -37,7 +37,7 @@ smiteDamage 80
 gustCooldown 3
 gustStack 3
 
-cloudDuration 9
+cloudDuration 11
 cloudCooldown 12
 cloudStack 1
 

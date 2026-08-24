@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Windows;
 
 namespace Mastic
 {
@@ -320,6 +321,10 @@ namespace Mastic
             transform.position = serverStateMessage.position;
             rb.linearVelocity = serverStateMessage.velocity;
             SetMovement(serverStateMessage.movementIndex);
+            
+            // NEW STUFF HERE.  
+            movementAbilities.ForEach(x => x.CheckAgainstTickClient(serverStateMessage.tick, movement));
+            EventManager<int>.RaiseEvent(Occasion.DoUnlocalMovementAbilities, serverStateMessage.tick);
 
             stateBuffer[stateBufferIndex] = serverStateMessage;
 
