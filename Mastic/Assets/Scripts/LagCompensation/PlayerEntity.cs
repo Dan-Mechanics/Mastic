@@ -8,6 +8,8 @@ namespace Mastic
     /// </summary>
     public class PlayerEntity : NetworkBehaviour, IEntity
     {
+        public int DisplayedTick => displayedTick;
+        
         [SerializeField] private string playerLayerName = default;
         [SerializeField] private string intangibleLayerName = default;
         [SerializeField] private Transform lookBone = default;
@@ -43,9 +45,6 @@ namespace Mastic
             if (!isLocalPlayer)
                 lookBone.localRotation = Quaternion.Euler(0f, 0f, -frame.xRotation);
         }
-
-        public int GetDisplayedTick()
-            => displayedTick;
 
         [Server]
         public void RecordFrame(int tick)

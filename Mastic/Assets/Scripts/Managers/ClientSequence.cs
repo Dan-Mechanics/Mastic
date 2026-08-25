@@ -40,7 +40,7 @@ namespace Mastic
 
             foreach (IReliableAttackAbility reliable in reliableAttackAbilities)
             {
-                reliable.DoLocalUpdate(networkMovement.InputTick - 1, playerEntity.GetDisplayedTick());
+                reliable.DoLocalUpdate(networkMovement.InputTick - 1, playerEntity.DisplayedTick);
             }
 
             foreach (IUnreliableAttackAbility unreliable in unreliableAttackAbilities)
@@ -73,7 +73,7 @@ namespace Mastic
                 OnDisplayCheats?.Invoke($"cheats: {clientPacketMultiplier} | fps: {Mathf.RoundToInt(1f / Time.smoothDeltaTime)}");
                 for (int j = 0; j < clientPacketMultiplier; j++)
                 {
-                    networkMovement.DoLocalTick(playerEntity.GetDisplayedTick());
+                    networkMovement.DoLocalTick(playerEntity.DisplayedTick);
                     cooldownHandler.Charge();
                 }
             }

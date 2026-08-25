@@ -74,10 +74,10 @@ namespace Mastic
                     OnPredictDamage?.Invoke(damage);
                     shootMessage.debugEnemyPos = target.position;
                 }
-                
+
                 // REDUCE NO-REGS.
                 if (target.TryGetComponent(out PlayerEntity playerEntity))
-                    shootMessage.rollbackTick = playerEntity.GetDisplayedTick();
+                    shootMessage.rollbackTick = playerEntity.DisplayedTick;
             }
 
             SpawnBoltBeam(cam.position, endPosition);
